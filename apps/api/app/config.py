@@ -3,7 +3,7 @@ import os
 
 
 class Settings(BaseSettings):
-    """Application settings from environment variables"""
+    """Application settings from environment variables."""
 
     # Supabase
     SUPABASE_URL: str = os.getenv("SUPABASE_URL", "http://localhost:54321")
