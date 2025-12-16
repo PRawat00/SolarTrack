@@ -109,6 +109,7 @@ async def upload_and_process(
     # Check rate limit before processing
     check_and_increment_usage(db, current_user.user_id, "gemini")
 
+    job = None
     try:
         # Get AI provider first so we have the name for the job
         provider = AIProviderFactory.create()
@@ -145,11 +146,12 @@ async def upload_and_process(
         )
 
     except Exception as e:
-        # Update job with failure
-        job.status = "failed"
-        job.completed_at = datetime.utcnow()
-        job.error_text = str(e)
-        db.commit()
+        # Update job with failure if it was created
+        if job:
+            job.status = "failed"
+            job.completed_at = datetime.utcnow()
+            job.error_text = str(e)
+            db.commit()
 
         raise HTTPException(
             status_code=500,
