@@ -171,7 +171,6 @@ export function SolarLegacyReport({ stats, trends, records }: SolarLegacyReportP
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={trends.data}>
                   <CartesianGrid vertical={false} stroke="#e2e8f0" strokeDasharray="3 3" />
-                  {/* @ts-expect-error - Recharts types incompatible with React 19 */}
                   <XAxis
                     dataKey="date"
                     stroke="#64748b"
@@ -179,7 +178,6 @@ export function SolarLegacyReport({ stats, trends, records }: SolarLegacyReportP
                     axisLine={false}
                     fontSize={12}
                   />
-                  {/* @ts-expect-error - Recharts types incompatible with React 19 */}
                   <Area
                     type="monotone"
                     dataKey="total"

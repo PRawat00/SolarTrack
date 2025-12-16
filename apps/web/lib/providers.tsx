@@ -19,7 +19,6 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* @ts-expect-error - next-themes types incompatible with React 19 */}
       <NextThemesProvider
         attribute="class"
         defaultTheme="dark"

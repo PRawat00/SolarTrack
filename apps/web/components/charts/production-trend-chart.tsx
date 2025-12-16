@@ -280,7 +280,6 @@ export function ProductionTrendChart() {
           <ResponsiveContainer width="100%" height={280}>
             <LineChart data={filteredData} margin={{ top: 10, right: 50, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted))" opacity={0.5} />
-              {/* @ts-expect-error - Recharts types incompatible with React 19 */}
               <XAxis
                 dataKey="date"
                 tickFormatter={formatXAxis}
@@ -289,7 +288,6 @@ export function ProductionTrendChart() {
                 tickLine={{ stroke: 'hsl(var(--muted))' }}
                 interval="preserveStartEnd"
               />
-              {/* @ts-expect-error - Recharts types incompatible with React 19 */}
               <YAxis
                 yAxisId="left"
                 tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
@@ -299,7 +297,6 @@ export function ProductionTrendChart() {
                 label={{ value: 'kWh', angle: -90, position: 'insideLeft', style: { fontSize: 10, fill: 'hsl(var(--muted-foreground))' } }}
               />
               {(showIrradiance || showSnowfall) && (
-                // @ts-expect-error - Recharts types incompatible with React 19
                 <YAxis
                   yAxisId="right"
                   orientation="right"
@@ -310,14 +307,11 @@ export function ProductionTrendChart() {
                   label={{ value: showIrradiance ? 'MJ/m2' : 'cm', angle: 90, position: 'insideRight', style: { fontSize: 10, fill: showIrradiance ? '#3b82f6' : '#06b6d4' } }}
                 />
               )}
-              {/* @ts-expect-error - Recharts types incompatible with React 19 */}
               <Tooltip content={<CustomTooltip />} />
-              {/* @ts-expect-error - Recharts types incompatible with React 19 */}
               <Legend
                 wrapperStyle={{ paddingTop: '10px' }}
                 formatter={(value: string) => <span className="text-sm text-muted-foreground">{value}</span>}
               />
-              {/* @ts-expect-error - Recharts types incompatible with React 19 */}
               <Line
                 type="monotone"
                 dataKey="m1"
@@ -328,7 +322,6 @@ export function ProductionTrendChart() {
                 activeDot={{ r: 4, fill: '#f59e0b' }}
                 yAxisId="left"
               />
-              {/* @ts-expect-error - Recharts types incompatible with React 19 */}
               <Line
                 type="monotone"
                 dataKey="m2"
@@ -341,7 +334,6 @@ export function ProductionTrendChart() {
                 yAxisId="left"
               />
               {showIrradiance && (
-                // @ts-expect-error - Recharts types incompatible with React 19
                 <Line
                   type="monotone"
                   dataKey="radiation"
@@ -355,7 +347,6 @@ export function ProductionTrendChart() {
                 />
               )}
               {showSnowfall && (
-                // @ts-expect-error - Recharts types incompatible with React 19
                 <Line
                   type="monotone"
                   dataKey="snowfall"
