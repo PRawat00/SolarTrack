@@ -2,7 +2,7 @@ name: Deploy Backend
 
 on:
   push:
-    branches: [master]
+    branches: [main]
     paths:
       - 'apps/api/**'
 
@@ -18,7 +18,7 @@ jobs:
           key: ${{ secrets.ORACLE_SSH_KEY }}
           script: |
             cd ~/SolarTrack/apps/api
-            git pull origin master
+            git pull origin main
             source venv/bin/activate
             pip install -r requirements.txt
             sudo systemctl restart solartrack
