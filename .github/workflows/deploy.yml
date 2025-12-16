@@ -1,0 +1,24 @@
+name: Deploy Backend
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'apps/api/**'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to Oracle Cloud
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.ORACLE_HOST }}
+          username: ${{ secrets.ORACLE_USER }}
+          key: ${{ secrets.ORACLE_SSH_KEY }}
+          script: |
+            cd ~/SolarTrack/apps/api
+            git pull origin master
+            source venv/bin/activate
+            pip install -r requirements.txt
+            sudo systemctl restart solartrack
