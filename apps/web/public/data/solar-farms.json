@@ -1,0 +1,3002 @@
+[
+  {
+    "lat": 27.054,
+    "lng": -80.563,
+    "capacity": 2448.5,
+    "name": "Martin"
+  },
+  {
+    "lat": 34.319,
+    "lng": -109.164,
+    "capacity": 1779.2,
+    "name": "Springerville"
+  },
+  {
+    "lat": 37.788,
+    "lng": -84.713,
+    "capacity": 1454.6,
+    "name": "E W Brown"
+  },
+  {
+    "lat": 18.35,
+    "lng": 55.71,
+    "capacity": 1021,
+    "name": "Miraah CSP"
+  },
+  {
+    "lat": 40.008,
+    "lng": 112.956,
+    "capacity": 1000,
+    "name": "Datong TopRunner"
+  },
+  {
+    "lat": 43.992,
+    "lng": 80.826,
+    "capacity": 1000,
+    "name": "Ili Kazakh I"
+  },
+  {
+    "lat": 37.982,
+    "lng": 106.999,
+    "capacity": 1000,
+    "name": "Yanchi"
+  },
+  {
+    "lat": 42.244,
+    "lng": 88.315,
+    "capacity": 971,
+    "name": "Toksun"
+  },
+  {
+    "lat": 38.957,
+    "lng": 102.472,
+    "capacity": 820,
+    "name": "Hongshagang"
+  },
+  {
+    "lat": 9.338,
+    "lng": 78.392,
+    "capacity": 648,
+    "name": "Kamuthi Solar Power Plant"
+  },
+  {
+    "lat": 33.556,
+    "lng": -112.215,
+    "capacity": 613.5,
+    "name": "Agua Fria"
+  },
+  {
+    "lat": 35.406,
+    "lng": -120.069,
+    "capacity": 585.9,
+    "name": "Topaz Solar Farm"
+  },
+  {
+    "lat": 27.491,
+    "lng": 71.961,
+    "capacity": 560,
+    "name": "BhSP3"
+  },
+  {
+    "lat": 36.099,
+    "lng": 100.547,
+    "capacity": 530,
+    "name": "Longyangxia Solar-Hydro II"
+  },
+  {
+    "lat": -19.733,
+    "lng": 147.048,
+    "capacity": 500,
+    "name": "Haughton River Solar Farm"
+  },
+  {
+    "lat": 38.93,
+    "lng": 105.64,
+    "capacity": 500,
+    "name": "Alashan 1p3"
+  },
+  {
+    "lat": 37.37,
+    "lng": 97.26,
+    "capacity": 500,
+    "name": "DhSP} CTGNE"
+  },
+  {
+    "lat": 36.34,
+    "lng": 95.19,
+    "capacity": 500,
+    "name": "GoSP} CTGNE"
+  },
+  {
+    "lat": 38.53,
+    "lng": 106.616,
+    "capacity": 500,
+    "name": "Xingqing A"
+  },
+  {
+    "lat": 15.679,
+    "lng": 78.274,
+    "capacity": 500,
+    "name": "KUMSP} Greenko"
+  },
+  {
+    "lat": 14.101,
+    "lng": 78.463,
+    "capacity": 500,
+    "name": "NPKSP} Greenko"
+  },
+  {
+    "lat": 34.071,
+    "lng": -2.105,
+    "capacity": 472,
+    "name": "Ain Beni Mathar Centrale Thermosolaire (CCGT)"
+  },
+  {
+    "lat": 35.47,
+    "lng": -97.675,
+    "capacity": 464.5,
+    "name": "Mustang"
+  },
+  {
+    "lat": 32.16,
+    "lng": -110.905,
+    "capacity": 434.9,
+    "name": "H Wilson Sundt Generating Station"
+  },
+  {
+    "lat": 27.491,
+    "lng": 71.961,
+    "capacity": 420,
+    "name": "BhSP1"
+  },
+  {
+    "lat": 11.335,
+    "lng": 106.275,
+    "capacity": 420,
+    "name": "Dau Tieng"
+  },
+  {
+    "lat": 38.761,
+    "lng": 105.723,
+    "capacity": 400,
+    "name": "Alashan 1p2"
+  },
+  {
+    "lat": 29.318,
+    "lng": 71.824,
+    "capacity": 400,
+    "name": "Quaid-e-Azam"
+  },
+  {
+    "lat": 27.507,
+    "lng": 71.974,
+    "capacity": 360,
+    "name": "BhSP3} SBG"
+  },
+  {
+    "lat": 15.662,
+    "lng": 78.257,
+    "capacity": 350,
+    "name": "KUMSP} Softbank"
+  },
+  {
+    "lat": 32.977,
+    "lng": -113.494,
+    "capacity": 347.7,
+    "name": "Agua Caliente Solar Project"
+  },
+  {
+    "lat": 25.586,
+    "lng": -103.056,
+    "capacity": 330,
+    "name": "Villanueva I"
+  },
+  {
+    "lat": 11.446,
+    "lng": 108.866,
+    "capacity": 330,
+    "name": "Phước Nam"
+  },
+  {
+    "lat": 36.184,
+    "lng": 100.618,
+    "capacity": 320,
+    "name": "Longyangxia Solar-Hydro I"
+  },
+  {
+    "lat": 29.945,
+    "lng": -112.665,
+    "capacity": 320,
+    "name": "Puerto Libertad"
+  },
+  {
+    "lat": 34.818,
+    "lng": -118.404,
+    "capacity": 318,
+    "name": "Solar Star 1"
+  },
+  {
+    "lat": 33.823,
+    "lng": -115.394,
+    "capacity": 313.7,
+    "name": "Desert Sunlight 300  LLC"
+  },
+  {
+    "lat": 40.467,
+    "lng": 114.027,
+    "capacity": 310,
+    "name": "Datong GCL"
+  },
+  {
+    "lat": 44.724,
+    "lng": -0.815,
+    "capacity": 301.4,
+    "name": "Cestas"
+  },
+  {
+    "lat": -23.8,
+    "lng": -66.8,
+    "capacity": 300,
+    "name": "Cauchari"
+  },
+  {
+    "lat": 38.924,
+    "lng": 102.548,
+    "capacity": 300,
+    "name": "Hongshagang I"
+  },
+  {
+    "lat": 23.75,
+    "lng": 102.933,
+    "capacity": 300,
+    "name": "Jianshui"
+  },
+  {
+    "lat": 38.315,
+    "lng": 106.805,
+    "capacity": 300,
+    "name": "Ningdong NGEI"
+  },
+  {
+    "lat": 38.81,
+    "lng": 109.692,
+    "capacity": 300,
+    "name": "Yuyang D"
+  },
+  {
+    "lat": 14.284,
+    "lng": 77.4,
+    "capacity": 300,
+    "name": "PaSP} Renew 2"
+  },
+  {
+    "lat": 24.765,
+    "lng": 55.37,
+    "capacity": 300,
+    "name": "MBRSP} IIIB"
+  },
+  {
+    "lat": 35.6,
+    "lng": -115.4,
+    "capacity": 299.5,
+    "name": "Stateline Solar"
+  },
+  {
+    "lat": 21.895,
+    "lng": -102.082,
+    "capacity": 287,
+    "name": "Solem"
+  },
+  {
+    "lat": 35.018,
+    "lng": -117.339,
+    "capacity": 280,
+    "name": "Mojave Solar Project"
+  },
+  {
+    "lat": 32.922,
+    "lng": -112.956,
+    "capacity": 280,
+    "name": "Solana Generating Station"
+  },
+  {
+    "lat": 34.849,
+    "lng": -118.353,
+    "capacity": 279,
+    "name": "Solar Star 2"
+  },
+  {
+    "lat": 33.236,
+    "lng": 117.977,
+    "capacity": 275,
+    "name": "Tiangang Floating"
+  },
+  {
+    "lat": 47.036,
+    "lng": -120.206,
+    "capacity": 273.1,
+    "name": "Wild Horse"
+  },
+  {
+    "lat": 33.695,
+    "lng": -114.74,
+    "capacity": 270.6,
+    "name": "McCoy Solar Energy Project Hybrid"
+  },
+  {
+    "lat": 37.276,
+    "lng": 95.514,
+    "capacity": 270,
+    "name": "Da Qaidam III+"
+  },
+  {
+    "lat": 38.862,
+    "lng": -94.298,
+    "capacity": 261.8,
+    "name": "Greenwood (MO)"
+  },
+  {
+    "lat": 35.63,
+    "lng": -115.32,
+    "capacity": 260.1,
+    "name": "Silver State Solar Power South"
+  },
+  {
+    "lat": 27.491,
+    "lng": 71.961,
+    "capacity": 260,
+    "name": "BhSP2"
+  },
+  {
+    "lat": 35.889,
+    "lng": -114.958,
+    "capacity": 255,
+    "name": "Copper Mountain Solar 3"
+  },
+  {
+    "lat": 34.78,
+    "lng": -118.424,
+    "capacity": 253,
+    "name": "AV Solar Ranch One"
+  },
+  {
+    "lat": 32.679,
+    "lng": -115.567,
+    "capacity": 252.3,
+    "name": "Mount Signal Solar Farm V"
+  },
+  {
+    "lat": 38.923,
+    "lng": 102.562,
+    "capacity": 250,
+    "name": "Hongshagang III"
+  },
+  {
+    "lat": 38.585,
+    "lng": 102.157,
+    "capacity": 250,
+    "name": "Jinchuan K"
+  },
+  {
+    "lat": 24.471,
+    "lng": 81.549,
+    "capacity": 250,
+    "name": "RUMS} Acme"
+  },
+  {
+    "lat": 24.484,
+    "lng": 81.595,
+    "capacity": 250,
+    "name": "RUMS} Mahindra"
+  },
+  {
+    "lat": 24.469,
+    "lng": 81.581,
+    "capacity": 250,
+    "name": "RUMS} Sprng"
+  },
+  {
+    "lat": 25.577,
+    "lng": -103.034,
+    "capacity": 250,
+    "name": "Villanueva III"
+  },
+  {
+    "lat": 33.665,
+    "lng": -114.998,
+    "capacity": 250,
+    "name": "Genesis Solar Energy Project"
+  },
+  {
+    "lat": 36.53,
+    "lng": -114.77,
+    "capacity": 250,
+    "name": "Moapa Southern Paiute"
+  },
+  {
+    "lat": 31.843,
+    "lng": -102.868,
+    "capacity": 250,
+    "name": "Phoebe Solar"
+  },
+  {
+    "lat": 35.324,
+    "lng": -119.917,
+    "capacity": 249.8,
+    "name": "California Valley Solar Ranch"
+  },
+  {
+    "lat": 33.806,
+    "lng": -115.395,
+    "capacity": 249.7,
+    "name": "Desert Sunlight 250  LLC"
+  },
+  {
+    "lat": 37.276,
+    "lng": 95.514,
+    "capacity": 247,
+    "name": "Da Qaidam"
+  },
+  {
+    "lat": 34.643,
+    "lng": 134.159,
+    "capacity": 230,
+    "name": "Setouchi"
+  },
+  {
+    "lat": 23.907,
+    "lng": 71.188,
+    "capacity": 221,
+    "name": "Charanka Solar Power Plant"
+  },
+  {
+    "lat": 24.759,
+    "lng": 55.383,
+    "capacity": 220,
+    "name": "MBRSP} II"
+  },
+  {
+    "lat": 37.365,
+    "lng": -7.665,
+    "capacity": 218.8,
+    "name": "Solara4"
+  },
+  {
+    "lat": -12.594,
+    "lng": -44.112,
+    "capacity": 210,
+    "name": "Ituverava"
+  },
+  {
+    "lat": -8.213,
+    "lng": -42.545,
+    "capacity": 210,
+    "name": "Nova Olinda"
+  },
+  {
+    "lat": 27.491,
+    "lng": 71.961,
+    "capacity": 210,
+    "name": "BhSP4"
+  },
+  {
+    "lat": 21.344,
+    "lng": -100.596,
+    "capacity": 207,
+    "name": "Don José"
+  },
+  {
+    "lat": 36.581,
+    "lng": -120.404,
+    "capacity": 205.3,
+    "name": "RE Tranquillity"
+  },
+  {
+    "lat": 11.7,
+    "lng": 109.03,
+    "capacity": 204,
+    "name": "Thuan Bac"
+  },
+  {
+    "lat": 36.581,
+    "lng": -120.38,
+    "capacity": 202.5,
+    "name": "Great Valley Solar Portfolio Holdings  LLC"
+  },
+  {
+    "lat": 30.576,
+    "lng": -102.551,
+    "capacity": 202,
+    "name": "Buckthorn Westex"
+  },
+  {
+    "lat": -34.804,
+    "lng": 143.491,
+    "capacity": 200,
+    "name": "Sunraysia"
+  },
+  {
+    "lat": 38.65,
+    "lng": 110.05,
+    "capacity": 200,
+    "name": "Dabaodangzhen A"
+  },
+  {
+    "lat": 36.35,
+    "lng": 95.12,
+    "capacity": 200,
+    "name": "GoSP} CSP"
+  },
+  {
+    "lat": 36.4,
+    "lng": 95.157,
+    "capacity": 200,
+    "name": "Golmud"
+  },
+  {
+    "lat": 36.155,
+    "lng": 100.507,
+    "capacity": 200,
+    "name": "Gonghe CPI"
+  },
+  {
+    "lat": 40.44,
+    "lng": 108.827,
+    "capacity": 200,
+    "name": "Hanggin C"
+  },
+  {
+    "lat": 43.138,
+    "lng": 92.947,
+    "capacity": 200,
+    "name": "Liushuquan ST"
+  },
+  {
+    "lat": 26.31,
+    "lng": 116.31,
+    "capacity": 200,
+    "name": "Shicheng"
+  },
+  {
+    "lat": 42.248,
+    "lng": 93.886,
+    "capacity": 200,
+    "name": "Wulataixiang G"
+  },
+  {
+    "lat": 31.76,
+    "lng": 113.515,
+    "capacity": 200,
+    "name": "Xihe"
+  },
+  {
+    "lat": 38.762,
+    "lng": 109.679,
+    "capacity": 200,
+    "name": "Yuyang A"
+  },
+  {
+    "lat": 14.026,
+    "lng": 78.434,
+    "capacity": 200,
+    "name": "Anantapur Tata"
+  },
+  {
+    "lat": 27.517,
+    "lng": 71.964,
+    "capacity": 200,
+    "name": "BhSP3} Acme"
+  },
+  {
+    "lat": 14.024,
+    "lng": 78.446,
+    "capacity": 200,
+    "name": "NPKSP} Azure O"
+  },
+  {
+    "lat": 31.009,
+    "lng": -6.862,
+    "capacity": 200,
+    "name": "Centrale Solaire Noor Ouarzazate 2"
+  },
+  {
+    "lat": 39.226,
+    "lng": -5.39,
+    "capacity": 200,
+    "name": "SOLABEN 3"
+  },
+  {
+    "lat": 24.747,
+    "lng": 55.385,
+    "capacity": 200,
+    "name": "MBRSP} IIIA"
+  },
+  {
+    "lat": 35.867,
+    "lng": -114.956,
+    "capacity": 200,
+    "name": "Techren Solar II LLC"
+  },
+  {
+    "lat": 37.009,
+    "lng": -120.957,
+    "capacity": 200,
+    "name": "Wright Solar Park"
+  },
+  {
+    "lat": 32.671,
+    "lng": -115.587,
+    "capacity": 199.9,
+    "name": "Imperial Valley Solar  LLC"
+  },
+  {
+    "lat": -29.112,
+    "lng": -70.915,
+    "capacity": 196,
+    "name": "El Romero"
+  },
+  {
+    "lat": 31.255,
+    "lng": -102.272,
+    "capacity": 189.9,
+    "name": "Castle Gap Solar Hybrid"
+  },
+  {
+    "lat": 34.825,
+    "lng": -118.525,
+    "capacity": 185.1,
+    "name": "RE Garland"
+  },
+  {
+    "lat": 30.996,
+    "lng": -102.223,
+    "capacity": 182,
+    "name": "Midway Solar - TX"
+  },
+  {
+    "lat": -20.488,
+    "lng": 147.745,
+    "capacity": 180,
+    "name": "Hayman Solar Farm"
+  },
+  {
+    "lat": 30.291,
+    "lng": 121.12,
+    "capacity": 180,
+    "name": "Jiantangjang Reservoir"
+  },
+  {
+    "lat": 34.96,
+    "lng": 114.849,
+    "capacity": 175,
+    "name": "Lankou A"
+  },
+  {
+    "lat": 37.558,
+    "lng": 107.808,
+    "capacity": 175,
+    "name": "Zhuanjingzhen D"
+  },
+  {
+    "lat": 37.228,
+    "lng": -5.867,
+    "capacity": 175,
+    "name": "Don Rodrigo"
+  },
+  {
+    "lat": 32.687,
+    "lng": -115.648,
+    "capacity": 174.8,
+    "name": "Centinela Solar Energy"
+  },
+  {
+    "lat": 39.128,
+    "lng": 117.652,
+    "capacity": 170,
+    "name": "Tianjin Binhai"
+  },
+  {
+    "lat": 41.397,
+    "lng": 114.638,
+    "capacity": 170,
+    "name": "Zhangjiakou CFC"
+  },
+  {
+    "lat": 21.915,
+    "lng": -101.325,
+    "capacity": 170,
+    "name": "Potosí Iberdrola"
+  },
+  {
+    "lat": 33.342,
+    "lng": -112.904,
+    "capacity": 170,
+    "name": "Mesquite Solar 1"
+  },
+  {
+    "lat": 11.7,
+    "lng": 108.9,
+    "capacity": 168,
+    "name": "Ninh Thuận CMX"
+  },
+  {
+    "lat": 51.545,
+    "lng": 13.98,
+    "capacity": 166,
+    "name": "Meuro Solar Power Plant"
+  },
+  {
+    "lat": 38.507,
+    "lng": 102.35,
+    "capacity": 164,
+    "name": "Jinchang Jinko"
+  },
+  {
+    "lat": 33.08,
+    "lng": -115.47,
+    "capacity": 163.2,
+    "name": "Solar Gen 2 Solar Facility"
+  },
+  {
+    "lat": 31.04,
+    "lng": -6.845,
+    "capacity": 160,
+    "name": "Centrale Solaire Noor Ouarzazate 1"
+  },
+  {
+    "lat": 30.96,
+    "lng": -103.307,
+    "capacity": 160,
+    "name": "RE Roserock"
+  },
+  {
+    "lat": -12.597,
+    "lng": -44.107,
+    "capacity": 158,
+    "name": "BJL ENEL"
+  },
+  {
+    "lat": 35.25,
+    "lng": -117.977,
+    "capacity": 155,
+    "name": "Springbok Solar Farm 2"
+  },
+  {
+    "lat": 35.786,
+    "lng": -114.963,
+    "capacity": 154,
+    "name": "Copper Mountain Solar 2"
+  },
+  {
+    "lat": 34.862,
+    "lng": -118.38,
+    "capacity": 151.1,
+    "name": "North Rosamond Solar LLC"
+  },
+  {
+    "lat": 32.948,
+    "lng": 3.238,
+    "capacity": 150,
+    "name": "SPP1 Thermal"
+  },
+  {
+    "lat": -21.91,
+    "lng": -49.85,
+    "capacity": 150,
+    "name": "Guaimbe"
+  },
+  {
+    "lat": -17.416,
+    "lng": -44.92,
+    "capacity": 150,
+    "name": "Pirapora I"
+  },
+  {
+    "lat": 36.392,
+    "lng": 95.155,
+    "capacity": 150,
+    "name": "GoSP} 150"
+  },
+  {
+    "lat": 38.257,
+    "lng": 102.314,
+    "capacity": 150,
+    "name": "Hexipuzhen F"
+  },
+  {
+    "lat": 38.984,
+    "lng": 102.5,
+    "capacity": 150,
+    "name": "Hongshagang II"
+  },
+  {
+    "lat": 32.6,
+    "lng": 116.64,
+    "capacity": 150,
+    "name": "Huainan Floating CTGNE"
+  },
+  {
+    "lat": 28.533,
+    "lng": 118.525,
+    "capacity": 150,
+    "name": "Jiangshan A"
+  },
+  {
+    "lat": 31.787,
+    "lng": 115.908,
+    "capacity": 150,
+    "name": "JinZhai"
+  },
+  {
+    "lat": 30.027,
+    "lng": 121.626,
+    "capacity": 150,
+    "name": "Lanshan Reservoir"
+  },
+  {
+    "lat": 24.448,
+    "lng": 32.729,
+    "capacity": 150,
+    "name": "BbSP} SP II"
+  },
+  {
+    "lat": 14.025,
+    "lng": 78.415,
+    "capacity": 150,
+    "name": "NPKSP} Acme"
+  },
+  {
+    "lat": 21.895,
+    "lng": -102.082,
+    "capacity": 150,
+    "name": "Solem I"
+  },
+  {
+    "lat": 31.009,
+    "lng": -6.862,
+    "capacity": 150,
+    "name": "Centrale Solaire Noor Ouarzazate 3"
+  },
+  {
+    "lat": 37.418,
+    "lng": -6.277,
+    "capacity": 150,
+    "name": "PLANTA SOLAR TERMICA SOLNOVA 1"
+  },
+  {
+    "lat": 35.616,
+    "lng": -120.404,
+    "capacity": 150,
+    "name": "CA Flats Solar 150  LLC"
+  },
+  {
+    "lat": 33.348,
+    "lng": -112.937,
+    "capacity": 150,
+    "name": "Mesquite Solar 3  LLC"
+  },
+  {
+    "lat": 30.849,
+    "lng": -83.643,
+    "capacity": 150,
+    "name": "Quitman Solar"
+  },
+  {
+    "lat": 31.242,
+    "lng": -102.29,
+    "capacity": 150,
+    "name": "Upton County Solar"
+  },
+  {
+    "lat": 38.64,
+    "lng": -6.744,
+    "capacity": 149.8,
+    "name": "EXTRESOL-1"
+  },
+  {
+    "lat": 37.228,
+    "lng": -3.051,
+    "capacity": 149.7,
+    "name": "ANDASOL-3"
+  },
+  {
+    "lat": 32.772,
+    "lng": -115.779,
+    "capacity": 148.7,
+    "name": "Imperial Solar Energy Center West"
+  },
+  {
+    "lat": -19.424,
+    "lng": 146.715,
+    "capacity": 148,
+    "name": "Ross River"
+  },
+  {
+    "lat": 32.583,
+    "lng": -84.297,
+    "capacity": 148,
+    "name": "Taylor County Solar"
+  },
+  {
+    "lat": 32.753,
+    "lng": -115.726,
+    "capacity": 147.4,
+    "name": "Campo Verde Solar"
+  },
+  {
+    "lat": -23.48,
+    "lng": -69.419,
+    "capacity": 146.5,
+    "name": "Boléro"
+  },
+  {
+    "lat": -31.523,
+    "lng": 138.62,
+    "capacity": 145,
+    "name": "Wilpena Solar Farm"
+  },
+  {
+    "lat": -17.19,
+    "lng": -71.01,
+    "capacity": 144.5,
+    "name": "Rubi"
+  },
+  {
+    "lat": 18.635,
+    "lng": 78.24,
+    "capacity": 143,
+    "name": "Dichpally"
+  },
+  {
+    "lat": 37.139,
+    "lng": -76.902,
+    "capacity": 142.4,
+    "name": "Colonial Trail West"
+  },
+  {
+    "lat": -27.025,
+    "lng": -69.894,
+    "capacity": 141,
+    "name": "Luz del Norte"
+  },
+  {
+    "lat": 21.895,
+    "lng": -102.082,
+    "capacity": 140,
+    "name": "Solem II"
+  },
+  {
+    "lat": 36.627,
+    "lng": -120.879,
+    "capacity": 140,
+    "name": "Panoche Valley Solar Farm"
+  },
+  {
+    "lat": -22.343,
+    "lng": -69.523,
+    "capacity": 138,
+    "name": "Finis Terrae"
+  },
+  {
+    "lat": -27.005,
+    "lng": -69.869,
+    "capacity": 135,
+    "name": "Carrera Pinto ENEL"
+  },
+  {
+    "lat": 37.37,
+    "lng": 97.288,
+    "capacity": 135,
+    "name": "DhSP} CSP tower"
+  },
+  {
+    "lat": 37.55,
+    "lng": 105.031,
+    "capacity": 135,
+    "name": "TeSP} F"
+  },
+  {
+    "lat": 16.135,
+    "lng": 75.27,
+    "capacity": 135,
+    "name": "Guttigoli"
+  },
+  {
+    "lat": 35.556,
+    "lng": -115.469,
+    "capacity": 133.4,
+    "name": "Ivanpah 2"
+  },
+  {
+    "lat": 35.581,
+    "lng": -115.482,
+    "capacity": 133.4,
+    "name": "Ivanpah 3"
+  },
+  {
+    "lat": 35.533,
+    "lng": -115.452,
+    "capacity": 133,
+    "name": "Ivanpah 1"
+  },
+  {
+    "lat": 14.103,
+    "lng": 121.542,
+    "capacity": 132.5,
+    "name": "Helios"
+  },
+  {
+    "lat": 33.68,
+    "lng": -114.73,
+    "capacity": 131.2,
+    "name": "Blythe Solar II  LLC"
+  },
+  {
+    "lat": 24.688,
+    "lng": 75.13,
+    "capacity": 131,
+    "name": "Neemuch"
+  },
+  {
+    "lat": -19.84,
+    "lng": 147.211,
+    "capacity": 130,
+    "name": "Clare Solar Farm"
+  },
+  {
+    "lat": 37.165,
+    "lng": 79.471,
+    "capacity": 130,
+    "name": "Karakax C"
+  },
+  {
+    "lat": 35.616,
+    "lng": -120.404,
+    "capacity": 130,
+    "name": "CA Flats Solar 130  LLC"
+  },
+  {
+    "lat": 33.305,
+    "lng": -112.834,
+    "capacity": 129,
+    "name": "Arlington Valley Solar Energy II"
+  },
+  {
+    "lat": 32.663,
+    "lng": -115.658,
+    "capacity": 128.9,
+    "name": "Imperial Solar Energy Center South"
+  },
+  {
+    "lat": 53.03,
+    "lng": 13.543,
+    "capacity": 128.4,
+    "name": "Templin Solar Power Plant"
+  },
+  {
+    "lat": -22.33,
+    "lng": -69.52,
+    "capacity": 127.9,
+    "name": "Blue Sky"
+  },
+  {
+    "lat": 39.603,
+    "lng": -84.205,
+    "capacity": 126.6,
+    "name": "Yankee Street"
+  },
+  {
+    "lat": -19.03,
+    "lng": 146.394,
+    "capacity": 125,
+    "name": "Rollingstone QLD"
+  },
+  {
+    "lat": 26.785,
+    "lng": 72.008,
+    "capacity": 125,
+    "name": "Dhursar"
+  },
+  {
+    "lat": 38.239,
+    "lng": -117.364,
+    "capacity": 125,
+    "name": "Crescent Dunes Solar Energy"
+  },
+  {
+    "lat": -19.335,
+    "lng": 146.889,
+    "capacity": 124,
+    "name": "Sun Metals Solar Farm"
+  },
+  {
+    "lat": 30.963,
+    "lng": 34.728,
+    "capacity": 121,
+    "name": "Ashalim Sun"
+  },
+  {
+    "lat": -5.06,
+    "lng": -37.755,
+    "capacity": 120,
+    "name": "Apodi"
+  },
+  {
+    "lat": -17.34,
+    "lng": -47.25,
+    "capacity": 120,
+    "name": "Paracatu"
+  },
+  {
+    "lat": -24.005,
+    "lng": -68.575,
+    "capacity": 120,
+    "name": "Los Andes II"
+  },
+  {
+    "lat": 32.133,
+    "lng": 116.779,
+    "capacity": 120,
+    "name": "Shouxian A"
+  },
+  {
+    "lat": 40.339,
+    "lng": 114.713,
+    "capacity": 120,
+    "name": "Yangyuan E"
+  },
+  {
+    "lat": 29.279,
+    "lng": 31.249,
+    "capacity": 120,
+    "name": "Kuriemat Solar/Thermal"
+  },
+  {
+    "lat": 38.205,
+    "lng": -104.567,
+    "capacity": 120,
+    "name": "Comanche Solar"
+  },
+  {
+    "lat": 31.512,
+    "lng": -84.044,
+    "capacity": 120,
+    "name": "Dougherty County Solar  LLC"
+  },
+  {
+    "lat": 39.56,
+    "lng": -119.511,
+    "capacity": 118.6,
+    "name": "Western 102 Power Plant"
+  },
+  {
+    "lat": 31.001,
+    "lng": -102.282,
+    "capacity": 118.5,
+    "name": "East Pecos Solar"
+  },
+  {
+    "lat": -33.104,
+    "lng": -70.637,
+    "capacity": 117.4,
+    "name": "Quilapilún"
+  },
+  {
+    "lat": 29.274,
+    "lng": 71.799,
+    "capacity": 117.4,
+    "name": "QeA} Zorlu"
+  },
+  {
+    "lat": 17.281,
+    "lng": 79.19,
+    "capacity": 115.9,
+    "name": "Kakarani"
+  },
+  {
+    "lat": -17.4,
+    "lng": -44.88,
+    "capacity": 115,
+    "name": "Pirapora II"
+  },
+  {
+    "lat": 18.35,
+    "lng": 55.71,
+    "capacity": 113.4,
+    "name": "Miraah CSP1"
+  },
+  {
+    "lat": -34.415,
+    "lng": 142.252,
+    "capacity": 112,
+    "name": "Karadoc Solar Farm"
+  },
+  {
+    "lat": 34.904,
+    "lng": -118.384,
+    "capacity": 111.2,
+    "name": "Valentine Solar  LLC"
+  },
+  {
+    "lat": 42.713,
+    "lng": 141.792,
+    "capacity": 111,
+    "name": "Tomatoh Abira Solar Power Plant"
+  },
+  {
+    "lat": -32.427,
+    "lng": 137.838,
+    "capacity": 110,
+    "name": "Bungala I"
+  },
+  {
+    "lat": -32.408,
+    "lng": 137.841,
+    "capacity": 110,
+    "name": "Bungala II"
+  },
+  {
+    "lat": -27.117,
+    "lng": 150.894,
+    "capacity": 110,
+    "name": "Darling Downs Solar Farm"
+  },
+  {
+    "lat": -34.803,
+    "lng": 142.546,
+    "capacity": 110,
+    "name": "Wemen Solar Farm"
+  },
+  {
+    "lat": -22.782,
+    "lng": -69.485,
+    "capacity": 110,
+    "name": "Cerro Dominador CSP"
+  },
+  {
+    "lat": 34.671,
+    "lng": 119.017,
+    "capacity": 110,
+    "name": "Haizhou B"
+  },
+  {
+    "lat": 37.765,
+    "lng": 103.132,
+    "capacity": 110,
+    "name": "Yongfengtanxiang B"
+  },
+  {
+    "lat": 31.104,
+    "lng": 114.918,
+    "capacity": 110,
+    "name": "Zhongguanyi"
+  },
+  {
+    "lat": 34.938,
+    "lng": -118.334,
+    "capacity": 110,
+    "name": "Catalina Solar LLC"
+  },
+  {
+    "lat": 33.68,
+    "lng": -114.742,
+    "capacity": 109.8,
+    "name": "Blythe Solar 110  LLC"
+  },
+  {
+    "lat": 53.625,
+    "lng": 31.6,
+    "capacity": 109,
+    "name": "Blizhnyaya Rechitsa 2"
+  },
+  {
+    "lat": 37.13,
+    "lng": -121.052,
+    "capacity": 108,
+    "name": "Quinto Solar PV Project"
+  },
+  {
+    "lat": 34.827,
+    "lng": -118.335,
+    "capacity": 107.9,
+    "name": "Willow Spring Solar  LLC"
+  },
+  {
+    "lat": 32.676,
+    "lng": -115.619,
+    "capacity": 106.7,
+    "name": "Wistaria Ranch Solar"
+  },
+  {
+    "lat": 34.342,
+    "lng": 3.169,
+    "capacity": 106.6,
+    "name": "Hauts Plateaux Centre"
+  },
+  {
+    "lat": 24.688,
+    "lng": 75.13,
+    "capacity": 106,
+    "name": "Bhagwanpura"
+  },
+  {
+    "lat": 30.993,
+    "lng": -102.271,
+    "capacity": 105,
+    "name": "Alamo 6"
+  },
+  {
+    "lat": 34.745,
+    "lng": -118.309,
+    "capacity": 105,
+    "name": "Antelope Expansion 2"
+  },
+  {
+    "lat": 35.249,
+    "lng": -117.955,
+    "capacity": 105,
+    "name": "Springbok Solar Farm 1"
+  },
+  {
+    "lat": -25.45,
+    "lng": -70.3,
+    "capacity": 104,
+    "name": "Conejo I"
+  },
+  {
+    "lat": 32.562,
+    "lng": -84.276,
+    "capacity": 104,
+    "name": "Butler Solar Project 103"
+  },
+  {
+    "lat": 51.66,
+    "lng": 14.626,
+    "capacity": 103.9,
+    "name": "Jocksdorf Solar Power Plant"
+  },
+  {
+    "lat": 36.518,
+    "lng": -116.497,
+    "capacity": 103.5,
+    "name": "Sunshine Valley Solar"
+  },
+  {
+    "lat": 29.73,
+    "lng": 35.35,
+    "capacity": 103,
+    "name": "Quweira"
+  },
+  {
+    "lat": 25.431,
+    "lng": -103.299,
+    "capacity": 102.5,
+    "name": "Laguna"
+  },
+  {
+    "lat": 31.416,
+    "lng": -84.831,
+    "capacity": 102.5,
+    "name": "SR Arlington II"
+  },
+  {
+    "lat": -31.553,
+    "lng": 147.085,
+    "capacity": 102,
+    "name": "Nyngan Solar Plant"
+  },
+  {
+    "lat": 38.507,
+    "lng": 102.35,
+    "capacity": 102,
+    "name": "Jinchang Jinko II"
+  },
+  {
+    "lat": 36.219,
+    "lng": -119.806,
+    "capacity": 102,
+    "name": "Henrietta Solar Project"
+  },
+  {
+    "lat": 32.716,
+    "lng": -101.926,
+    "capacity": 102,
+    "name": "Lamesa Solar"
+  },
+  {
+    "lat": 32.506,
+    "lng": -84.257,
+    "capacity": 101.2,
+    "name": "White Pine Solar  LLC"
+  },
+  {
+    "lat": -27.117,
+    "lng": -70.171,
+    "capacity": 101,
+    "name": "LLANO DE LLAMPOS"
+  },
+  {
+    "lat": 13.4,
+    "lng": -88.98,
+    "capacity": 101,
+    "name": "Providencia"
+  },
+  {
+    "lat": -29.485,
+    "lng": -71.21,
+    "capacity": 100.8,
+    "name": "El Pelícano"
+  },
+  {
+    "lat": 36.399,
+    "lng": 95.167,
+    "capacity": 100.2,
+    "name": "GoSP} 100"
+  },
+  {
+    "lat": 39.768,
+    "lng": 98.097,
+    "capacity": 100.2,
+    "name": "Jiayuguan 100"
+  },
+  {
+    "lat": -22.845,
+    "lng": 147.586,
+    "capacity": 100,
+    "name": "Clermont Solar Farm"
+  },
+  {
+    "lat": -23.087,
+    "lng": 148.439,
+    "capacity": 100,
+    "name": "Lilyvale Solar Farm"
+  },
+  {
+    "lat": -36.159,
+    "lng": 145.475,
+    "capacity": 100,
+    "name": "Numurkah Solar Farm"
+  },
+  {
+    "lat": 42.888,
+    "lng": -79.819,
+    "capacity": 100,
+    "name": "Grand Renewable Energy Park"
+  },
+  {
+    "lat": 44.312,
+    "lng": -76.651,
+    "capacity": 100,
+    "name": "Sol-Luce Kingston"
+  },
+  {
+    "lat": -22.788,
+    "lng": -69.472,
+    "capacity": 100,
+    "name": "Cerro Dominador PV"
+  },
+  {
+    "lat": -26.235,
+    "lng": -69.85,
+    "capacity": 100,
+    "name": "Sol de los Andes"
+  },
+  {
+    "lat": 38.895,
+    "lng": 105.648,
+    "capacity": 100,
+    "name": "Alashan 1p1"
+  },
+  {
+    "lat": 40.185,
+    "lng": 107.036,
+    "capacity": 100,
+    "name": "Balagong IV"
+  },
+  {
+    "lat": 46.245,
+    "lng": 125.006,
+    "capacity": 100,
+    "name": "Changde"
+  },
+  {
+    "lat": 40.89,
+    "lng": 118.623,
+    "capacity": 100,
+    "name": "Chengde"
+  },
+  {
+    "lat": 39.974,
+    "lng": 113.447,
+    "capacity": 100,
+    "name": "Datong UPV"
+  },
+  {
+    "lat": 25.8,
+    "lng": 100.46,
+    "capacity": 100,
+    "name": "Daying"
+  },
+  {
+    "lat": 37.372,
+    "lng": 97.243,
+    "capacity": 100,
+    "name": "DhSP} AD"
+  },
+  {
+    "lat": 37.552,
+    "lng": 107.68,
+    "capacity": 100,
+    "name": "Dingbian B"
+  },
+  {
+    "lat": 31.152,
+    "lng": 118.327,
+    "capacity": 100,
+    "name": "Eqiao"
+  },
+  {
+    "lat": 38.083,
+    "lng": 102.325,
+    "capacity": 100,
+    "name": "Fengle B"
+  },
+  {
+    "lat": 32.544,
+    "lng": 115.66,
+    "capacity": 100,
+    "name": "Funan"
+  },
+  {
+    "lat": 39.283,
+    "lng": 99.527,
+    "capacity": 100,
+    "name": "Gaotai B"
+  },
+  {
+    "lat": 32.972,
+    "lng": 119.603,
+    "capacity": 100,
+    "name": "Gaoyou B"
+  },
+  {
+    "lat": 36.205,
+    "lng": 100.58,
+    "capacity": 100,
+    "name": "Gonghe UPV 100"
+  },
+  {
+    "lat": 40.609,
+    "lng": 96.406,
+    "capacity": 100,
+    "name": "Guazhou"
+  },
+  {
+    "lat": 40.478,
+    "lng": 108.893,
+    "capacity": 100,
+    "name": "Hanggin B"
+  },
+  {
+    "lat": 37.486,
+    "lng": 106.13,
+    "capacity": 100,
+    "name": "Hongsibu A"
+  },
+  {
+    "lat": 30.95,
+    "lng": 119.85,
+    "capacity": 100,
+    "name": "Huzhou"
+  },
+  {
+    "lat": 31.789,
+    "lng": 115.897,
+    "capacity": 100,
+    "name": "JinZhai II"
+  },
+  {
+    "lat": 38.62,
+    "lng": 102.148,
+    "capacity": 100,
+    "name": "Jinchuan E"
+  },
+  {
+    "lat": 38.596,
+    "lng": 102.129,
+    "capacity": 100,
+    "name": "Jinchuan F"
+  },
+  {
+    "lat": 38.617,
+    "lng": 102.113,
+    "capacity": 100,
+    "name": "Jinchuan G"
+  },
+  {
+    "lat": 38.621,
+    "lng": 102.13,
+    "capacity": 100,
+    "name": "Jinchuan H"
+  },
+  {
+    "lat": 36.987,
+    "lng": 105.146,
+    "capacity": 100,
+    "name": "Jingyuan A"
+  },
+  {
+    "lat": 31.842,
+    "lng": 119.515,
+    "capacity": 100,
+    "name": "Jintan"
+  },
+  {
+    "lat": 39.999,
+    "lng": 99.007,
+    "capacity": 100,
+    "name": "Jinta} L"
+  },
+  {
+    "lat": 37.551,
+    "lng": 118.827,
+    "capacity": 100,
+    "name": "Kenli A"
+  },
+  {
+    "lat": 24.78,
+    "lng": 103.43,
+    "capacity": 100,
+    "name": "Kunming Shilin"
+  },
+  {
+    "lat": 37.448,
+    "lng": 114.332,
+    "capacity": 100,
+    "name": "Lincheng"
+  },
+  {
+    "lat": 30.92,
+    "lng": 121.205,
+    "capacity": 100,
+    "name": "Lingang"
+  },
+  {
+    "lat": 37.374,
+    "lng": 114.346,
+    "capacity": 100,
+    "name": "Neiqiu"
+  },
+  {
+    "lat": 38.162,
+    "lng": 106.762,
+    "capacity": 100,
+    "name": "Ningdong SA1"
+  },
+  {
+    "lat": 38.157,
+    "lng": 106.781,
+    "capacity": 100,
+    "name": "Ningdong SA2"
+  },
+  {
+    "lat": 38.15,
+    "lng": 106.795,
+    "capacity": 100,
+    "name": "Ningdong SA3"
+  },
+  {
+    "lat": 38.145,
+    "lng": 106.805,
+    "capacity": 100,
+    "name": "Ningdong SA4"
+  },
+  {
+    "lat": 38.14,
+    "lng": 106.815,
+    "capacity": 100,
+    "name": "Ningdong SA5"
+  },
+  {
+    "lat": 40.131,
+    "lng": 94.492,
+    "capacity": 100,
+    "name": "Qili} H"
+  },
+  {
+    "lat": 36.346,
+    "lng": 95.14,
+    "capacity": 100,
+    "name": "Qinghai SPIC"
+  },
+  {
+    "lat": 37.433,
+    "lng": 105.958,
+    "capacity": 100,
+    "name": "Shagoumen B"
+  },
+  {
+    "lat": 32.345,
+    "lng": 112.836,
+    "capacity": 100,
+    "name": "Shijiashan A"
+  },
+  {
+    "lat": 36.77,
+    "lng": 106.56,
+    "capacity": 100,
+    "name": "Shizuishan Solar Power Station"
+  },
+  {
+    "lat": 37.181,
+    "lng": 118.75,
+    "capacity": 100,
+    "name": "Shouguang C"
+  },
+  {
+    "lat": 44.6,
+    "lng": 127.2,
+    "capacity": 100,
+    "name": "Shulan"
+  },
+  {
+    "lat": 33.335,
+    "lng": 118.46,
+    "capacity": 100,
+    "name": "Sihong Fishery"
+  },
+  {
+    "lat": 37.64,
+    "lng": 109.206,
+    "capacity": 100,
+    "name": "Tawanzhen A"
+  },
+  {
+    "lat": 32.8,
+    "lng": 119.125,
+    "capacity": 100,
+    "name": "Tianchang A"
+  },
+  {
+    "lat": 41.179,
+    "lng": 79.282,
+    "capacity": 100,
+    "name": "Uqturpan 5"
+  },
+  {
+    "lat": 42.024,
+    "lng": 108.397,
+    "capacity": 100,
+    "name": "Urad Zhongqi B"
+  },
+  {
+    "lat": 42.02,
+    "lng": 108.09,
+    "capacity": 100,
+    "name": "Urad Zhongqi Trough"
+  },
+  {
+    "lat": 39.6,
+    "lng": 106.915,
+    "capacity": 100,
+    "name": "Wuhai"
+  },
+  {
+    "lat": 42.428,
+    "lng": 93.975,
+    "capacity": 100,
+    "name": "Wulataixiang A"
+  },
+  {
+    "lat": 34.401,
+    "lng": 119.951,
+    "capacity": 100,
+    "name": "Xiangshui JS"
+  },
+  {
+    "lat": 37.005,
+    "lng": 114.28,
+    "capacity": 100,
+    "name": "Xingtai Xujiang"
+  },
+  {
+    "lat": 37.768,
+    "lng": 103.111,
+    "capacity": 100,
+    "name": "Yongfengtanxiang C"
+  },
+  {
+    "lat": 28.124,
+    "lng": 121.027,
+    "capacity": 100,
+    "name": "Yueqing Chint"
+  },
+  {
+    "lat": 28.163,
+    "lng": 121.32,
+    "capacity": 100,
+    "name": "Yuhuan A"
+  },
+  {
+    "lat": 38.09,
+    "lng": 113.533,
+    "capacity": 100,
+    "name": "Yuxian SX"
+  },
+  {
+    "lat": 38.775,
+    "lng": 109.691,
+    "capacity": 100,
+    "name": "Yuyang B"
+  },
+  {
+    "lat": 42.268,
+    "lng": 115.856,
+    "capacity": 100,
+    "name": "Zhenglanqi"
+  },
+  {
+    "lat": 40.714,
+    "lng": 111.37,
+    "capacity": 100,
+    "name": "Zhonghuan 3"
+  },
+  {
+    "lat": 13.516,
+    "lng": -87.556,
+    "capacity": 100,
+    "name": "Valle Solar Park"
+  },
+  {
+    "lat": 27.47,
+    "lng": 71.988,
+    "capacity": 100,
+    "name": "BhSP4} SBG"
+  },
+  {
+    "lat": 27.736,
+    "lng": 71.692,
+    "capacity": 100,
+    "name": "Diwakar"
+  },
+  {
+    "lat": 14.144,
+    "lng": 76.682,
+    "capacity": 100,
+    "name": "Harthikote A"
+  },
+  {
+    "lat": 15.655,
+    "lng": 78.277,
+    "capacity": 100,
+    "name": "KUMSP} Azure"
+  },
+  {
+    "lat": 14.525,
+    "lng": 77.59,
+    "capacity": 100,
+    "name": "Kothapalli Solar Park"
+  },
+  {
+    "lat": 17.961,
+    "lng": 78.055,
+    "capacity": 100,
+    "name": "Minpoor Renew"
+  },
+  {
+    "lat": 9.444,
+    "lng": 78.572,
+    "capacity": 100,
+    "name": "NLC Ramanathapuram"
+  },
+  {
+    "lat": 14.02,
+    "lng": 78.415,
+    "capacity": 100,
+    "name": "NPKSP} FRV"
+  },
+  {
+    "lat": 14.026,
+    "lng": 78.434,
+    "capacity": 100,
+    "name": "NPKSP} Tata I"
+  },
+  {
+    "lat": 14.041,
+    "lng": 78.43,
+    "capacity": 100,
+    "name": "NPKSP} Tata NSM-P2B3"
+  },
+  {
+    "lat": 26.787,
+    "lng": 72.01,
+    "capacity": 100,
+    "name": "Pokhran THE Solar Power Plant"
+  },
+  {
+    "lat": 21.43,
+    "lng": 81.305,
+    "capacity": 100,
+    "name": "Rajpur"
+  },
+  {
+    "lat": 21.073,
+    "lng": 74.386,
+    "capacity": 100,
+    "name": "Sakri 1A Solar Power Plant"
+  },
+  {
+    "lat": 30.219,
+    "lng": 74.761,
+    "capacity": 100,
+    "name": "Sardargarh"
+  },
+  {
+    "lat": 16.544,
+    "lng": 77.935,
+    "capacity": 100,
+    "name": "Shakhapur"
+  },
+  {
+    "lat": 8.917,
+    "lng": 77.715,
+    "capacity": 100,
+    "name": "Shezhilanallur"
+  },
+  {
+    "lat": 14.987,
+    "lng": 78.047,
+    "capacity": 100,
+    "name": "Talaricheruvu"
+  },
+  {
+    "lat": 14.946,
+    "lng": 78.059,
+    "capacity": 100,
+    "name": "Talaricheruvu II"
+  },
+  {
+    "lat": 16.32,
+    "lng": 75.415,
+    "capacity": 100,
+    "name": "Vajramatti Energon"
+  },
+  {
+    "lat": 14.367,
+    "lng": 76.58,
+    "capacity": 100,
+    "name": "Varavoo Kaval Greenko"
+  },
+  {
+    "lat": 17.557,
+    "lng": 74.812,
+    "capacity": 100,
+    "name": "Varkute Malawadi"
+  },
+  {
+    "lat": 16.529,
+    "lng": 77.903,
+    "capacity": 100,
+    "name": "Veltoor Renew"
+  },
+  {
+    "lat": 16.468,
+    "lng": 77.909,
+    "capacity": 100,
+    "name": "Veltoor SP"
+  },
+  {
+    "lat": 16.445,
+    "lng": 77.867,
+    "capacity": 100,
+    "name": "Veltoor Suzlon"
+  },
+  {
+    "lat": 49.81,
+    "lng": 72.872,
+    "capacity": 100,
+    "name": "Saran"
+  },
+  {
+    "lat": 28.546,
+    "lng": -111.44,
+    "capacity": 100,
+    "name": "Bizani"
+  },
+  {
+    "lat": 28.96,
+    "lng": -111.5,
+    "capacity": 100,
+    "name": "Hermosillo Iberdrola"
+  },
+  {
+    "lat": 20.145,
+    "lng": -103.495,
+    "capacity": 100,
+    "name": "Las Viborillas"
+  },
+  {
+    "lat": 15.335,
+    "lng": 120.695,
+    "capacity": 100,
+    "name": "Concepcion"
+  },
+  {
+    "lat": -30.16,
+    "lng": 24.137,
+    "capacity": 100,
+    "name": "KaXu Solar Power Plant"
+  },
+  {
+    "lat": -27.613,
+    "lng": 23.025,
+    "capacity": 100,
+    "name": "Kathu CSP"
+  },
+  {
+    "lat": -27.595,
+    "lng": 22.929,
+    "capacity": 100,
+    "name": "Kathu Solar Park"
+  },
+  {
+    "lat": -28.895,
+    "lng": 19.592,
+    "capacity": 100,
+    "name": "Xina One"
+  },
+  {
+    "lat": 37.573,
+    "lng": -5.145,
+    "capacity": 100,
+    "name": "PLANTA SOLAR TERMICA HELIOENERGY 1"
+  },
+  {
+    "lat": 37.958,
+    "lng": -4.498,
+    "capacity": 100,
+    "name": "PST SOLACOR 1"
+  },
+  {
+    "lat": 37.648,
+    "lng": -5.254,
+    "capacity": 100,
+    "name": "Palma del Rio CSP"
+  },
+  {
+    "lat": 24.101,
+    "lng": 120.391,
+    "capacity": 100,
+    "name": "Changhua Coastal"
+  },
+  {
+    "lat": 23.571,
+    "lng": 53.714,
+    "capacity": 100,
+    "name": "Shams"
+  },
+  {
+    "lat": 35.348,
+    "lng": -114.97,
+    "capacity": 100,
+    "name": "Boulder Solar Power  LLC"
+  },
+  {
+    "lat": 34.838,
+    "lng": -79.944,
+    "capacity": 100,
+    "name": "Innovative Solar 37"
+  },
+  {
+    "lat": 32.46,
+    "lng": -102.673,
+    "capacity": 100,
+    "name": "Lapetus"
+  },
+  {
+    "lat": 33.333,
+    "lng": -112.911,
+    "capacity": 100,
+    "name": "Mesquite Solar 2  LLC"
+  },
+  {
+    "lat": 45.47,
+    "lng": -92.91,
+    "capacity": 100,
+    "name": "North Star Solar Project"
+  },
+  {
+    "lat": 29.217,
+    "lng": -99.716,
+    "capacity": 100,
+    "name": "OCI Alamo 5 LLC"
+  },
+  {
+    "lat": 33.04,
+    "lng": -99.552,
+    "capacity": 100,
+    "name": "OCI Alamo 7 LLC"
+  },
+  {
+    "lat": 36.408,
+    "lng": -114.908,
+    "capacity": 100,
+    "name": "Playa Solar 2"
+  },
+  {
+    "lat": 34.844,
+    "lng": -118.458,
+    "capacity": 100,
+    "name": "RE Astoria"
+  },
+  {
+    "lat": 36.222,
+    "lng": -119.903,
+    "capacity": 100,
+    "name": "RE Mustang LLC"
+  },
+  {
+    "lat": 34.724,
+    "lng": -118.28,
+    "capacity": 100,
+    "name": "San Pablo Raceway"
+  },
+  {
+    "lat": 36.614,
+    "lng": -77.166,
+    "capacity": 100,
+    "name": "Southampton Solar  LLC"
+  },
+  {
+    "lat": 35.851,
+    "lng": -114.974,
+    "capacity": 100,
+    "name": "Techren Solar I LLC"
+  },
+  {
+    "lat": 31.431,
+    "lng": -103.729,
+    "capacity": 100,
+    "name": "West of the Pecos Solar"
+  },
+  {
+    "lat": 39.583,
+    "lng": 66.72,
+    "capacity": 100,
+    "name": "Sazagan"
+  },
+  {
+    "lat": 39.171,
+    "lng": -3.267,
+    "capacity": 99.8,
+    "name": "ASTE 1A"
+  },
+  {
+    "lat": 39.239,
+    "lng": -3.475,
+    "capacity": 99.8,
+    "name": "HELIOS I"
+  },
+  {
+    "lat": 39.184,
+    "lng": -3.312,
+    "capacity": 99.8,
+    "name": "MANCHASOL-2"
+  },
+  {
+    "lat": 39.193,
+    "lng": -5.578,
+    "capacity": 99.8,
+    "name": "TERMOSOL-2"
+  },
+  {
+    "lat": 51.203,
+    "lng": 5.265,
+    "capacity": 99.5,
+    "name": "Kristal"
+  },
+  {
+    "lat": -25.32,
+    "lng": 152.405,
+    "capacity": 98,
+    "name": "Susan River"
+  },
+  {
+    "lat": -33.094,
+    "lng": -70.862,
+    "capacity": 98,
+    "name": "Til Til"
+  },
+  {
+    "lat": 38.507,
+    "lng": 102.35,
+    "capacity": 98,
+    "name": "Jinchang Jinko I"
+  },
+  {
+    "lat": 29.321,
+    "lng": 71.823,
+    "capacity": 98,
+    "name": "QeA} Jinnah"
+  },
+  {
+    "lat": -27.005,
+    "lng": -69.869,
+    "capacity": 97,
+    "name": "Carrera Pinto I"
+  },
+  {
+    "lat": 31.902,
+    "lng": 131.339,
+    "capacity": 96.2,
+    "name": "Hosoe"
+  },
+  {
+    "lat": 37.56,
+    "lng": 105.017,
+    "capacity": 96,
+    "name": "TeSP} G"
+  },
+  {
+    "lat": -28.312,
+    "lng": 23.367,
+    "capacity": 96,
+    "name": "Jasper Solar Power Plant"
+  },
+  {
+    "lat": 44.015,
+    "lng": 6.017,
+    "capacity": 95.3,
+    "name": "Les Mées"
+  },
+  {
+    "lat": -35.271,
+    "lng": 139.492,
+    "capacity": 95,
+    "name": "Tailem Bend Solar Farm"
+  },
+  {
+    "lat": -27.584,
+    "lng": 22.928,
+    "capacity": 94.3,
+    "name": "Sishen Solar Power Plant"
+  },
+  {
+    "lat": 35.782,
+    "lng": -114.975,
+    "capacity": 93.6,
+    "name": "Copper Mountain Solar 4  LLC"
+  },
+  {
+    "lat": 35.033,
+    "lng": -117.338,
+    "capacity": 92,
+    "name": "SEGS IX"
+  },
+  {
+    "lat": 35.031,
+    "lng": -117.356,
+    "capacity": 92,
+    "name": "SEGS VIII"
+  },
+  {
+    "lat": 41.629,
+    "lng": -109.683,
+    "capacity": 92,
+    "name": "Sweetwater Solar"
+  },
+  {
+    "lat": 35.171,
+    "lng": -118.002,
+    "capacity": 91.5,
+    "name": "Springbok 3 Solar Farm Hybrid"
+  },
+  {
+    "lat": -8.343,
+    "lng": -36.235,
+    "capacity": 91,
+    "name": "Tacaimbo"
+  },
+  {
+    "lat": 52.437,
+    "lng": 12.453,
+    "capacity": 91,
+    "name": "Briest Solar Power Plant"
+  },
+  {
+    "lat": -18,
+    "lng": -46.87,
+    "capacity": 90,
+    "name": "Vazante"
+  },
+  {
+    "lat": 38.09,
+    "lng": 102.268,
+    "capacity": 90,
+    "name": "Fengle H"
+  },
+  {
+    "lat": 39.74,
+    "lng": 98.079,
+    "capacity": 90,
+    "name": "Jiayuguan F"
+  },
+  {
+    "lat": 38.462,
+    "lng": 102.429,
+    "capacity": 90,
+    "name": "Jinchang G"
+  },
+  {
+    "lat": 42.244,
+    "lng": 88.315,
+    "capacity": 90,
+    "name": "Toksun I"
+  },
+  {
+    "lat": 18.393,
+    "lng": 99.422,
+    "capacity": 90,
+    "name": "Lampang Solar Power Plant"
+  },
+  {
+    "lat": 15.367,
+    "lng": 100.301,
+    "capacity": 90,
+    "name": "Nakhon Sawan Solar Power Plant"
+  },
+  {
+    "lat": 17.071,
+    "lng": 100.118,
+    "capacity": 90,
+    "name": "Phitsanulok Solar Power Plant"
+  },
+  {
+    "lat": -34.69,
+    "lng": 142.745,
+    "capacity": 88,
+    "name": "Bannerton Solar Farm"
+  },
+  {
+    "lat": -32.353,
+    "lng": 149.468,
+    "capacity": 87,
+    "name": "Beryl AU"
+  },
+  {
+    "lat": 44.958,
+    "lng": 33.923,
+    "capacity": 86.6,
+    "name": "Perovo"
+  },
+  {
+    "lat": 9.69,
+    "lng": -73.765,
+    "capacity": 86.2,
+    "name": "El Paso"
+  },
+  {
+    "lat": -30.025,
+    "lng": 22.339,
+    "capacity": 86,
+    "name": "Mulilo Sonnedix Prieska"
+  },
+  {
+    "lat": -30.022,
+    "lng": 22.356,
+    "capacity": 86,
+    "name": "Prieska Solar Plant"
+  },
+  {
+    "lat": -25.536,
+    "lng": -70.178,
+    "capacity": 85.7,
+    "name": "Pampa Sur"
+  },
+  {
+    "lat": -25.511,
+    "lng": -70.166,
+    "capacity": 85.3,
+    "name": "Pampa Norte"
+  },
+  {
+    "lat": 34.656,
+    "lng": -118.298,
+    "capacity": 85,
+    "name": "Solverde 1"
+  },
+  {
+    "lat": 52.822,
+    "lng": 13.701,
+    "capacity": 84.9,
+    "name": "Finow Solar Power Plant"
+  },
+  {
+    "lat": 26.862,
+    "lng": -81.751,
+    "capacity": 84.5,
+    "name": "Babcock Solar Energy Center Hybrid"
+  },
+  {
+    "lat": 54.623,
+    "lng": 9.346,
+    "capacity": 83.2,
+    "name": "Eggebek Solar Power Plant"
+  },
+  {
+    "lat": -27.374,
+    "lng": 23.008,
+    "capacity": 82.5,
+    "name": "Adams Solar PV Project"
+  },
+  {
+    "lat": -32.423,
+    "lng": 18.736,
+    "capacity": 82.5,
+    "name": "Paleisheuwel Solar Power Plant"
+  },
+  {
+    "lat": -29.039,
+    "lng": 24.933,
+    "capacity": 82.5,
+    "name": "Pulida Solar Park"
+  },
+  {
+    "lat": 43.895,
+    "lng": 89.43,
+    "capacity": 82,
+    "name": "Changji"
+  },
+  {
+    "lat": 32.582,
+    "lng": 116.594,
+    "capacity": 82,
+    "name": "Jiaoganghu"
+  },
+  {
+    "lat": 33.21,
+    "lng": 118.03,
+    "capacity": 82,
+    "name": "Sihong Tianganghu"
+  },
+  {
+    "lat": 28.365,
+    "lng": 117.61,
+    "capacity": 82,
+    "name": "Yangjia"
+  },
+  {
+    "lat": 43.776,
+    "lng": 5.822,
+    "capacity": 82,
+    "name": "Gréoux-les-Bains"
+  },
+  {
+    "lat": 51.558,
+    "lng": 13.994,
+    "capacity": 82,
+    "name": "Senftenberg II/III"
+  },
+  {
+    "lat": 26.73,
+    "lng": 73.199,
+    "capacity": 82,
+    "name": "Hardhani 100"
+  },
+  {
+    "lat": 33.26,
+    "lng": 131.721,
+    "capacity": 82,
+    "name": "Oita - Marubeni Solar Power Plant"
+  },
+  {
+    "lat": -34.407,
+    "lng": 142.179,
+    "capacity": 81,
+    "name": "Yatpool"
+  },
+  {
+    "lat": 51.568,
+    "lng": 13.738,
+    "capacity": 81,
+    "name": "Solar Schipkau II GmbH & Co. KG"
+  },
+  {
+    "lat": 32.286,
+    "lng": -110.088,
+    "capacity": 81,
+    "name": "Red Horse 2"
+  },
+  {
+    "lat": 34.44,
+    "lng": -91.44,
+    "capacity": 81,
+    "name": "Stuttgart Solar"
+  },
+  {
+    "lat": 35.597,
+    "lng": -76.764,
+    "capacity": 80.6,
+    "name": "Wilkinson Solar LLC"
+  },
+  {
+    "lat": -26.04,
+    "lng": -65.93,
+    "capacity": 80,
+    "name": "Cafayate"
+  },
+  {
+    "lat": -30.34,
+    "lng": -69.27,
+    "capacity": 80,
+    "name": "Iglesia-Guañizuil"
+  },
+  {
+    "lat": -12.705,
+    "lng": -43.99,
+    "capacity": 80,
+    "name": "Horizonte"
+  },
+  {
+    "lat": 38.623,
+    "lng": 102.171,
+    "capacity": 80,
+    "name": "Jinchuan J"
+  },
+  {
+    "lat": 36.013,
+    "lng": 114.891,
+    "capacity": 80,
+    "name": "Mashang"
+  },
+  {
+    "lat": 39.587,
+    "lng": 98.574,
+    "capacity": 80,
+    "name": "Suzhou F"
+  },
+  {
+    "lat": 14.04,
+    "lng": -90.36,
+    "capacity": 80,
+    "name": "Horus 1 y 2"
+  },
+  {
+    "lat": 20.905,
+    "lng": 85.925,
+    "capacity": 80,
+    "name": "Ambosara"
+  },
+  {
+    "lat": 24.865,
+    "lng": 78.665,
+    "capacity": 80,
+    "name": "Khariya Mishar"
+  },
+  {
+    "lat": 16.24,
+    "lng": 75.305,
+    "capacity": 80,
+    "name": "Vajramatti Acme"
+  },
+  {
+    "lat": 36.291,
+    "lng": -77.067,
+    "capacity": 80,
+    "name": "Aulander Holloman Solar  LLC"
+  },
+  {
+    "lat": 35.822,
+    "lng": -77.481,
+    "capacity": 80,
+    "name": "Conetoe II Solar  LLC"
+  },
+  {
+    "lat": 30.992,
+    "lng": -84.634,
+    "capacity": 80,
+    "name": "Decatur Parkway Solar Project  LLC"
+  },
+  {
+    "lat": 37.944,
+    "lng": -75.57,
+    "capacity": 80,
+    "name": "Eastern Shore Solar  LLC"
+  },
+  {
+    "lat": 37.641,
+    "lng": -113.612,
+    "capacity": 80,
+    "name": "Enterprise Solar  LLC"
+  },
+  {
+    "lat": 38.524,
+    "lng": -113.034,
+    "capacity": 80,
+    "name": "Escalante Solar I  LLC"
+  },
+  {
+    "lat": 38.501,
+    "lng": -113.03,
+    "capacity": 80,
+    "name": "Escalante Solar II  LLC"
+  },
+  {
+    "lat": 38.498,
+    "lng": -112.987,
+    "capacity": 80,
+    "name": "Escalante Solar III  LLC"
+  },
+  {
+    "lat": 42.99,
+    "lng": -116.093,
+    "capacity": 80,
+    "name": "Grand View Solar Two"
+  },
+  {
+    "lat": 37.775,
+    "lng": -113.226,
+    "capacity": 80,
+    "name": "Granite Mountain Solar East  LLC"
+  },
+  {
+    "lat": 37.721,
+    "lng": -113.152,
+    "capacity": 80,
+    "name": "Iron Springs Solar  LLC"
+  },
+  {
+    "lat": 37.827,
+    "lng": -113.137,
+    "capacity": 80,
+    "name": "Three Peaks Power"
+  },
+  {
+    "lat": 37.883,
+    "lng": -112.904,
+    "capacity": 80,
+    "name": "Utah Red Hills Renewable Energy Park"
+  },
+  {
+    "lat": 36.486,
+    "lng": -77.535,
+    "capacity": 79.9,
+    "name": "Gutenberg Solar"
+  },
+  {
+    "lat": 32.876,
+    "lng": -85.388,
+    "capacity": 79.2,
+    "name": "LaFayette Solar Farm"
+  },
+  {
+    "lat": 36.408,
+    "lng": -114.908,
+    "capacity": 79,
+    "name": "Playa Solar 1  LLC"
+  },
+  {
+    "lat": 48.787,
+    "lng": 5.979,
+    "capacity": 78.9,
+    "name": "Rosières-en-Haye"
+  },
+  {
+    "lat": 27.321,
+    "lng": -81.807,
+    "capacity": 78.5,
+    "name": "Citrus Solar Energy Center Hybrid"
+  },
+  {
+    "lat": 34.918,
+    "lng": -78.944,
+    "capacity": 78.5,
+    "name": "Innovative Solar 46"
+  },
+  {
+    "lat": -23.48,
+    "lng": -69.419,
+    "capacity": 76.7,
+    "name": "Boléro East"
+  },
+  {
+    "lat": 52.612,
+    "lng": 14.241,
+    "capacity": 76.7,
+    "name": "Neuhardenberg Solar Power Plant"
+  },
+  {
+    "lat": 33.037,
+    "lng": -82.111,
+    "capacity": 76.5,
+    "name": "White Oak Solar  LLC"
+  },
+  {
+    "lat": 13.455,
+    "lng": -89.005,
+    "capacity": 76,
+    "name": "Antares"
+  },
+  {
+    "lat": 45.28,
+    "lng": 33.601,
+    "capacity": 76,
+    "name": "Ohotnikovo"
+  },
+  {
+    "lat": 35.8,
+    "lng": -114.982,
+    "capacity": 75.7,
+    "name": "Nevada Solar One"
+  },
+  {
+    "lat": -25.28,
+    "lng": 152.38,
+    "capacity": 75,
+    "name": "Childers"
+  },
+  {
+    "lat": 36.284,
+    "lng": 114.013,
+    "capacity": 75,
+    "name": "Anyang A"
+  },
+  {
+    "lat": 37.386,
+    "lng": 97.269,
+    "capacity": 75,
+    "name": "DhSP} AI"
+  },
+  {
+    "lat": 39.274,
+    "lng": 99.56,
+    "capacity": 75,
+    "name": "Gaotai D"
+  },
+  {
+    "lat": 40.13,
+    "lng": 94.473,
+    "capacity": 75,
+    "name": "Qili} M"
+  },
+  {
+    "lat": 37.573,
+    "lng": 105.068,
+    "capacity": 75,
+    "name": "TeSP} J"
+  },
+  {
+    "lat": 40.345,
+    "lng": 111.209,
+    "capacity": 75,
+    "name": "Togtoh A"
+  },
+  {
+    "lat": 34.947,
+    "lng": 108.974,
+    "capacity": 75,
+    "name": "Yaozhou A"
+  },
+  {
+    "lat": 34.284,
+    "lng": 113.235,
+    "capacity": 75,
+    "name": "Yuzhou B"
+  },
+  {
+    "lat": 37.54,
+    "lng": 107.772,
+    "capacity": 75,
+    "name": "Zhuanjingzhen A"
+  },
+  {
+    "lat": 10.88,
+    "lng": 78.345,
+    "capacity": 75,
+    "name": "Iyyermalai"
+  },
+  {
+    "lat": 26.27,
+    "lng": 79.52,
+    "capacity": 75,
+    "name": "Jalaun SD"
+  },
+  {
+    "lat": 25.1,
+    "lng": 82.38,
+    "capacity": 75,
+    "name": "Mirzapur"
+  },
+  {
+    "lat": -30.596,
+    "lng": 24.103,
+    "capacity": 75,
+    "name": "De Aar 3 Solar Power Plant"
+  },
+  {
+    "lat": -30.838,
+    "lng": 26.226,
+    "capacity": 75,
+    "name": "Dreunberg Solar Power Plant"
+  },
+  {
+    "lat": -31.727,
+    "lng": 23.192,
+    "capacity": 75,
+    "name": "Kalkbult Solar Power Plant"
+  },
+  {
+    "lat": -28.887,
+    "lng": 19.554,
+    "capacity": 75,
+    "name": "Konkoonsies II Solar Facility"
+  },
+  {
+    "lat": -28.315,
+    "lng": 23.354,
+    "capacity": 75,
+    "name": "Lesedi Solar Power Plant"
+  },
+  {
+    "lat": -28.915,
+    "lng": 25.92,
+    "capacity": 75,
+    "name": "Letsatsi Solar Power Plant"
+  },
+  {
+    "lat": -30.579,
+    "lng": 24.079,
+    "capacity": 75,
+    "name": "Solar Capital De Aar I"
+  },
+  {
+    "lat": -30.596,
+    "lng": 24.103,
+    "capacity": 75,
+    "name": "Solar Capital De Aar III"
+  },
+  {
+    "lat": 38.169,
+    "lng": -75.697,
+    "capacity": 75,
+    "name": "Great Bay Solar 1"
+  },
+  {
+    "lat": 33.34,
+    "lng": -80.697,
+    "capacity": 75,
+    "name": "Palmetto Plains"
+  },
+  {
+    "lat": 34.837,
+    "lng": -118.48,
+    "capacity": 75,
+    "name": "RE Astoria 2"
+  },
+  {
+    "lat": 34.832,
+    "lng": -87.842,
+    "capacity": 75,
+    "name": "River Bend Solar  LLC"
+  },
+  {
+    "lat": 30.444,
+    "lng": -83.187,
+    "capacity": 74.9,
+    "name": "Hamilton Solar Power Plant"
+  },
+  {
+    "lat": 36.481,
+    "lng": -77.481,
+    "capacity": 74.9,
+    "name": "Pecan Solar"
+  },
+  {
+    "lat": 33.675,
+    "lng": -81.754,
+    "capacity": 74.9,
+    "name": "Shaw Creek Solar  LLC"
+  },
+  {
+    "lat": 29.635,
+    "lng": -82.843,
+    "capacity": 74.9,
+    "name": "Trenton Solar Power Plant"
+  },
+  {
+    "lat": 33.54,
+    "lng": -115.975,
+    "capacity": 74.8,
+    "name": "Colgreen North Shore Solar Farm"
+  },
+  {
+    "lat": 35.293,
+    "lng": -80.497,
+    "capacity": 74.8,
+    "name": "NC 102 Project LLC"
+  },
+  {
+    "lat": 35.258,
+    "lng": -81.831,
+    "capacity": 74.8,
+    "name": "Rutherford Farm"
+  },
+  {
+    "lat": 27.866,
+    "lng": -80.521,
+    "capacity": 74.5,
+    "name": "Barefoot Bay Solar Energy Center"
+  },
+  {
+    "lat": 27.61,
+    "lng": -80.537,
+    "capacity": 74.5,
+    "name": "Blue Cypress Solar Energy Center"
+  },
+  {
+    "lat": 29.757,
+    "lng": -81.897,
+    "capacity": 74.5,
+    "name": "Coral Farms Solar Energy Center"
+  },
+  {
+    "lat": 26.693,
+    "lng": -81.325,
+    "capacity": 74.5,
+    "name": "Hammock Solar"
+  },
+  {
+    "lat": 29.666,
+    "lng": -82.058,
+    "capacity": 74.5,
+    "name": "Horizon Solar Energy Center"
+  },
+  {
+    "lat": 27.573,
+    "lng": -80.578,
+    "capacity": 74.5,
+    "name": "Indian River Solar Center"
+  },
+  {
+    "lat": 27.5,
+    "lng": -80.44,
+    "capacity": 74.5,
+    "name": "Interstate Solar Energy Center"
+  },
+  {
+    "lat": 27.753,
+    "lng": -82.165,
+    "capacity": 74.5,
+    "name": "Lithia Solar"
+  },
+  {
+    "lat": 27.238,
+    "lng": -80.541,
+    "capacity": 74.5,
+    "name": "Loggerhead Solar Energy Center"
+  },
+  {
+    "lat": 27.608,
+    "lng": -82.355,
+    "capacity": 74.5,
+    "name": "Manatee Solar Energy Center"
+  },
+  {
+    "lat": 25.64,
+    "lng": -80.49,
+    "capacity": 74.5,
+    "name": "Miami Dade Solar Energy Center"
+  },
+  {
+    "lat": 29.08,
+    "lng": -81.1,
+    "capacity": 74.5,
+    "name": "Pioneer Trail Solar Energy Center"
+  },
+  {
+    "lat": 30.29,
+    "lng": -82.75,
+    "capacity": 74.5,
+    "name": "Sunshine Gateway Solar Energy Center"
+  }
+]

@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      # Mount wallet directory (adjust path as needed)
+      - ../../Wallet_SolarTrack:/app/wallet:ro
+      # Mount app code for development (hot reload)
+      - ./app:/app/app:ro
+    environment:
+      - TNS_ADMIN=/app/wallet
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+
+# Usage:
+# docker-compose up --build       # Build and start
+# docker-compose up -d            # Start in background
+# docker-compose logs -f          # View logs
+# docker-compose down             # Stop and remove

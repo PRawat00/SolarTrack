@@ -1,0 +1,74 @@
+name: Deploy Backend to Oracle VM
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'apps/api/**'
+      - '.github/workflows/deploy-backend.yml'
+  workflow_dispatch:  # Allow manual trigger
+
+env:
+  DOCKER_IMAGE: solartrack-api
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to Oracle VM
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.ORACLE_VM_HOST }}
+          username: ${{ secrets.ORACLE_VM_USER }}
+          key: ${{ secrets.ORACLE_VM_SSH_KEY }}
+          script: |
+            cd ~/solartrack
+
+            # Pull latest code
+            git pull origin main
+
+            # Create .env file from secrets
+            cat > apps/api/.env << 'EOF'
+            DATABASE_URL=${{ secrets.DATABASE_URL }}
+            TNS_ADMIN=${{ secrets.TNS_ADMIN }}
+            WALLET_PASSWORD=${{ secrets.WALLET_PASSWORD }}
+            SUPABASE_JWT_SECRET=${{ secrets.SUPABASE_JWT_SECRET }}
+            DEFAULT_AI_PROVIDER=gemini
+            GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
+            ENVIRONMENT=production
+            CORS_ORIGINS=${{ secrets.CORS_ORIGINS }}
+            EOF
+
+            # Build and restart Docker container
+            cd apps/api
+            docker build -t ${{ env.DOCKER_IMAGE }} .
+
+            # Stop existing container if running
+            docker stop ${{ env.DOCKER_IMAGE }} 2>/dev/null || true
+            docker rm ${{ env.DOCKER_IMAGE }} 2>/dev/null || true
+
+            # Run new container with wallet volume mounted
+            docker run -d \
+              --name ${{ env.DOCKER_IMAGE }} \
+              --restart unless-stopped \
+              -p 8000:8000 \
+              -v ~/wallet:/app/wallet:ro \
+              --env-file .env \
+              -e TNS_ADMIN=/app/wallet \
+              ${{ env.DOCKER_IMAGE }}
+
+            # Cleanup old images
+            docker image prune -f
+
+            # Health check
+            sleep 5
+            curl -f http://localhost:8000/health || exit 1
+
+      - name: Notify on failure
+        if: failure()
+        run: echo "Deployment failed! Check the logs above."

@@ -1,0 +1,78 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+*.egg-info/
+__pycache__/
+.pytest_cache/
+*.pyc
+dist/
+build/
+
+# Environment
+.env
+.env.local
+.env*.local
+.env.production.local
+.env.development.local
+.env.test.local
+
+# Next.js
+.next/
+out/
+
+# Python
+venv/
+.venv/
+ENV/
+
+# Supabase
+.supabase/
+.supabase.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Misc
+.cache/
+.coverage/
+*.pem
+
+# Claude Code (local settings)
+.claude/
+
+# Oracle Wallet (contains database credentials)
+Wallet_SolarTrack/
+Wallet_*/
+*.p12
+*.jks
+*.sso
+
+# Secrets and credentials
+*.key
+secret*
+*credentials*
+credentials/
+
+# SSL/TLS certificates
+*.crt
+*.cer
+
+# Terraform (if used in future)
+*.tfstate
+*.tfstate.*
+.terraform/
+
+# Docker secrets
+docker-compose.override.yml
