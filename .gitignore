@@ -64,6 +64,8 @@ Wallet_*/
 secret*
 *credentials*
 credentials/
+keys/
+*.pub
 
 # SSL/TLS certificates
 *.crt
