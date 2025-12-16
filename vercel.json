@@ -3,6 +3,5 @@
   "framework": "nextjs",
   "installCommand": "pnpm install",
   "buildCommand": "pnpm --filter @solarlog/web build",
-  "outputDirectory": "apps/web/.next",
-  "ignoreCommand": "git diff HEAD^ HEAD --quiet -- apps/web/ packages/"
+  "outputDirectory": "apps/web/.next"
 }
