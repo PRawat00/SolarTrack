@@ -3,7 +3,7 @@
 import { useState, useCallback, useEffect } from 'react'
 import * as Dialog from '@radix-ui/react-dialog'
 import { useEarthSceneStore, SelectedLocation } from '@/lib/stores/earth-scene-store'
-import { geocodingAPI, settingsAPI, GeoLocation, SettingsResponse } from '@/lib/api/client'
+import { geocodingAPI, settingsAPI, GeoLocation } from '@/lib/api/client'
 import { createClient } from '@/lib/supabase/client'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
