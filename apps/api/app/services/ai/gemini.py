@@ -38,9 +38,7 @@ class GeminiProvider(AIProvider):
     def __init__(self):
         if not settings.GEMINI_API_KEY:
             raise ValueError("GEMINI_API_KEY not configured")
-        # Set API key in environment for the client
-        os.environ["GEMINI_API_KEY"] = settings.GEMINI_API_KEY
-        self.client = genai.Client()
+        self.client = genai.Client(api_key=settings.GEMINI_API_KEY)
 
     async def extract_readings(
         self,
