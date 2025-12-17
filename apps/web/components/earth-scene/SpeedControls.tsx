@@ -5,7 +5,20 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
 export function SpeedControls() {
-  const { earthPreset, sunPreset, setEarthPreset, setSunPreset, isZooming, isFadingOut } = useEarthSceneStore()
+  const {
+    earthPreset,
+    sunPreset,
+    setEarthPreset,
+    setSunPreset,
+    isZooming,
+    isFadingOut,
+    showSolar,
+    showWind,
+    showNuclear,
+    toggleSolar,
+    toggleWind,
+    toggleNuclear,
+  } = useEarthSceneStore()
 
   // Hide controls during zoom/fade
   if (isZooming || isFadingOut) {
@@ -64,6 +77,57 @@ export function SpeedControls() {
                 {SUN_SPEEDS[preset].label}
               </Button>
             ))}
+          </div>
+        </div>
+
+        {/* Layers */}
+        <div>
+          <div className="text-xs text-white/60 uppercase tracking-wider mb-2">
+            Layers
+          </div>
+          <div className="flex gap-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={toggleSolar}
+              className={cn(
+                'text-xs px-3 py-1 h-7 transition-all flex items-center gap-1.5',
+                showSolar
+                  ? 'bg-orange-500/20 text-orange-400 border border-orange-500/50'
+                  : 'text-white/40 hover:text-white hover:bg-white/10'
+              )}
+            >
+              <span className="w-2 h-2 rounded-full bg-orange-400" />
+              Solar
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={toggleWind}
+              className={cn(
+                'text-xs px-3 py-1 h-7 transition-all flex items-center gap-1.5',
+                showWind
+                  ? 'bg-green-500/20 text-green-400 border border-green-500/50'
+                  : 'text-white/40 hover:text-white hover:bg-white/10'
+              )}
+            >
+              <span className="w-2 h-2 rounded-full bg-green-400" />
+              Wind
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={toggleNuclear}
+              className={cn(
+                'text-xs px-3 py-1 h-7 transition-all flex items-center gap-1.5',
+                showNuclear
+                  ? 'bg-fuchsia-500/20 text-fuchsia-400 border border-fuchsia-500/50'
+                  : 'text-white/40 hover:text-white hover:bg-white/10'
+              )}
+            >
+              <span className="w-2 h-2 rounded-full bg-fuchsia-400" />
+              Nuclear
+            </Button>
           </div>
         </div>
 

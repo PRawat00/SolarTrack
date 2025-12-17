@@ -266,6 +266,9 @@ export const readingsAPI = {
       method: 'PATCH',
       body: JSON.stringify(reading),
     }),
+
+  deleteAll: (): Promise<{ message: string; deleted_count: number }> =>
+    fetchAPI('/api/readings/all', { method: 'DELETE' }),
 }
 
 export const settingsAPI = {

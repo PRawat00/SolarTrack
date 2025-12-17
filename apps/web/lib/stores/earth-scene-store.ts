@@ -18,6 +18,11 @@ interface EarthSceneState {
   earthPreset: SpeedPreset
   sunPreset: SpeedPreset
 
+  // Layer visibility
+  showSolar: boolean
+  showWind: boolean
+  showNuclear: boolean
+
   // Earth rotation tracking for zoom animation
   currentEarthRotation: number
   targetEarthRotation: number | null
@@ -54,6 +59,9 @@ interface EarthSceneState {
   startFadeOut: () => void
   setTexturesLoaded: (loaded: boolean) => void
   setEarthGroupRef: (group: THREE.Group | null) => void
+  toggleSolar: () => void
+  toggleWind: () => void
+  toggleNuclear: () => void
   reset: () => void
 }
 
@@ -99,6 +107,9 @@ const initialState = {
   sunOrbitSpeed: SUN_SPEEDS.cinematic.speed,
   earthPreset: 'cinematic' as SpeedPreset,
   sunPreset: 'cinematic' as SpeedPreset,
+  showSolar: true,
+  showWind: true,
+  showNuclear: true,
   currentEarthRotation: 0,
   targetEarthRotation: null as number | null,
   targetEarthXRotation: null as number | null,
@@ -152,6 +163,12 @@ export const useEarthSceneStore = create<EarthSceneState>((set) => ({
   setTexturesLoaded: (loaded: boolean) => set({ texturesLoaded: loaded }),
 
   setEarthGroupRef: (group: THREE.Group | null) => set({ earthGroupRef: group }),
+
+  toggleSolar: () => set((state) => ({ showSolar: !state.showSolar })),
+
+  toggleWind: () => set((state) => ({ showWind: !state.showWind })),
+
+  toggleNuclear: () => set((state) => ({ showNuclear: !state.showNuclear })),
 
   reset: () => set(initialState),
 }))

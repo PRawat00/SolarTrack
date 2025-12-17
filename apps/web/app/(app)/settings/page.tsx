@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { settingsAPI, geocodingAPI, usageAPI, GeoLocation, UsageResponse } from '@/lib/api/client'
+import { settingsAPI, geocodingAPI, usageAPI, readingsAPI, GeoLocation, UsageResponse } from '@/lib/api/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -65,6 +65,9 @@ export default function SettingsPage() {
   const [isSearching, setIsSearching] = useState(false)
   const [showResults, setShowResults] = useState(false)
   const [usage, setUsage] = useState<UsageResponse | null>(null)
+  const [deleteConfirmation, setDeleteConfirmation] = useState('')
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [deleteMessage, setDeleteMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
   const {
     register,
@@ -170,6 +173,26 @@ export default function SettingsPage() {
         type: 'error',
         text: err instanceof Error ? err.message : 'Failed to save settings',
       })
+    }
+  }
+
+  const handleDeleteAllData = async () => {
+    if (deleteConfirmation !== 'DELETE ALL DATA') return
+
+    setIsDeleting(true)
+    setDeleteMessage(null)
+
+    try {
+      const result = await readingsAPI.deleteAll()
+      setDeleteMessage({ type: 'success', text: result.message })
+      setDeleteConfirmation('')
+    } catch (err) {
+      setDeleteMessage({
+        type: 'error',
+        text: err instanceof Error ? err.message : 'Failed to delete data',
+      })
+    } finally {
+      setIsDeleting(false)
     }
   }
 
@@ -403,6 +426,54 @@ export default function SettingsPage() {
           ) : (
             <p className="text-sm text-muted-foreground">Loading usage data...</p>
           )}
+        </CardContent>
+      </Card>
+
+      {/* Danger Zone */}
+      <Card className="border-destructive">
+        <CardHeader>
+          <CardTitle className="text-destructive">Danger Zone</CardTitle>
+          <CardDescription>
+            Irreversible actions that permanently delete your data
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {deleteMessage && (
+            <div
+              className={`p-3 text-sm rounded-md ${
+                deleteMessage.type === 'success'
+                  ? 'bg-green-500/10 text-green-500'
+                  : 'bg-destructive/10 text-destructive'
+              }`}
+            >
+              {deleteMessage.text}
+            </div>
+          )}
+
+          <div className="space-y-2">
+            <p className="text-sm text-muted-foreground">
+              This will permanently delete all your solar readings. This action cannot be undone.
+            </p>
+            <div className="space-y-2">
+              <Label htmlFor="delete-confirmation">
+                Type <span className="font-mono font-bold">DELETE ALL DATA</span> to confirm
+              </Label>
+              <Input
+                id="delete-confirmation"
+                value={deleteConfirmation}
+                onChange={(e) => setDeleteConfirmation(e.target.value)}
+                placeholder="DELETE ALL DATA"
+                className="font-mono"
+              />
+            </div>
+            <Button
+              variant="destructive"
+              onClick={handleDeleteAllData}
+              disabled={deleteConfirmation !== 'DELETE ALL DATA' || isDeleting}
+            >
+              {isDeleting ? 'Deleting...' : 'Delete All Readings'}
+            </Button>
+          </div>
         </CardContent>
       </Card>
     </div>

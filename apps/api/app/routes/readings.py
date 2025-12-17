@@ -231,3 +231,16 @@ async def update_reading(
     db.refresh(reading)
 
     return _reading_to_response(reading)
+
+
+@router.delete("/readings/all")
+async def delete_all_readings(
+    current_user: TokenData = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Delete all readings for the current user. This action is irreversible."""
+    count = db.query(SolarReading).filter(
+        SolarReading.user_id == current_user.user_id
+    ).delete()
+    db.commit()
+    return {"message": f"Deleted {count} readings", "deleted_count": count}
