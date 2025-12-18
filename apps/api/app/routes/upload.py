@@ -7,7 +7,7 @@ import json
 
 from app.middleware.auth import get_current_user, TokenData
 from app.services.ai.factory import AIProviderFactory
-from app.services.ai.base import ExtractedReading
+from app.services.ai.base import ExtractedReading, ExtractionResult
 from app.models.base import get_db
 from app.models.models import ProcessingJob, ApiUsage
 from app.config import settings
@@ -126,25 +126,40 @@ async def upload_and_process(
         db.commit()
         db.refresh(job)
 
-        readings = await provider.extract_readings(
+        result = await provider.extract_readings(
             image_data=image_data,
             mime_type=file.content_type,
         )
 
+        # Check if extraction failed
+        if not result.success:
+            job.status = "failed"
+            job.completed_at = datetime.utcnow()
+            job.error_text = result.error
+            db.commit()
+
+            raise HTTPException(
+                status_code=422,
+                detail=result.error or "Failed to extract readings from image"
+            )
+
         # Update job with success
         job.status = "completed"
         job.completed_at = datetime.utcnow()
-        job.result = json.dumps([r.model_dump() for r in readings])
+        job.result = json.dumps([r.model_dump() for r in result.readings])
         db.commit()
 
         # Image is automatically garbage collected after this function returns
         return UploadResponse(
-            readings=readings,
+            readings=result.readings,
             provider=provider.get_provider_name(),
-            message=f"Extracted {len(readings)} readings",
+            message=f"Extracted {len(result.readings)} readings",
             job_id=job.id,
         )
 
+    except HTTPException:
+        # Re-raise HTTP exceptions (like our 422 validation error)
+        raise
     except Exception as e:
         # Update job with failure if it was created
         if job:
