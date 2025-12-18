@@ -338,3 +338,184 @@ export const geocodingAPI = {
     return response.json()
   },
 }
+
+// ============ Family Types ============
+
+export interface Family {
+  id: string
+  name: string
+  join_code: string
+  owner_id: string
+  member_count: number
+  is_owner: boolean
+  created_at: string
+}
+
+export interface FamilyMember {
+  id: string
+  user_id: string
+  display_name: string | null
+  email: string | null
+  role: 'owner' | 'member'
+  joined_at: string
+  images_processed: number
+}
+
+export interface FamilyImage {
+  id: string
+  filename: string
+  uploader_id: string
+  uploader_name: string | null
+  status: 'pending' | 'claimed' | 'processing' | 'processed' | 'error'
+  claimed_by: string | null
+  claimed_by_name: string | null
+  processed_by: string | null
+  processed_by_name: string | null
+  readings_count: number
+  file_size: number
+  created_at: string
+  claimed_at: string | null
+  processed_at: string | null
+}
+
+export interface ImageListResponse {
+  images: FamilyImage[]
+  total: number
+  pending_count: number
+  claimed_count: number
+  processed_count: number
+}
+
+export interface LeaderboardEntry {
+  rank: number
+  user_id: string
+  display_name: string | null
+  images_processed: number
+  readings_extracted: number
+  contribution_percent: number
+  last_activity: string | null
+}
+
+export interface FamilyStats {
+  total_images: number
+  pending_images: number
+  processed_images: number
+  total_readings_extracted: number
+  member_count: number
+}
+
+export interface FamilyDashboard {
+  stats: FamilyStats
+  leaderboard: LeaderboardEntry[]
+  recent_activity: {
+    image_id: string
+    filename: string
+    processed_by: string
+    processed_by_name: string | null
+    readings_count: number
+    processed_at: string | null
+  }[]
+}
+
+export interface FamilyProcessResponse {
+  readings: ExtractedReading[]
+  provider: string
+  message: string
+  job_id: string
+  image_id: string
+}
+
+// ============ Family API ============
+
+export const familyAPI = {
+  get: (): Promise<Family | null> =>
+    fetchAPI('/api/family'),
+
+  create: (name: string, password: string): Promise<Family> =>
+    fetchAPI('/api/family', {
+      method: 'POST',
+      body: JSON.stringify({ name, password }),
+    }),
+
+  join: (joinCode: string, password: string): Promise<Family> =>
+    fetchAPI('/api/family/join', {
+      method: 'POST',
+      body: JSON.stringify({ join_code: joinCode, password }),
+    }),
+
+  leave: (): Promise<{ message: string }> =>
+    fetchAPI('/api/family/leave', { method: 'POST' }),
+
+  getMembers: (): Promise<FamilyMember[]> =>
+    fetchAPI('/api/family/members'),
+
+  removeMember: (userId: string): Promise<{ message: string }> =>
+    fetchAPI(`/api/family/members/${userId}`, { method: 'DELETE' }),
+
+  updateDisplayName: (displayName: string): Promise<FamilyMember> =>
+    fetchAPI('/api/family/display-name', {
+      method: 'PATCH',
+      body: JSON.stringify({ display_name: displayName }),
+    }),
+
+  getLeaderboard: (): Promise<LeaderboardEntry[]> =>
+    fetchAPI('/api/family/leaderboard'),
+
+  getStats: (): Promise<FamilyStats> =>
+    fetchAPI('/api/family/stats'),
+
+  getDashboard: (): Promise<FamilyDashboard> =>
+    fetchAPI('/api/family/dashboard'),
+}
+
+// ============ Family Images API ============
+
+export const familyImagesAPI = {
+  list: (status?: string): Promise<ImageListResponse> =>
+    fetchAPI(`/api/family/images${status ? `?status_filter=${status}` : ''}`),
+
+  uploadBulk: async (files: File[]): Promise<FamilyImage[]> => {
+    const authHeaders = await getAuthHeaders()
+    const formData = new FormData()
+    files.forEach(f => formData.append('files', f))
+
+    const response = await fetch(`${API_BASE_URL}/api/family/images/upload`, {
+      method: 'POST',
+      headers: authHeaders,
+      body: formData,
+    })
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}))
+      throw new Error(error.detail || 'Upload failed')
+    }
+
+    return response.json()
+  },
+
+  claim: (imageId: string): Promise<FamilyImage> =>
+    fetchAPI(`/api/family/images/${imageId}/claim`, { method: 'POST' }),
+
+  release: (imageId: string): Promise<{ message: string }> =>
+    fetchAPI(`/api/family/images/${imageId}/release`, { method: 'POST' }),
+
+  getDownloadUrl: (imageId: string): string =>
+    `${API_BASE_URL}/api/family/images/${imageId}/download`,
+
+  download: async (imageId: string): Promise<Blob> => {
+    const authHeaders = await getAuthHeaders()
+    const response = await fetch(`${API_BASE_URL}/api/family/images/${imageId}/download`, {
+      headers: authHeaders,
+    })
+    if (!response.ok) {
+      throw new Error('Failed to download image')
+    }
+    return response.blob()
+  },
+
+  process: (imageId: string): Promise<FamilyProcessResponse> =>
+    fetchAPI(`/api/family/images/${imageId}/process`, { method: 'POST' }),
+
+  delete: (imageId: string): Promise<{ message: string }> =>
+    fetchAPI(`/api/family/images/${imageId}`, { method: 'DELETE' }),
+}

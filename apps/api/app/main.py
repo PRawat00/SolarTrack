@@ -5,7 +5,17 @@ from datetime import datetime
 import logging
 
 from app.config import settings
-from app.routes import settings_router, readings_router, upload_router, stats_router, export_router, weather_router
+from app.routes import (
+    settings_router,
+    readings_router,
+    upload_router,
+    stats_router,
+    export_router,
+    weather_router,
+    family_router,
+    family_images_router,
+    family_stats_router,
+)
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -38,6 +48,9 @@ app.include_router(upload_router)
 app.include_router(stats_router)
 app.include_router(export_router)
 app.include_router(weather_router)
+app.include_router(family_router)
+app.include_router(family_images_router)
+app.include_router(family_stats_router)
 
 
 # Health check endpoint

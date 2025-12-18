@@ -1,7 +1,13 @@
 from sqlalchemy import Column, String, Numeric, Integer, Text, DateTime, Index
 from sqlalchemy.sql import func
+from passlib.context import CryptContext
 from .base import Base
 import uuid
+import secrets
+import string
+
+# Password hashing context for family passwords
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 def generate_uuid_hex() -> str:
@@ -85,4 +91,74 @@ class ApiUsage(Base):
 
     __table_args__ = (
         Index("idx_api_usage_user_date", "user_id", "provider", "usage_date"),
+    )
+
+
+def generate_join_code(length: int = 8) -> str:
+    """Generate random alphanumeric join code (uppercase), excluding confusing characters."""
+    # Exclude confusing characters: 0, O, 1, I, L
+    alphabet = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"
+    return "".join(secrets.choice(alphabet) for _ in range(length))
+
+
+class Family(Base):
+    """Family group for collaborative solar tracking."""
+    __tablename__ = "families"
+
+    id = Column(String(32), primary_key=True, default=generate_uuid_hex)
+    name = Column(String(100), nullable=False)
+    join_code = Column(String(8), nullable=False, unique=True, index=True, default=generate_join_code)
+    password_hash = Column(String(255), nullable=False)
+    owner_id = Column(String(255), nullable=False, index=True)
+    created_at = Column(DateTime, server_default=func.now())
+    updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
+
+    def set_password(self, password: str):
+        """Hash and set the family password."""
+        self.password_hash = pwd_context.hash(password)
+
+    def verify_password(self, password: str) -> bool:
+        """Verify the family password."""
+        return pwd_context.verify(password, self.password_hash)
+
+
+class FamilyMember(Base):
+    """Membership in a family."""
+    __tablename__ = "family_members"
+
+    id = Column(String(32), primary_key=True, default=generate_uuid_hex)
+    family_id = Column(String(32), nullable=False, index=True)
+    user_id = Column(String(255), nullable=False, unique=True, index=True)  # One family per user
+    display_name = Column(String(100), nullable=True)
+    role = Column(String(20), default="member")  # "owner" or "member"
+    joined_at = Column(DateTime, server_default=func.now())
+
+    __table_args__ = (
+        Index("idx_family_member", "family_id", "user_id"),
+    )
+
+
+class FamilyImage(Base):
+    """Images uploaded to family pool for processing."""
+    __tablename__ = "family_images"
+
+    id = Column(String(32), primary_key=True, default=generate_uuid_hex)
+    family_id = Column(String(32), nullable=False, index=True)
+    uploader_id = Column(String(255), nullable=False, index=True)
+    filename = Column(String(255), nullable=False)
+    storage_path = Column(String(512), nullable=False)
+    mime_type = Column(String(50), nullable=False)
+    file_size = Column(Integer, nullable=False)
+    status = Column(String(20), default="pending")  # pending, claimed, processing, processed, error
+    claimed_by = Column(String(255), nullable=True)
+    claimed_at = Column(DateTime, nullable=True)
+    processed_by = Column(String(255), nullable=True)
+    processed_at = Column(DateTime, nullable=True)
+    readings_count = Column(Integer, default=0)
+    error_message = Column(Text, nullable=True)
+    created_at = Column(DateTime, server_default=func.now())
+
+    __table_args__ = (
+        Index("idx_family_images_status", "family_id", "status"),
+        Index("idx_family_images_claimed", "family_id", "claimed_by"),
     )

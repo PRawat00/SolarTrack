@@ -30,6 +30,12 @@ class Settings(BaseSettings):
     # Mock auth for local development (bypasses JWT validation)
     MOCK_AUTH: bool = os.getenv("MOCK_AUTH", "false").lower() == "true"
 
+    # Family feature
+    FAMILY_DATA_PATH: str = os.getenv("FAMILY_DATA_PATH", "/data/families")
+    FAMILY_CLAIM_TIMEOUT_MINUTES: int = int(os.getenv("FAMILY_CLAIM_TIMEOUT_MINUTES", "30"))
+    FAMILY_MAX_MEMBERS: int = int(os.getenv("FAMILY_MAX_MEMBERS", "20"))
+    FAMILY_MAX_PENDING_IMAGES: int = int(os.getenv("FAMILY_MAX_PENDING_IMAGES", "500"))
+
     # CORS - configurable via environment variable (comma-separated)
     # Default to localhost for development
     @property
