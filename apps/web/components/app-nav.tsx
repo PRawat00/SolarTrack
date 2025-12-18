@@ -1,19 +1,14 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { User } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/client'
+import { familyAPI } from '@/lib/api/client'
 import { Button } from '@/components/ui/button'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { cn } from '@/lib/utils'
-
-const navItems = [
-  { href: '/dashboard', label: 'Dashboard' },
-  { href: '/database', label: 'Database' },
-  { href: '/family', label: 'Family' },
-  { href: '/settings', label: 'Settings' },
-]
 
 interface AppNavProps {
   user: User
@@ -21,6 +16,29 @@ interface AppNavProps {
 
 export function AppNav({ user }: AppNavProps) {
   const pathname = usePathname()
+  const [isInFamily, setIsInFamily] = useState(false)
+
+  // Check family membership on mount
+  useEffect(() => {
+    const checkFamily = async () => {
+      try {
+        const family = await familyAPI.get()
+        setIsInFamily(!!family)
+      } catch {
+        setIsInFamily(false)
+      }
+    }
+    checkFamily()
+  }, [])
+
+  // Build nav items dynamically based on family membership
+  const navItems = [
+    { href: '/dashboard', label: 'Dashboard' },
+    { href: '/database', label: 'Database' },
+    { href: '/family', label: 'Family' },
+    ...(isInFamily ? [{ href: '/family/leaderboard', label: 'Leaderboard' }] : []),
+    { href: '/settings', label: 'Settings' },
+  ]
 
   const handleSignOut = async () => {
     const supabase = createClient()

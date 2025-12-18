@@ -78,3 +78,7 @@ keys/
 
 # Docker secrets
 docker-compose.override.yml
+
+# Family data (stored on server only, never commit)
+data/
+apps/api/data/

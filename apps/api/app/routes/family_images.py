@@ -26,6 +26,20 @@ router = APIRouter(prefix="/api/family/images", tags=["family-images"])
 
 # ============ Request/Response Models ============
 
+class TableRegion(BaseModel):
+    """Region coordinates for a table in an image."""
+    x: float           # Left position (0-1 normalized)
+    y: float           # Top position (0-1 normalized)
+    width: float       # Width (0-1 normalized)
+    height: float      # Height (0-1 normalized)
+    label: str = "Table"
+
+
+class TagImageRequest(BaseModel):
+    """Request to tag table regions on an image."""
+    regions: List[TableRegion]
+
+
 class FamilyImageResponse(BaseModel):
     """Family image response."""
     id: str
@@ -42,6 +56,12 @@ class FamilyImageResponse(BaseModel):
     created_at: str
     claimed_at: Optional[str]
     processed_at: Optional[str]
+    # Table tagging fields
+    table_regions: Optional[List[TableRegion]]
+    tagged_by: Optional[str]
+    tagged_by_name: Optional[str]
+    tagged_at: Optional[str]
+    regions_count: int = 0
 
 
 class ProcessResponse(BaseModel):
@@ -57,9 +77,10 @@ class ImageListResponse(BaseModel):
     """List of images with counts."""
     images: List[FamilyImageResponse]
     total: int
-    pending_count: int
-    claimed_count: int
-    processed_count: int
+    uploaded_count: int  # Images without table regions
+    tagged_count: int    # Images with table regions, ready for processing
+    claimed_count: int   # Images being processed
+    processed_count: int # Completed images
 
 
 # ============ Helper Functions ============
@@ -75,6 +96,17 @@ def get_member_display_name(db: Session, user_id: str, family_id: str) -> Option
 
 def image_to_response(db: Session, image: FamilyImage) -> FamilyImageResponse:
     """Convert FamilyImage to response model."""
+    # Parse table_regions JSON if exists
+    regions = None
+    regions_count = 0
+    if image.table_regions:
+        try:
+            regions_data = json.loads(image.table_regions)
+            regions = [TableRegion(**r) for r in regions_data]
+            regions_count = len(regions)
+        except (json.JSONDecodeError, TypeError):
+            pass
+
     return FamilyImageResponse(
         id=image.id,
         filename=image.filename,
@@ -90,6 +122,11 @@ def image_to_response(db: Session, image: FamilyImage) -> FamilyImageResponse:
         created_at=image.created_at.isoformat() if image.created_at else datetime.utcnow().isoformat(),
         claimed_at=image.claimed_at.isoformat() if image.claimed_at else None,
         processed_at=image.processed_at.isoformat() if image.processed_at else None,
+        table_regions=regions,
+        tagged_by=image.tagged_by,
+        tagged_by_name=get_member_display_name(db, image.tagged_by, image.family_id) if image.tagged_by else None,
+        tagged_at=image.tagged_at.isoformat() if image.tagged_at else None,
+        regions_count=regions_count,
     )
 
 
@@ -105,10 +142,10 @@ async def upload_images(
     Bulk upload images to the family pool.
     Images are stored on the filesystem and metadata is saved to the database.
     """
-    # Check pending image limit
+    # Check pending image limit (images not yet processed)
     pending_count = db.query(FamilyImage).filter(
         FamilyImage.family_id == member.family_id,
-        FamilyImage.status.in_(["pending", "claimed", "processing"])
+        FamilyImage.status.in_(["uploaded", "tagged", "claimed", "processing"])
     ).count()
 
     if pending_count + len(files) > settings.FAMILY_MAX_PENDING_IMAGES:
@@ -142,7 +179,7 @@ async def upload_images(
             storage_path="",  # Will be updated after saving
             mime_type=file.content_type,
             file_size=len(data),
-            status="pending",
+            status="uploaded",  # No tables tagged yet
         )
 
         # Save to filesystem
@@ -193,10 +230,15 @@ async def list_images(
 
     images = query.order_by(FamilyImage.created_at.desc()).offset(offset).limit(limit).all()
 
-    # Get counts
-    pending_count = db.query(FamilyImage).filter(
+    # Get counts by status
+    uploaded_count = db.query(FamilyImage).filter(
         FamilyImage.family_id == member.family_id,
-        FamilyImage.status == "pending"
+        FamilyImage.status == "uploaded"
+    ).count()
+
+    tagged_count = db.query(FamilyImage).filter(
+        FamilyImage.family_id == member.family_id,
+        FamilyImage.status == "tagged"
     ).count()
 
     claimed_count = db.query(FamilyImage).filter(
@@ -212,7 +254,8 @@ async def list_images(
     return ImageListResponse(
         images=[image_to_response(db, img) for img in images],
         total=total,
-        pending_count=pending_count,
+        uploaded_count=uploaded_count,
+        tagged_count=tagged_count,
         claimed_count=claimed_count,
         processed_count=processed_count,
     )
@@ -226,24 +269,25 @@ async def claim_image(
 ):
     """
     Claim an image for processing.
-    Uses database-level locking to prevent race conditions.
     Claims expire after 30 minutes.
     """
     now = datetime.utcnow()
     timeout_threshold = now - timedelta(minutes=settings.FAMILY_CLAIM_TIMEOUT_MINUTES)
 
-    # Query with FOR UPDATE to lock the row
+    # Accept both "uploaded" (no tags) and "tagged" (has tags) images
+    # Note: FOR UPDATE removed due to Oracle compatibility issues with FETCH FIRST
     image = db.query(FamilyImage).filter(
         FamilyImage.id == image_id,
         FamilyImage.family_id == member.family_id,
         or_(
-            FamilyImage.status == "pending",
+            FamilyImage.status == "uploaded",
+            FamilyImage.status == "tagged",
             and_(
                 FamilyImage.status == "claimed",
                 FamilyImage.claimed_at < timeout_threshold
             )
         )
-    ).with_for_update().first()
+    ).first()
 
     if not image:
         # Check if image exists but is not claimable
@@ -303,7 +347,11 @@ async def release_image(
             detail="Image not found or not claimed by you"
         )
 
-    image.status = "pending"
+    # Release back to appropriate status based on whether it has table regions
+    if image.table_regions:
+        image.status = "tagged"
+    else:
+        image.status = "uploaded"
     image.claimed_by = None
     image.claimed_at = None
 
@@ -469,6 +517,154 @@ async def process_image(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Processing failed: {str(e)}"
         )
+
+
+@router.post("/{image_id}/tag", response_model=FamilyImageResponse)
+async def tag_image(
+    image_id: str,
+    request: TagImageRequest,
+    member: FamilyMember = Depends(require_family_member),
+    db: Session = Depends(get_db),
+):
+    """
+    Tag table regions on an image.
+    Saves the region coordinates for later processing.
+    """
+    image = db.query(FamilyImage).filter(
+        FamilyImage.id == image_id,
+        FamilyImage.family_id == member.family_id,
+        FamilyImage.status.in_(["uploaded", "tagged"])  # Can re-tag
+    ).first()
+
+    if not image:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Image not found or cannot be tagged (already claimed/processed)"
+        )
+
+    # Save regions as JSON
+    regions_json = json.dumps([r.model_dump() for r in request.regions])
+    image.table_regions = regions_json
+    image.tagged_by = member.user_id
+    image.tagged_at = datetime.utcnow()
+
+    # Update status to tagged if regions were provided
+    if len(request.regions) > 0:
+        image.status = "tagged"
+    else:
+        image.status = "uploaded"
+
+    db.commit()
+    db.refresh(image)
+
+    return image_to_response(db, image)
+
+
+@router.get("/random", response_model=FamilyImageResponse)
+async def get_random_image(
+    status_filter: str = "tagged",  # Default to tagged (ready for processing)
+    member: FamilyMember = Depends(require_family_member),
+    db: Session = Depends(get_db),
+):
+    """
+    Get a random image from the pool by status.
+    Useful for dashboard integration to fetch images to process.
+
+    - status_filter: "uploaded" (needs tagging), "tagged" (ready for processing)
+    """
+    from sqlalchemy import text
+
+    if status_filter not in ["uploaded", "tagged"]:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="status_filter must be 'uploaded' or 'tagged'"
+        )
+
+    # Get random image with the specified status
+    # Use DBMS_RANDOM.VALUE for Oracle (random() doesn't work in Oracle)
+    image = db.query(FamilyImage).filter(
+        FamilyImage.family_id == member.family_id,
+        FamilyImage.status == status_filter
+    ).order_by(text('DBMS_RANDOM.VALUE')).first()
+
+    if not image:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"No {status_filter} images available"
+        )
+
+    return image_to_response(db, image)
+
+
+@router.get("/counts")
+async def get_image_counts(
+    member: FamilyMember = Depends(require_family_member),
+    db: Session = Depends(get_db),
+):
+    """
+    Get image counts by status.
+    Useful for dashboard to show available images.
+    """
+    uploaded_count = db.query(FamilyImage).filter(
+        FamilyImage.family_id == member.family_id,
+        FamilyImage.status == "uploaded"
+    ).count()
+
+    tagged_count = db.query(FamilyImage).filter(
+        FamilyImage.family_id == member.family_id,
+        FamilyImage.status == "tagged"
+    ).count()
+
+    return {
+        "uploaded_count": uploaded_count,
+        "tagged_count": tagged_count,
+        "total_available": uploaded_count + tagged_count,
+    }
+
+
+class CompleteImageRequest(BaseModel):
+    """Request to mark an image as complete."""
+    readings_count: int = 0
+
+
+@router.post("/{image_id}/complete", response_model=FamilyImageResponse)
+async def complete_image(
+    image_id: str,
+    request: CompleteImageRequest,
+    member: FamilyMember = Depends(require_family_member),
+    db: Session = Depends(get_db),
+):
+    """
+    Mark an image as processed (complete) after client-side processing.
+    Used when processing is done via dashboard upload panel with client-side cropping.
+    The image must be claimed by the current user.
+    """
+    image = db.query(FamilyImage).filter(
+        FamilyImage.id == image_id,
+        FamilyImage.family_id == member.family_id,
+        FamilyImage.claimed_by == member.user_id,
+        FamilyImage.status.in_(["claimed", "processing"])
+    ).first()
+
+    if not image:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Image not found, not claimed by you, or already processed"
+        )
+
+    # Mark as processed
+    image.status = "processed"
+    image.processed_by = member.user_id
+    image.processed_at = datetime.utcnow()
+    image.readings_count = request.readings_count
+
+    # Update member's images_processed count
+    member.images_processed = (member.images_processed or 0) + 1
+
+    db.commit()
+    db.refresh(image)
+
+    return image_to_response(db, image)
 
 
 @router.delete("/{image_id}")

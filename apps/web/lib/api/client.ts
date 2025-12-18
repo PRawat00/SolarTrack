@@ -361,12 +361,20 @@ export interface FamilyMember {
   images_processed: number
 }
 
+export interface TableRegion {
+  x: number        // Left position (0-1 normalized)
+  y: number        // Top position (0-1 normalized)
+  width: number    // Width (0-1 normalized)
+  height: number   // Height (0-1 normalized)
+  label: string
+}
+
 export interface FamilyImage {
   id: string
   filename: string
   uploader_id: string
   uploader_name: string | null
-  status: 'pending' | 'claimed' | 'processing' | 'processed' | 'error'
+  status: 'uploaded' | 'tagged' | 'claimed' | 'processing' | 'processed' | 'error'
   claimed_by: string | null
   claimed_by_name: string | null
   processed_by: string | null
@@ -376,14 +384,27 @@ export interface FamilyImage {
   created_at: string
   claimed_at: string | null
   processed_at: string | null
+  // Table tagging fields
+  table_regions: TableRegion[] | null
+  tagged_by: string | null
+  tagged_by_name: string | null
+  tagged_at: string | null
+  regions_count: number
 }
 
 export interface ImageListResponse {
   images: FamilyImage[]
   total: number
-  pending_count: number
+  uploaded_count: number  // Images without table regions
+  tagged_count: number    // Images with table regions, ready for processing
   claimed_count: number
   processed_count: number
+}
+
+export interface ImageCountsResponse {
+  uploaded_count: number
+  tagged_count: number
+  total_available: number
 }
 
 export interface LeaderboardEntry {
@@ -518,4 +539,26 @@ export const familyImagesAPI = {
 
   delete: (imageId: string): Promise<{ message: string }> =>
     fetchAPI(`/api/family/images/${imageId}`, { method: 'DELETE' }),
+
+  // Tag table regions on an image
+  tag: (imageId: string, regions: TableRegion[]): Promise<FamilyImage> =>
+    fetchAPI(`/api/family/images/${imageId}/tag`, {
+      method: 'POST',
+      body: JSON.stringify({ regions }),
+    }),
+
+  // Get a random image by status
+  getRandom: (status: 'uploaded' | 'tagged' = 'tagged'): Promise<FamilyImage> =>
+    fetchAPI(`/api/family/images/random?status_filter=${status}`),
+
+  // Get image counts for dashboard
+  getCounts: (): Promise<ImageCountsResponse> =>
+    fetchAPI('/api/family/images/counts'),
+
+  // Mark an image as complete after client-side processing
+  complete: (imageId: string, readingsCount: number): Promise<FamilyImage> =>
+    fetchAPI(`/api/family/images/${imageId}/complete`, {
+      method: 'POST',
+      body: JSON.stringify({ readings_count: readingsCount }),
+    }),
 }

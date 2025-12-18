@@ -7,9 +7,9 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { ImageUploadZone } from '@/components/family/image-upload-zone'
 import { ImageCard } from '@/components/family/image-card'
-import { ProcessImageDialog } from '@/components/family/process-image-dialog'
+import { ImageTaggingDialog } from '@/components/family/image-tagging-dialog'
 
-type StatusFilter = 'all' | 'pending' | 'claimed' | 'processed' | 'error'
+type StatusFilter = 'all' | 'uploaded' | 'tagged' | 'claimed' | 'processed' | 'error'
 
 export default function FamilyImagesPage() {
   const [family, setFamily] = useState<Family | null>(null)
@@ -17,7 +17,7 @@ export default function FamilyImagesPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
-  const [processingImage, setProcessingImage] = useState<FamilyImage | null>(null)
+  const [taggingImage, setTaggingImage] = useState<FamilyImage | null>(null)
 
   const loadData = useCallback(async () => {
     try {
@@ -49,24 +49,6 @@ export default function FamilyImagesPage() {
     loadData()
   }
 
-  const handleClaim = async (imageId: string) => {
-    try {
-      const image = await familyImagesAPI.claim(imageId)
-      setProcessingImage(image)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to claim image')
-    }
-  }
-
-  const handleRelease = async (imageId: string) => {
-    try {
-      await familyImagesAPI.release(imageId)
-      loadData()
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to release image')
-    }
-  }
-
   const handleDelete = async (imageId: string) => {
     if (!confirm('Are you sure you want to delete this image?')) return
 
@@ -78,9 +60,13 @@ export default function FamilyImagesPage() {
     }
   }
 
-  const handleProcessComplete = () => {
-    setProcessingImage(null)
+  const handleTagComplete = () => {
+    setTaggingImage(null)
     loadData()
+  }
+
+  const handleTag = (image: FamilyImage) => {
+    setTaggingImage(image)
   }
 
   if (loading && !imageList) {
@@ -114,7 +100,7 @@ export default function FamilyImagesPage() {
           </div>
           <h1 className="text-3xl font-bold">Image Pool</h1>
           <p className="text-muted-foreground">
-            Upload images or claim existing ones to process
+            Upload images and tag tables. Process from dashboard.
           </p>
         </div>
         <Button variant="outline" onClick={loadData} disabled={loading}>
@@ -127,17 +113,23 @@ export default function FamilyImagesPage() {
 
       {/* Stats Cards */}
       {imageList && (
-        <div className="grid gap-4 md:grid-cols-4">
+        <div className="grid gap-4 md:grid-cols-5">
           <Card className={statusFilter === 'all' ? 'border-primary' : 'cursor-pointer hover:border-primary/50'} onClick={() => setStatusFilter('all')}>
             <CardContent className="pt-6">
               <p className="text-2xl font-bold">{imageList.total}</p>
-              <p className="text-sm text-muted-foreground">Total Images</p>
+              <p className="text-sm text-muted-foreground">Total</p>
             </CardContent>
           </Card>
-          <Card className={statusFilter === 'pending' ? 'border-primary' : 'cursor-pointer hover:border-primary/50'} onClick={() => setStatusFilter('pending')}>
+          <Card className={statusFilter === 'uploaded' ? 'border-primary' : 'cursor-pointer hover:border-primary/50'} onClick={() => setStatusFilter('uploaded')}>
             <CardContent className="pt-6">
-              <p className="text-2xl font-bold text-yellow-500">{imageList.pending_count}</p>
-              <p className="text-sm text-muted-foreground">Pending</p>
+              <p className="text-2xl font-bold text-yellow-500">{imageList.uploaded_count}</p>
+              <p className="text-sm text-muted-foreground">Need Tagging</p>
+            </CardContent>
+          </Card>
+          <Card className={statusFilter === 'tagged' ? 'border-primary' : 'cursor-pointer hover:border-primary/50'} onClick={() => setStatusFilter('tagged')}>
+            <CardContent className="pt-6">
+              <p className="text-2xl font-bold text-orange-500">{imageList.tagged_count}</p>
+              <p className="text-sm text-muted-foreground">Ready to Process</p>
             </CardContent>
           </Card>
           <Card className={statusFilter === 'claimed' ? 'border-primary' : 'cursor-pointer hover:border-primary/50'} onClick={() => setStatusFilter('claimed')}>
@@ -175,10 +167,8 @@ export default function FamilyImagesPage() {
             <ImageCard
               key={image.id}
               image={image}
-              onClaim={() => handleClaim(image.id)}
-              onRelease={() => handleRelease(image.id)}
               onDelete={() => handleDelete(image.id)}
-              onProcess={() => setProcessingImage(image)}
+              onTag={() => handleTag(image)}
             />
           ))}
         </div>
@@ -196,12 +186,12 @@ export default function FamilyImagesPage() {
         </Card>
       )}
 
-      {/* Process Dialog */}
-      {processingImage && (
-        <ProcessImageDialog
-          image={processingImage}
-          onClose={() => setProcessingImage(null)}
-          onComplete={handleProcessComplete}
+      {/* Tagging Dialog */}
+      {taggingImage && (
+        <ImageTaggingDialog
+          image={taggingImage}
+          onClose={() => setTaggingImage(null)}
+          onComplete={handleTagComplete}
         />
       )}
     </div>

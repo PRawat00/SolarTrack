@@ -2,11 +2,11 @@
 
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { useDropzone } from 'react-dropzone'
-import { uploadImage, readingsAPI, type ExtractedReading } from '@/lib/api/client'
+import { uploadImage, readingsAPI, familyAPI, familyImagesAPI, type ExtractedReading, type ImageCountsResponse, type TableRegion } from '@/lib/api/client'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { RegionSelector } from './region-selector'
-import { Region, cropImage } from '@/lib/image-crop'
+import { Region, cropImage, generateRegionId } from '@/lib/image-crop'
 
 type UploadStatus =
   | 'idle'
@@ -41,9 +41,21 @@ interface UploadState {
 interface UploadPanelProps {
   onComplete: () => void
   onCancel: () => void
+  visible?: boolean
 }
 
-export function UploadPanel({ onComplete, onCancel }: UploadPanelProps) {
+// Convert API TableRegion (0-1 normalized) to display Region (0-100 percentages)
+function apiToDisplayRegion(apiRegion: TableRegion): Region {
+  return {
+    id: generateRegionId(),
+    x: apiRegion.x * 100,
+    y: apiRegion.y * 100,
+    width: apiRegion.width * 100,
+    height: apiRegion.height * 100,
+  }
+}
+
+export function UploadPanel({ onComplete, onCancel, visible = true }: UploadPanelProps) {
   const [state, setState] = useState<UploadState>({
     status: 'idle',
     regions: [],
@@ -54,6 +66,82 @@ export function UploadPanel({ onComplete, onCancel }: UploadPanelProps) {
   })
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const processingRef = useRef<Set<number>>(new Set())
+
+  // Family integration state
+  const [isInFamily, setIsInFamily] = useState<boolean>(false)
+  const [familyCounts, setFamilyCounts] = useState<ImageCountsResponse | null>(null)
+  const [fetchingFamily, setFetchingFamily] = useState<boolean>(false)
+  const [familyImageId, setFamilyImageId] = useState<string | null>(null)
+
+  // Load family status on mount AND when panel becomes visible
+  useEffect(() => {
+    if (visible === false) return  // Don't fetch when hidden
+
+    const checkFamily = async () => {
+      try {
+        const family = await familyAPI.get()
+        setIsInFamily(!!family)
+        if (family) {
+          const counts = await familyImagesAPI.getCounts()
+          setFamilyCounts(counts)
+        }
+      } catch {
+        // Not in family or error - that's fine
+        setIsInFamily(false)
+      }
+    }
+    checkFamily()
+  }, [visible])
+
+  // Fetch image from family pool
+  const handleFetchFromFamily = useCallback(async (status: 'uploaded' | 'tagged') => {
+    setFetchingFamily(true)
+    try {
+      // Get a random image with the specified status
+      const image = await familyImagesAPI.getRandom(status)
+
+      // Claim the image to prevent others from processing it
+      const claimedImage = await familyImagesAPI.claim(image.id)
+
+      // Download the image
+      const blob = await familyImagesAPI.download(claimedImage.id)
+      const url = URL.createObjectURL(blob)
+      setPreviewUrl(url)
+      setFamilyImageId(claimedImage.id)
+
+      // If image is already tagged, load the regions
+      if (status === 'tagged' && claimedImage.table_regions && claimedImage.table_regions.length > 0) {
+        const displayRegions = claimedImage.table_regions.map(apiToDisplayRegion)
+        setState(s => ({
+          ...s,
+          status: 'selecting-regions',
+          regions: displayRegions,
+          error: null,
+          currentTableIndex: 0,
+          tableResults: [],
+        }))
+      } else {
+        // Untagged image - user needs to draw regions
+        setState(s => ({
+          ...s,
+          status: 'selecting-regions',
+          regions: [],
+          error: null,
+          currentTableIndex: 0,
+          tableResults: [],
+        }))
+      }
+
+      // Refresh counts after claiming
+      const counts = await familyImagesAPI.getCounts()
+      setFamilyCounts(counts)
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : 'Failed to fetch image'
+      setState(s => ({ ...s, error: errorMsg }))
+    } finally {
+      setFetchingFamily(false)
+    }
+  }, [])
 
   // Handle file drop - move to region selection
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
@@ -316,6 +404,17 @@ export function UploadPanel({ onComplete, onCancel }: UploadPanelProps) {
 
     try {
       await readingsAPI.createBulk(allSelectedReadings)
+
+      // If this was a family image, mark it as complete
+      if (familyImageId) {
+        try {
+          await familyImagesAPI.complete(familyImageId, allSelectedReadings.length)
+        } catch {
+          // Don't fail the whole save if marking complete fails
+          console.error('Failed to mark family image as complete')
+        }
+      }
+
       setState(s => ({ ...s, status: 'complete' }))
       setTimeout(() => {
         onComplete()
@@ -329,7 +428,16 @@ export function UploadPanel({ onComplete, onCancel }: UploadPanelProps) {
     }
   }
 
-  const resetUpload = () => {
+  const resetUpload = useCallback(async (releaseImage: boolean = true) => {
+    // Release family image if we're cancelling
+    if (releaseImage && familyImageId) {
+      try {
+        await familyImagesAPI.release(familyImageId)
+      } catch {
+        // Ignore errors - image might already be released
+      }
+    }
+
     if (previewUrl) {
       URL.revokeObjectURL(previewUrl)
     }
@@ -340,6 +448,7 @@ export function UploadPanel({ onComplete, onCancel }: UploadPanelProps) {
       }
     })
     setPreviewUrl(null)
+    setFamilyImageId(null)
     processingRef.current.clear()
     setState({
       status: 'idle',
@@ -349,7 +458,17 @@ export function UploadPanel({ onComplete, onCancel }: UploadPanelProps) {
       error: null,
       provider: null,
     })
-  }
+
+    // Refresh family counts
+    if (isInFamily) {
+      try {
+        const counts = await familyImagesAPI.getCounts()
+        setFamilyCounts(counts)
+      } catch {
+        // Ignore errors
+      }
+    }
+  }, [previewUrl, state.tableResults, isInFamily, familyImageId])
 
   const handleBackToRegions = () => {
     // Clean up cropped image URLs
@@ -392,33 +511,89 @@ export function UploadPanel({ onComplete, onCancel }: UploadPanelProps) {
 
         {/* Idle State - Drop Zone */}
         {state.status === 'idle' && (
-          <div
-            {...getRootProps()}
-            className={`
-              border-2 border-dashed rounded-lg p-8 text-center cursor-pointer
-              transition-colors duration-200
-              ${isDragActive
-                ? 'border-orange-500 bg-orange-500/5'
-                : 'border-muted-foreground/25 hover:border-muted-foreground/50'}
-            `}
-          >
-            <input {...(getInputProps() as React.InputHTMLAttributes<HTMLInputElement>)} />
-            <div className="flex flex-col items-center gap-3">
-              <div className="rounded-full bg-muted p-3">
-                <svg className="w-6 h-6 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                </svg>
-              </div>
-              <div>
-                <p className="font-medium">Upload Images</p>
-                <p className="text-sm text-muted-foreground">
-                  Drag and drop your handwritten logs or click to browse.
-                </p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Supported formats: JPG, PNG.
-                </p>
+          <div className="space-y-4">
+            <div
+              {...getRootProps()}
+              className={`
+                border-2 border-dashed rounded-lg p-8 text-center cursor-pointer
+                transition-colors duration-200
+                ${isDragActive
+                  ? 'border-orange-500 bg-orange-500/5'
+                  : 'border-muted-foreground/25 hover:border-muted-foreground/50'}
+              `}
+            >
+              <input {...(getInputProps() as React.InputHTMLAttributes<HTMLInputElement>)} />
+              <div className="flex flex-col items-center gap-3">
+                <div className="rounded-full bg-muted p-3">
+                  <svg className="w-6 h-6 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="font-medium">Upload Images</p>
+                  <p className="text-sm text-muted-foreground">
+                    Drag and drop your handwritten logs or click to browse.
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Supported formats: JPG, PNG.
+                  </p>
+                </div>
               </div>
             </div>
+
+            {/* Fetch from Family Section */}
+            {isInFamily && familyCounts && familyCounts.total_available > 0 && (
+              <div className="border rounded-lg p-4 space-y-3">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <div className="flex-1 border-t" />
+                  <span>or fetch from family pool</span>
+                  <div className="flex-1 border-t" />
+                </div>
+
+                <div className="flex gap-2 justify-center">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleFetchFromFamily('tagged')}
+                    disabled={fetchingFamily || familyCounts.tagged_count === 0}
+                    className="flex-1 max-w-[200px]"
+                  >
+                    {fetchingFamily ? (
+                      <span className="flex items-center gap-2">
+                        <span className="h-3 w-3 rounded-full border-2 border-current border-t-transparent animate-spin" />
+                        Fetching...
+                      </span>
+                    ) : (
+                      <>Fetch Tagged ({familyCounts.tagged_count})</>
+                    )}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleFetchFromFamily('uploaded')}
+                    disabled={fetchingFamily || familyCounts.uploaded_count === 0}
+                    className="flex-1 max-w-[200px]"
+                  >
+                    {fetchingFamily ? (
+                      <span className="flex items-center gap-2">
+                        <span className="h-3 w-3 rounded-full border-2 border-current border-t-transparent animate-spin" />
+                        Fetching...
+                      </span>
+                    ) : (
+                      <>Fetch Untagged ({familyCounts.uploaded_count})</>
+                    )}
+                  </Button>
+                </div>
+
+                <p className="text-xs text-center text-muted-foreground">
+                  {familyCounts.tagged_count > 0
+                    ? `${familyCounts.tagged_count} images ready with pre-tagged tables`
+                    : familyCounts.uploaded_count > 0
+                      ? `${familyCounts.uploaded_count} images need table tagging`
+                      : 'No images available in family pool'}
+                </p>
+              </div>
+            )}
           </div>
         )}
 
@@ -471,7 +646,7 @@ export function UploadPanel({ onComplete, onCancel }: UploadPanelProps) {
               <Button onClick={handleBackToRegions} size="sm">
                 Try Different Regions
               </Button>
-              <Button onClick={resetUpload} variant="outline" size="sm">
+              <Button onClick={() => resetUpload()} variant="outline" size="sm">
                 Start Over
               </Button>
               <Button onClick={onCancel} variant="ghost" size="sm">

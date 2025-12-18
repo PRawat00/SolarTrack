@@ -149,13 +149,18 @@ class FamilyImage(Base):
     storage_path = Column(String(512), nullable=False)
     mime_type = Column(String(50), nullable=False)
     file_size = Column(Integer, nullable=False)
-    status = Column(String(20), default="pending")  # pending, claimed, processing, processed, error
+    # Status: uploaded, tagged, claimed, processing, processed, error
+    status = Column(String(20), default="uploaded")
     claimed_by = Column(String(255), nullable=True)
     claimed_at = Column(DateTime, nullable=True)
     processed_by = Column(String(255), nullable=True)
     processed_at = Column(DateTime, nullable=True)
     readings_count = Column(Integer, default=0)
     error_message = Column(Text, nullable=True)
+    # Table tagging fields
+    table_regions = Column(Text, nullable=True)  # JSON array of region coordinates
+    tagged_by = Column(String(255), nullable=True)
+    tagged_at = Column(DateTime, nullable=True)
     created_at = Column(DateTime, server_default=func.now())
 
     __table_args__ = (

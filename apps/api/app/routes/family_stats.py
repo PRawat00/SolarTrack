@@ -114,7 +114,7 @@ async def get_family_stats(
 
     pending_images = db.query(FamilyImage).filter(
         FamilyImage.family_id == family_id,
-        FamilyImage.status.in_(["pending", "claimed", "processing"])
+        FamilyImage.status.in_(["uploaded", "tagged", "claimed", "processing"])
     ).count()
 
     processed_images = db.query(FamilyImage).filter(

@@ -147,6 +147,7 @@ export default function DashboardPage() {
       {/* Upload Panel (conditional) */}
       {showUpload && (
         <UploadPanel
+          visible={showUpload}
           onComplete={handleUploadComplete}
           onCancel={() => setShowUpload(false)}
         />

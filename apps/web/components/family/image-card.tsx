@@ -7,13 +7,11 @@ import { Button } from '@/components/ui/button'
 
 interface ImageCardProps {
   image: FamilyImage
-  onClaim: () => void
-  onRelease: () => void
   onDelete: () => void
-  onProcess: () => void
+  onTag: () => void
 }
 
-export function ImageCard({ image, onClaim, onRelease, onDelete, onProcess }: ImageCardProps) {
+export function ImageCard({ image, onDelete, onTag }: ImageCardProps) {
   const [imageUrl, setImageUrl] = useState<string | null>(null)
   const [loadingImage, setLoadingImage] = useState(false)
 
@@ -48,16 +46,18 @@ export function ImageCard({ image, onClaim, onRelease, onDelete, onProcess }: Im
     }
   }, [image.id])
 
-  const statusColors = {
-    pending: 'bg-yellow-500',
+  const statusColors: Record<string, string> = {
+    uploaded: 'bg-yellow-500',
+    tagged: 'bg-orange-500',
     claimed: 'bg-blue-500',
     processing: 'bg-blue-500',
     processed: 'bg-green-500',
     error: 'bg-red-500',
   }
 
-  const statusLabels = {
-    pending: 'Pending',
+  const statusLabels: Record<string, string> = {
+    uploaded: 'Needs Tagging',
+    tagged: 'Ready',
     claimed: 'Claimed',
     processing: 'Processing',
     processed: 'Processed',
@@ -102,9 +102,16 @@ export function ImageCard({ image, onClaim, onRelease, onDelete, onProcess }: Im
         )}
 
         {/* Status Badge */}
-        <div className={`absolute top-2 right-2 px-2 py-1 rounded text-xs font-medium text-white ${statusColors[image.status]}`}>
-          {statusLabels[image.status]}
+        <div className={`absolute top-2 right-2 px-2 py-1 rounded text-xs font-medium text-white ${statusColors[image.status] || 'bg-gray-500'}`}>
+          {statusLabels[image.status] || image.status}
         </div>
+
+        {/* Regions Count Badge */}
+        {image.regions_count > 0 && (
+          <div className="absolute top-2 left-2 px-2 py-1 rounded text-xs font-medium bg-purple-600 text-white">
+            {image.regions_count} table{image.regions_count !== 1 ? 's' : ''}
+          </div>
+        )}
       </div>
 
       <CardContent className="p-4 space-y-3">
@@ -129,6 +136,11 @@ export function ImageCard({ image, onClaim, onRelease, onDelete, onProcess }: Im
             <p>
               Claimed by <span className="font-medium text-foreground">{image.claimed_by_name || 'Member'}</span>
             </p>
+          ) : image.status === 'tagged' ? (
+            <p>
+              Tagged by <span className="font-medium text-foreground">{image.tagged_by_name || 'Member'}</span>
+              {' - '}{image.regions_count} table{image.regions_count !== 1 ? 's' : ''}
+            </p>
           ) : (
             <p>
               Uploaded by <span className="font-medium text-foreground">{image.uploader_name || 'Member'}</span>
@@ -136,46 +148,56 @@ export function ImageCard({ image, onClaim, onRelease, onDelete, onProcess }: Im
           )}
         </div>
 
-        {/* Actions */}
-        <div className="flex gap-2">
-          {image.status === 'pending' && (
-            <>
-              <Button size="sm" className="flex-1" onClick={onClaim}>
-                Claim & Process
+        {/* Actions - Only tagging allowed here, processing is done from dashboard */}
+        <div className="flex gap-2 items-center">
+          {/* Status-specific content */}
+          <div className="flex-1 flex gap-2 items-center">
+            {image.status === 'uploaded' && (
+              <Button size="sm" className="flex-1" onClick={onTag}>
+                Tag Tables
               </Button>
-              <Button size="sm" variant="ghost" className="text-destructive" onClick={onDelete}>
+            )}
+
+            {image.status === 'tagged' && (
+              <>
+                <Button size="sm" onClick={onTag}>
+                  Edit Tags
+                </Button>
+                <p className="text-sm text-muted-foreground">
+                  Ready for processing
+                </p>
+              </>
+            )}
+
+            {(image.status === 'claimed' || image.status === 'processing') && (
+              <p className="text-sm text-blue-600 flex items-center gap-1">
+                <span className="h-3 w-3 rounded-full border-2 border-blue-600 border-t-transparent animate-spin" />
+                Being processed
+              </p>
+            )}
+
+            {image.status === 'processed' && (
+              <p className="text-sm text-green-600 flex items-center gap-1">
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                 </svg>
-              </Button>
-            </>
-          )}
+                Completed
+              </p>
+            )}
 
-          {(image.status === 'claimed' || image.status === 'processing') && (
-            <>
-              <Button size="sm" className="flex-1" onClick={onProcess}>
-                Process Now
-              </Button>
-              <Button size="sm" variant="outline" onClick={onRelease}>
-                Release
-              </Button>
-            </>
-          )}
+            {image.status === 'error' && (
+              <p className="text-sm text-destructive">
+                Processing failed
+              </p>
+            )}
+          </div>
 
-          {image.status === 'processed' && (
-            <p className="text-sm text-green-600 flex items-center gap-1">
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-              </svg>
-              Completed
-            </p>
-          )}
-
-          {image.status === 'error' && (
-            <Button size="sm" variant="outline" className="flex-1" onClick={onClaim}>
-              Retry
-            </Button>
-          )}
+          {/* Delete button - always visible */}
+          <Button size="sm" variant="ghost" className="text-destructive" onClick={onDelete}>
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+          </Button>
         </div>
       </CardContent>
     </Card>
