@@ -1,3 +1,5 @@
+import { ChristmasTheme } from '@/components/christmas'
+
 export default function AuthLayout({
   children,
 }: {
@@ -5,7 +7,8 @@ export default function AuthLayout({
 }) {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="w-full max-w-md px-4">
+      <ChristmasTheme />
+      <div className="w-full max-w-md px-4 pt-16">
         {children}
       </div>
     </div>

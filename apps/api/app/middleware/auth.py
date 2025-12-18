@@ -8,6 +8,10 @@ from app.config import settings
 # Security scheme for Bearer token
 security = HTTPBearer()
 
+# Mock user for local development
+MOCK_USER_ID = "mock-user-123"
+MOCK_USER_EMAIL = "test@localhost.dev"
+
 
 class TokenData(BaseModel):
     """Data extracted from validated JWT token."""
@@ -32,6 +36,13 @@ async def get_current_user(
         def protected_route(current_user: TokenData = Depends(get_current_user)):
             return {"user_id": current_user.user_id}
     """
+    # Mock auth for local development - skip JWT validation
+    if settings.MOCK_AUTH:
+        return TokenData(
+            user_id=MOCK_USER_ID,
+            email=MOCK_USER_EMAIL,
+        )
+
     if not settings.SUPABASE_JWT_SECRET:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

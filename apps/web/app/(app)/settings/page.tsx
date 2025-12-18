@@ -16,6 +16,7 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
+import { resetAllGifts } from '@/components/christmas/gift-wrap'
 
 const settingsSchema = z.object({
   currency_symbol: z
@@ -426,6 +427,32 @@ export default function SettingsPage() {
           ) : (
             <p className="text-sm text-muted-foreground">Loading usage data...</p>
           )}
+        </CardContent>
+      </Card>
+
+      {/* Christmas Settings */}
+      <Card className="border-green-500">
+        <CardHeader>
+          <CardTitle className="text-green-500 flex items-center gap-2">
+            <span>Holiday Season</span>
+          </CardTitle>
+          <CardDescription>
+            Special Christmas features for the holiday season
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <p className="text-sm text-muted-foreground">
+              Re-wrap all the gift boxes on your dashboard to experience the surprise again!
+            </p>
+            <Button
+              variant="outline"
+              onClick={resetAllGifts}
+              className="border-green-500 text-green-500 hover:bg-green-500/10"
+            >
+              Re-wrap All Gifts
+            </Button>
+          </div>
         </CardContent>
       </Card>
 

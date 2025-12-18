@@ -27,6 +27,9 @@ class Settings(BaseSettings):
     # Environment
     ENVIRONMENT: str = os.getenv("ENVIRONMENT", "development")
 
+    # Mock auth for local development (bypasses JWT validation)
+    MOCK_AUTH: bool = os.getenv("MOCK_AUTH", "false").lower() == "true"
+
     # CORS - configurable via environment variable (comma-separated)
     # Default to localhost for development
     @property

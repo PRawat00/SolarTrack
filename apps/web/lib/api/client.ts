@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/client'
+import { MOCK_TOKEN } from '@/lib/auth/mock-user'
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
@@ -7,6 +8,13 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
  * Tries getSession first, then falls back to refreshSession if needed.
  */
 async function getAuthHeaders(): Promise<HeadersInit> {
+  // Mock auth for local development
+  if (process.env.NEXT_PUBLIC_MOCK_AUTH === 'true') {
+    return {
+      'Authorization': `Bearer ${MOCK_TOKEN}`,
+    }
+  }
+
   const supabase = createClient()
 
   // Try getSession first

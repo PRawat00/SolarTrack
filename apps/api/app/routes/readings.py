@@ -152,8 +152,8 @@ async def create_readings_bulk(
     if not readings:
         raise HTTPException(status_code=400, detail="No readings provided")
 
-    if len(readings) > 100:
-        raise HTTPException(status_code=400, detail="Maximum 100 readings per request")
+    if len(readings) > 500:
+        raise HTTPException(status_code=400, detail="Maximum 500 readings per request")
 
     db_readings = []
     for reading in readings:

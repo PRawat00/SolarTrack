@@ -1,20 +1,39 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { useDropzone } from 'react-dropzone'
 import { uploadImage, readingsAPI, type ExtractedReading } from '@/lib/api/client'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { RegionSelector } from './region-selector'
+import { Region, cropImage } from '@/lib/image-crop'
 
-type UploadStatus = 'idle' | 'uploading' | 'reviewing' | 'saving' | 'complete' | 'error'
+type UploadStatus =
+  | 'idle'
+  | 'selecting-regions'
+  | 'processing'
+  | 'reviewing'
+  | 'saving'
+  | 'complete'
+  | 'error'
 
 interface EditableReading extends ExtractedReading {
   selected: boolean
 }
 
+interface TableResult {
+  tableIndex: number
+  croppedImageUrl: string | null
+  readings: EditableReading[]
+  status: 'pending' | 'processing' | 'done' | 'error'
+  error: string | null
+}
+
 interface UploadState {
   status: UploadStatus
-  readings: EditableReading[]
+  regions: Region[]
+  currentTableIndex: number
+  tableResults: TableResult[]
   error: string | null
   provider: string | null
 }
@@ -27,12 +46,16 @@ interface UploadPanelProps {
 export function UploadPanel({ onComplete, onCancel }: UploadPanelProps) {
   const [state, setState] = useState<UploadState>({
     status: 'idle',
-    readings: [],
+    regions: [],
+    currentTableIndex: 0,
+    tableResults: [],
     error: null,
     provider: null,
   })
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const processingRef = useRef<Set<number>>(new Set())
 
+  // Handle file drop - move to region selection
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
     const file = acceptedFiles[0]
     if (!file) return
@@ -42,31 +65,12 @@ export function UploadPanel({ onComplete, onCancel }: UploadPanelProps) {
 
     setState(s => ({
       ...s,
-      status: 'uploading',
+      status: 'selecting-regions',
       error: null,
-      readings: [],
+      regions: [],
+      currentTableIndex: 0,
+      tableResults: [],
     }))
-
-    try {
-      const result = await uploadImage(file)
-      const editableReadings: EditableReading[] = result.readings.map(r => ({
-        ...r,
-        selected: true,
-      }))
-
-      setState(s => ({
-        ...s,
-        status: 'reviewing',
-        readings: editableReadings,
-        provider: result.provider,
-      }))
-    } catch (err) {
-      setState(s => ({
-        ...s,
-        status: 'error',
-        error: err instanceof Error ? err.message : 'Upload failed',
-      }))
-    }
   }, [])
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -78,28 +82,182 @@ export function UploadPanel({ onComplete, onCancel }: UploadPanelProps) {
     },
     maxFiles: 1,
     maxSize: 10 * 1024 * 1024,
-    disabled: state.status === 'uploading' || state.status === 'saving',
-    // Required for React 19 types compatibility
+    disabled: state.status !== 'idle',
     onDragEnter: undefined,
     onDragLeave: undefined,
     onDragOver: undefined,
     multiple: false,
   })
 
-  const toggleReading = (index: number) => {
+  // Update regions from selector
+  const handleRegionsChange = useCallback((regions: Region[]) => {
+    setState(s => ({ ...s, regions }))
+  }, [])
+
+  // Process a single table
+  const processTable = useCallback(async (tableIndex: number) => {
+    if (!previewUrl || processingRef.current.has(tableIndex)) return
+
+    const region = state.regions[tableIndex]
+    if (!region) return
+
+    processingRef.current.add(tableIndex)
+
+    // Mark as processing
     setState(s => ({
       ...s,
-      readings: s.readings.map((r, i) =>
-        i === index ? { ...r, selected: !r.selected } : r
+      tableResults: s.tableResults.map((r, i) =>
+        i === tableIndex ? { ...r, status: 'processing' } : r
+      ),
+    }))
+
+    try {
+      // Crop the image
+      const croppedBlob = await cropImage(previewUrl, region)
+      const croppedUrl = URL.createObjectURL(croppedBlob)
+      const croppedFile = new File([croppedBlob], `table-${tableIndex + 1}.jpg`, {
+        type: 'image/jpeg',
+      })
+
+      // Upload to API
+      const result = await uploadImage(croppedFile)
+
+      const editableReadings: EditableReading[] = result.readings.map(r => ({
+        ...r,
+        selected: true,
+      }))
+
+      // Mark as done
+      setState(s => ({
+        ...s,
+        provider: result.provider,
+        tableResults: s.tableResults.map((r, i) =>
+          i === tableIndex
+            ? { ...r, status: 'done', croppedImageUrl: croppedUrl, readings: editableReadings }
+            : r
+        ),
+      }))
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : 'Processing failed'
+      setState(s => ({
+        ...s,
+        tableResults: s.tableResults.map((r, i) =>
+          i === tableIndex ? { ...r, status: 'error', error: errorMsg } : r
+        ),
+      }))
+    } finally {
+      processingRef.current.delete(tableIndex)
+    }
+  }, [previewUrl, state.regions])
+
+  // Start processing all regions - begins with Table 1
+  const handleProcessRegions = useCallback(async () => {
+    if (!previewUrl || state.regions.length === 0) return
+
+    // Initialize table results
+    const initialResults: TableResult[] = state.regions.map((_, i) => ({
+      tableIndex: i,
+      croppedImageUrl: null,
+      readings: [],
+      status: 'pending',
+      error: null,
+    }))
+
+    setState(s => ({
+      ...s,
+      status: 'processing',
+      currentTableIndex: 0,
+      tableResults: initialResults,
+      error: null,
+    }))
+
+    // Start processing first table
+    processingRef.current.clear()
+  }, [previewUrl, state.regions])
+
+  // Effect to process tables - chain processing (when one finishes, start next)
+  useEffect(() => {
+    if (state.status !== 'processing' && state.status !== 'reviewing') return
+    if (state.tableResults.length === 0) return
+
+    // Find first pending table where previous is done/error (or it's the first table)
+    for (let i = 0; i < state.tableResults.length; i++) {
+      const result = state.tableResults[i]
+      if (result.status === 'pending') {
+        const prevDone = i === 0 ||
+          state.tableResults[i - 1].status === 'done' ||
+          state.tableResults[i - 1].status === 'error'
+        if (prevDone) {
+          processTable(i)
+          break // Only start one at a time
+        }
+      }
+    }
+
+    // Move to reviewing when first table is done
+    if (state.status === 'processing') {
+      const firstResult = state.tableResults[0]
+      if (firstResult?.status === 'done') {
+        setState(s => ({ ...s, status: 'reviewing' }))
+      } else if (firstResult?.status === 'error') {
+        // If first failed, find next done table to show
+        const nextDone = state.tableResults.findIndex(r => r.status === 'done')
+        if (nextDone >= 0) {
+          setState(s => ({ ...s, status: 'reviewing', currentTableIndex: nextDone }))
+        } else if (state.tableResults.every(r => r.status === 'error')) {
+          setState(s => ({ ...s, status: 'error', error: 'All tables failed to process' }))
+        }
+      }
+    }
+  }, [state.status, state.tableResults, processTable])
+
+  // Navigation
+  const goToNextTable = useCallback(() => {
+    setState(s => {
+      const nextIndex = s.currentTableIndex + 1
+      if (nextIndex >= s.tableResults.length) return s
+      return { ...s, currentTableIndex: nextIndex }
+    })
+  }, [])
+
+  const goToPrevTable = useCallback(() => {
+    setState(s => {
+      const prevIndex = s.currentTableIndex - 1
+      if (prevIndex < 0) return s
+      return { ...s, currentTableIndex: prevIndex }
+    })
+  }, [])
+
+  // Toggle reading selection for current table
+  const toggleReading = (readingIndex: number) => {
+    setState(s => ({
+      ...s,
+      tableResults: s.tableResults.map((table, ti) =>
+        ti === s.currentTableIndex
+          ? {
+              ...table,
+              readings: table.readings.map((r, ri) =>
+                ri === readingIndex ? { ...r, selected: !r.selected } : r
+              ),
+            }
+          : table
       ),
     }))
   }
 
-  const updateReading = (index: number, field: keyof ExtractedReading, value: string | number | null) => {
+  // Update reading for current table
+  const updateReading = (readingIndex: number, field: keyof ExtractedReading, value: string | number | null) => {
     setState(s => ({
       ...s,
-      readings: s.readings.map((r, i) =>
-        i === index ? { ...r, [field]: value } : r
+      tableResults: s.tableResults.map((table, ti) =>
+        ti === s.currentTableIndex
+          ? {
+              ...table,
+              readings: table.readings.map((r, ri) =>
+                ri === readingIndex ? { ...r, [field]: value } : r
+              ),
+            }
+          : table
       ),
     }))
   }
@@ -107,32 +265,49 @@ export function UploadPanel({ onComplete, onCancel }: UploadPanelProps) {
   const selectAll = () => {
     setState(s => ({
       ...s,
-      readings: s.readings.map(r => ({ ...r, selected: true })),
+      tableResults: s.tableResults.map((table, ti) =>
+        ti === s.currentTableIndex
+          ? { ...table, readings: table.readings.map(r => ({ ...r, selected: true })) }
+          : table
+      ),
     }))
   }
 
   const selectNone = () => {
     setState(s => ({
       ...s,
-      readings: s.readings.map(r => ({ ...r, selected: false })),
+      tableResults: s.tableResults.map((table, ti) =>
+        ti === s.currentTableIndex
+          ? { ...table, readings: table.readings.map(r => ({ ...r, selected: false })) }
+          : table
+      ),
     }))
   }
 
-  const selectedCount = state.readings.filter(r => r.selected).length
+  // Get total selected readings across all tables
+  const getTotalSelectedCount = () => {
+    return state.tableResults.reduce(
+      (sum, table) => sum + table.readings.filter(r => r.selected).length,
+      0
+    )
+  }
 
-  const handleConfirm = async () => {
-    const selectedReadings = state.readings
-      .filter(r => r.selected)
-      .map(r => ({
-        date: r.date,
-        time: r.time,
-        m1: r.m1,
-        m2: r.m2,
-        notes: r.notes,
-        is_verified: true,
-      }))
+  // Save all readings from all tables
+  const handleSaveAll = async () => {
+    const allSelectedReadings = state.tableResults.flatMap(table =>
+      table.readings
+        .filter(r => r.selected)
+        .map(r => ({
+          date: r.date,
+          time: r.time,
+          m1: r.m1,
+          m2: r.m2,
+          notes: r.notes,
+          is_verified: true,
+        }))
+    )
 
-    if (selectedReadings.length === 0) {
+    if (allSelectedReadings.length === 0) {
       setState(s => ({ ...s, error: 'No readings selected' }))
       return
     }
@@ -140,9 +315,8 @@ export function UploadPanel({ onComplete, onCancel }: UploadPanelProps) {
     setState(s => ({ ...s, status: 'saving', error: null }))
 
     try {
-      await readingsAPI.createBulk(selectedReadings)
+      await readingsAPI.createBulk(allSelectedReadings)
       setState(s => ({ ...s, status: 'complete' }))
-      // Notify parent after short delay for user feedback
       setTimeout(() => {
         onComplete()
       }, 1500)
@@ -159,14 +333,47 @@ export function UploadPanel({ onComplete, onCancel }: UploadPanelProps) {
     if (previewUrl) {
       URL.revokeObjectURL(previewUrl)
     }
+    // Clean up cropped image URLs
+    state.tableResults.forEach(table => {
+      if (table.croppedImageUrl) {
+        URL.revokeObjectURL(table.croppedImageUrl)
+      }
+    })
     setPreviewUrl(null)
+    processingRef.current.clear()
     setState({
       status: 'idle',
-      readings: [],
+      regions: [],
+      currentTableIndex: 0,
+      tableResults: [],
       error: null,
       provider: null,
     })
   }
+
+  const handleBackToRegions = () => {
+    // Clean up cropped image URLs
+    state.tableResults.forEach(table => {
+      if (table.croppedImageUrl) {
+        URL.revokeObjectURL(table.croppedImageUrl)
+      }
+    })
+    processingRef.current.clear()
+    setState(s => ({
+      ...s,
+      status: 'selecting-regions',
+      currentTableIndex: 0,
+      tableResults: [],
+      error: null,
+    }))
+  }
+
+  // Current table data
+  const currentTable = state.tableResults[state.currentTableIndex]
+  const currentReadings = currentTable?.readings || []
+  const currentSelectedCount = currentReadings.filter(r => r.selected).length
+  const isLastTable = state.currentTableIndex === state.tableResults.length - 1
+  const isFirstTable = state.currentTableIndex === 0
 
   return (
     <Card className="mt-4">
@@ -215,12 +422,44 @@ export function UploadPanel({ onComplete, onCancel }: UploadPanelProps) {
           </div>
         )}
 
-        {/* Uploading State */}
-        {state.status === 'uploading' && (
+        {/* Region Selection State */}
+        {state.status === 'selecting-regions' && previewUrl && (
+          <div className="space-y-4">
+            <RegionSelector
+              imageUrl={previewUrl}
+              regions={state.regions}
+              onRegionsChange={handleRegionsChange}
+            />
+
+            <div className="flex gap-2 pt-2 border-t">
+              <Button
+                onClick={handleProcessRegions}
+                disabled={state.regions.length === 0}
+                className="flex-1 bg-orange-500 hover:bg-orange-600"
+              >
+                Process {state.regions.length} Table{state.regions.length !== 1 ? 's' : ''}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  resetUpload()
+                  onCancel()
+                }}
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Processing State (waiting for first table) */}
+        {state.status === 'processing' && (
           <div className="text-center py-8 space-y-4">
             <div className="h-8 w-8 mx-auto rounded-full border-4 border-orange-500 border-t-transparent animate-spin" />
-            <p className="font-medium">Processing image with AI...</p>
-            <p className="text-sm text-muted-foreground">This may take a few seconds</p>
+            <p className="font-medium">Processing Table 1...</p>
+            <p className="text-sm text-muted-foreground">
+              Extracting readings from your handwritten log
+            </p>
           </div>
         )}
 
@@ -229,145 +468,210 @@ export function UploadPanel({ onComplete, onCancel }: UploadPanelProps) {
           <div className="text-center py-8 space-y-4">
             <p className="font-medium text-destructive">Processing failed</p>
             <div className="flex gap-2 justify-center">
-              <Button onClick={resetUpload} size="sm">Try Again</Button>
-              <Button onClick={onCancel} variant="outline" size="sm">Cancel</Button>
+              <Button onClick={handleBackToRegions} size="sm">
+                Try Different Regions
+              </Button>
+              <Button onClick={resetUpload} variant="outline" size="sm">
+                Start Over
+              </Button>
+              <Button onClick={onCancel} variant="ghost" size="sm">
+                Cancel
+              </Button>
             </div>
           </div>
         )}
 
-        {/* Review State */}
-        {(state.status === 'reviewing' || state.status === 'saving') && (
+        {/* Review State - One table at a time */}
+        {(state.status === 'reviewing' || state.status === 'saving') && currentTable && (
           <div className="space-y-4">
-            <div className="grid md:grid-cols-2 gap-4">
-              {/* Image Preview */}
-              {previewUrl && (
-                <div>
-                  <p className="text-sm font-medium mb-2">Uploaded Image</p>
-                  <img
-                    src={previewUrl}
-                    alt="Uploaded solar log"
-                    className="w-full rounded-lg border max-h-[60vh] object-contain bg-muted"
-                  />
-                </div>
+            {/* Table indicator */}
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-medium">
+                Table {state.currentTableIndex + 1} of {state.tableResults.length}
+              </p>
+              {currentTable.status === 'processing' && (
+                <span className="text-sm text-orange-500 flex items-center gap-2">
+                  <span className="h-3 w-3 rounded-full border-2 border-orange-500 border-t-transparent animate-spin" />
+                  Processing...
+                </span>
               )}
-
-              {/* Readings Table */}
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <p className="text-sm font-medium">
-                    Extracted Readings ({selectedCount}/{state.readings.length})
-                  </p>
-                  <div className="flex gap-1">
-                    <Button variant="ghost" size="sm" onClick={selectAll} className="h-6 text-xs">
-                      All
-                    </Button>
-                    <Button variant="ghost" size="sm" onClick={selectNone} className="h-6 text-xs">
-                      None
-                    </Button>
-                  </div>
-                </div>
-
-                {state.readings.length === 0 ? (
-                  <p className="text-sm text-muted-foreground py-4 text-center">
-                    No readings could be extracted.
-                  </p>
-                ) : (
-                  <div className="border rounded-lg overflow-hidden max-h-[60vh] overflow-y-auto">
-                    <table className="w-full text-sm">
-                      <thead className="bg-muted/50 sticky top-0">
-                        <tr>
-                          <th className="p-2 w-6"></th>
-                          <th className="p-2 text-left">Date</th>
-                          <th className="p-2 text-left">Time</th>
-                          <th className="p-2 text-right">M1</th>
-                          <th className="p-2 text-right">M2</th>
-                          <th className="p-2 text-left">Notes</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {state.readings.map((reading, index) => (
-                          <tr
-                            key={index}
-                            className={`border-t ${reading.selected ? '' : 'opacity-50'}`}
-                          >
-                            <td className="p-2 text-center">
-                              <input
-                                type="checkbox"
-                                checked={reading.selected}
-                                onChange={() => toggleReading(index)}
-                                className="h-4 w-4"
-                              />
-                            </td>
-                            <td className="p-2">
-                              <input
-                                type="date"
-                                value={reading.date}
-                                onChange={(e) => updateReading(index, 'date', e.target.value)}
-                                className="w-full bg-transparent text-sm focus:outline-none"
-                              />
-                            </td>
-                            <td className="p-2">
-                              <input
-                                type="time"
-                                value={reading.time || ''}
-                                onChange={(e) => updateReading(index, 'time', e.target.value || null)}
-                                className="w-full bg-transparent text-sm focus:outline-none"
-                              />
-                            </td>
-                            <td className="p-2">
-                              <input
-                                type="number"
-                                step="0.01"
-                                value={reading.m1}
-                                onChange={(e) => updateReading(index, 'm1', parseFloat(e.target.value) || 0)}
-                                className="w-full bg-transparent text-sm text-right font-mono focus:outline-none"
-                              />
-                            </td>
-                            <td className="p-2">
-                              <input
-                                type="number"
-                                step="0.01"
-                                value={reading.m2 ?? ''}
-                                onChange={(e) => updateReading(index, 'm2', e.target.value ? parseFloat(e.target.value) : null)}
-                                className="w-full bg-transparent text-sm text-right font-mono focus:outline-none"
-                              />
-                            </td>
-                            <td className="p-2">
-                              <input
-                                type="text"
-                                value={reading.notes || ''}
-                                onChange={(e) => updateReading(index, 'notes', e.target.value || null)}
-                                placeholder="Notes..."
-                                className="w-full bg-transparent text-sm focus:outline-none"
-                              />
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-              </div>
+              {currentTable.status === 'error' && (
+                <span className="text-sm text-destructive">
+                  Error: {currentTable.error}
+                </span>
+              )}
             </div>
 
-            {/* Actions */}
+            {/* Current table: cropped image + readings */}
+            {currentTable.status === 'done' && (
+              <div className="grid md:grid-cols-2 gap-4">
+                {/* Cropped Image */}
+                <div>
+                  <p className="text-sm font-medium mb-2">Table {state.currentTableIndex + 1}</p>
+                  {currentTable.croppedImageUrl && (
+                    <div className="overflow-auto rounded-lg border bg-muted max-h-[70vh]">
+                      <img
+                        src={currentTable.croppedImageUrl}
+                        alt={`Table ${state.currentTableIndex + 1}`}
+                        className="w-full object-contain"
+                      />
+                    </div>
+                  )}
+                </div>
+
+                {/* Readings Table */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-sm font-medium">
+                      Readings ({currentSelectedCount}/{currentReadings.length})
+                    </p>
+                    <div className="flex gap-1">
+                      <Button variant="ghost" size="sm" onClick={selectAll} className="h-6 text-xs">
+                        All
+                      </Button>
+                      <Button variant="ghost" size="sm" onClick={selectNone} className="h-6 text-xs">
+                        None
+                      </Button>
+                    </div>
+                  </div>
+
+                  {currentReadings.length === 0 ? (
+                    <p className="text-sm text-muted-foreground py-4 text-center">
+                      No readings extracted from this table.
+                    </p>
+                  ) : (
+                    <div className="border rounded-lg overflow-hidden max-h-[70vh] overflow-y-auto">
+                      <table className="w-full text-sm">
+                        <thead className="bg-muted/50 sticky top-0">
+                          <tr>
+                            <th className="p-2 w-6"></th>
+                            <th className="p-2 text-left">Date</th>
+                            <th className="p-2 text-left">Time</th>
+                            <th className="p-2 text-right">M1</th>
+                            <th className="p-2 text-right">M2</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {currentReadings.map((reading, index) => (
+                            <tr
+                              key={index}
+                              className={`border-t ${reading.selected ? '' : 'opacity-50'}`}
+                            >
+                              <td className="p-2 text-center">
+                                <input
+                                  type="checkbox"
+                                  checked={reading.selected}
+                                  onChange={() => toggleReading(index)}
+                                  className="h-4 w-4 accent-orange-500"
+                                />
+                              </td>
+                              <td className="p-2">
+                                <input
+                                  type="date"
+                                  value={reading.date}
+                                  onChange={(e) => updateReading(index, 'date', e.target.value)}
+                                  className="w-full bg-transparent text-sm focus:outline-none"
+                                />
+                              </td>
+                              <td className="p-2">
+                                <input
+                                  type="time"
+                                  value={reading.time || ''}
+                                  onChange={(e) => updateReading(index, 'time', e.target.value || null)}
+                                  className="w-full bg-transparent text-sm focus:outline-none"
+                                />
+                              </td>
+                              <td className="p-2">
+                                <input
+                                  type="number"
+                                  step="0.01"
+                                  value={reading.m1}
+                                  onChange={(e) => updateReading(index, 'm1', parseFloat(e.target.value) || 0)}
+                                  className="w-full bg-transparent text-sm text-right font-mono focus:outline-none"
+                                />
+                              </td>
+                              <td className="p-2">
+                                <input
+                                  type="number"
+                                  step="0.01"
+                                  value={reading.m2 ?? ''}
+                                  onChange={(e) => updateReading(index, 'm2', e.target.value ? parseFloat(e.target.value) : null)}
+                                  className="w-full bg-transparent text-sm text-right font-mono focus:outline-none"
+                                />
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Waiting for current table */}
+            {currentTable.status === 'processing' && (
+              <div className="text-center py-8 space-y-4">
+                <div className="h-8 w-8 mx-auto rounded-full border-4 border-orange-500 border-t-transparent animate-spin" />
+                <p className="text-sm text-muted-foreground">
+                  Processing Table {state.currentTableIndex + 1}...
+                </p>
+              </div>
+            )}
+
+            {/* Error for current table */}
+            {currentTable.status === 'error' && (
+              <div className="text-center py-8 space-y-4 bg-destructive/5 rounded-lg">
+                <p className="text-destructive">Failed to process this table</p>
+                <p className="text-sm text-muted-foreground">{currentTable.error}</p>
+              </div>
+            )}
+
+            {/* Navigation */}
             <div className="flex gap-2 pt-2 border-t">
               <Button
-                onClick={handleConfirm}
-                disabled={selectedCount === 0 || state.status === 'saving'}
-                className="flex-1 bg-orange-500 hover:bg-orange-600"
-              >
-                {state.status === 'saving' ? 'Saving...' : `Save ${selectedCount} Reading${selectedCount !== 1 ? 's' : ''}`}
-              </Button>
-              <Button
                 variant="outline"
+                onClick={goToPrevTable}
+                disabled={isFirstTable || state.status === 'saving'}
+              >
+                Back
+              </Button>
+
+              <div className="flex-1 text-center text-sm text-muted-foreground self-center">
+                {getTotalSelectedCount()} readings selected total
+              </div>
+
+              {isLastTable ? (
+                <Button
+                  onClick={handleSaveAll}
+                  disabled={getTotalSelectedCount() === 0 || state.status === 'saving'}
+                  className="bg-orange-500 hover:bg-orange-600"
+                >
+                  {state.status === 'saving' ? 'Saving...' : `Save All (${getTotalSelectedCount()})`}
+                </Button>
+              ) : (
+                <Button
+                  onClick={goToNextTable}
+                  disabled={state.status === 'saving'}
+                  className="bg-orange-500 hover:bg-orange-600"
+                >
+                  Next Table
+                </Button>
+              )}
+            </div>
+
+            {/* Cancel option */}
+            <div className="text-center">
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={() => {
                   resetUpload()
                   onCancel()
                 }}
                 disabled={state.status === 'saving'}
               >
-                Cancel
+                Cancel Import
               </Button>
             </div>
           </div>
@@ -378,7 +682,7 @@ export function UploadPanel({ onComplete, onCancel }: UploadPanelProps) {
           <div className="text-center py-8 space-y-3">
             <div className="text-green-500 text-4xl">&#10003;</div>
             <p className="font-medium text-green-500">
-              Saved {selectedCount} reading{selectedCount !== 1 ? 's' : ''}!
+              Saved {getTotalSelectedCount()} readings!
             </p>
           </div>
         )}

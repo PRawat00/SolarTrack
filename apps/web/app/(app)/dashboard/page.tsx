@@ -7,6 +7,7 @@ import { UploadPanel } from '@/components/dashboard/upload-panel'
 import { ImpactSidebar } from '@/components/dashboard/impact-sidebar'
 import { ProductionTrendChart } from '@/components/charts/production-trend-chart'
 import { ProductionHeatmap, BestDaysSidebar } from '@/components/charts/production-heatmap'
+import { GiftWrap } from '@/components/christmas/gift-wrap'
 
 export default function DashboardPage() {
   const [stats, setStats] = useState<StatsResponse | null>(null)
@@ -93,46 +94,54 @@ export default function DashboardPage() {
       {/* Top Stats Row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Add Readings Card */}
-        <AddReadingsCard
-          isActive={showUpload}
-          onClick={() => setShowUpload(!showUpload)}
-        />
+        <GiftWrap id="gift-add-readings">
+          <AddReadingsCard
+            isActive={showUpload}
+            onClick={() => setShowUpload(!showUpload)}
+          />
+        </GiftWrap>
 
         {/* Estimated Generation */}
-        <StatsCard
-          icon={
-            <svg className="w-5 h-5 text-amber-900" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
-          }
-          iconBgColor="bg-amber-500"
-          value={`${formatNumber(stats?.total_production || 0)} kWh`}
-          label="Estimated Generation"
-        />
+        <GiftWrap id="gift-generation">
+          <StatsCard
+            icon={
+              <svg className="w-5 h-5 text-amber-900" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+            }
+            iconBgColor="bg-amber-500"
+            value={`${formatNumber(stats?.total_production || 0)} kWh`}
+            label="Estimated Generation"
+          />
+        </GiftWrap>
 
         {/* Estimated Savings */}
-        <StatsCard
-          icon={
-            <svg className="w-5 h-5 text-green-900" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          }
-          iconBgColor="bg-green-500"
-          value={`${stats?.currency_symbol || '$'}${formatNumber(stats?.money_saved || 0, 2)}`}
-          label="Estimated Savings"
-        />
+        <GiftWrap id="gift-savings">
+          <StatsCard
+            icon={
+              <svg className="w-5 h-5 text-green-900" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            }
+            iconBgColor="bg-green-500"
+            value={`${stats?.currency_symbol || '$'}${formatNumber(stats?.money_saved || 0, 2)}`}
+            label="Estimated Savings"
+          />
+        </GiftWrap>
 
         {/* CO2 Offset */}
-        <StatsCard
-          icon={
-            <svg className="w-5 h-5 text-emerald-900" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          }
-          iconBgColor="bg-emerald-500"
-          value={`${formatNumber(stats?.co2_offset || 0)} kg`}
-          label="CO2 Offset"
-        />
+        <GiftWrap id="gift-co2">
+          <StatsCard
+            icon={
+              <svg className="w-5 h-5 text-emerald-900" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            }
+            iconBgColor="bg-emerald-500"
+            value={`${formatNumber(stats?.co2_offset || 0)} kg`}
+            label="CO2 Offset"
+          />
+        </GiftWrap>
       </div>
 
       {/* Upload Panel (conditional) */}
@@ -148,22 +157,30 @@ export default function DashboardPage() {
         <>
           <div className="grid lg:grid-cols-[minmax(0,1fr),320px] gap-6">
             {/* Chart */}
-            <ProductionTrendChart />
+            <GiftWrap id="gift-trend-chart">
+              <ProductionTrendChart />
+            </GiftWrap>
 
             {/* Sidebar */}
-            <ImpactSidebar
-              treesEquivalent={stats?.trees_equivalent || 0}
-              specificYield={stats?.specific_yield || 0}
-              yearlyGoal={stats?.yearly_goal || 0}
-              totalProduction={stats?.total_production || 0}
-              goalProgress={stats?.goal_progress || 0}
-            />
+            <GiftWrap id="gift-impact-sidebar">
+              <ImpactSidebar
+                treesEquivalent={stats?.trees_equivalent || 0}
+                specificYield={stats?.specific_yield || 0}
+                yearlyGoal={stats?.yearly_goal || 0}
+                totalProduction={stats?.total_production || 0}
+                goalProgress={stats?.goal_progress || 0}
+              />
+            </GiftWrap>
           </div>
 
           {/* Heatmap */}
           <div className="grid lg:grid-cols-[minmax(0,1fr),320px] gap-6">
-            <ProductionHeatmap year={heatmapYear} onYearChange={setHeatmapYear} />
-            <BestDaysSidebar year={heatmapYear} />
+            <GiftWrap id="gift-heatmap">
+              <ProductionHeatmap year={heatmapYear} onYearChange={setHeatmapYear} />
+            </GiftWrap>
+            <GiftWrap id="gift-best-days">
+              <BestDaysSidebar year={heatmapYear} />
+            </GiftWrap>
           </div>
         </>
       ) : (
