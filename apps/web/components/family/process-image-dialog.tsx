@@ -228,10 +228,28 @@ export function ProcessImageDialog({ image, onClose, onComplete }: ProcessImageD
             </div>
           )}
 
-          {/* Error Display */}
+          {/* Error Display with Retry */}
           {error && (
-            <div className="bg-destructive/10 text-destructive p-4 rounded-lg">
-              {error}
+            <div className="bg-destructive/10 text-destructive p-4 rounded-lg space-y-3">
+              <p>{error}</p>
+              <div className="flex gap-2 justify-center">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setError(null)}
+                >
+                  Dismiss
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    setError(null)
+                    handleProcess()
+                  }}
+                >
+                  Retry Processing
+                </Button>
+              </div>
             </div>
           )}
         </div>

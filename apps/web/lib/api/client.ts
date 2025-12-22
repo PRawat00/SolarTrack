@@ -562,6 +562,9 @@ export const familyImagesAPI = {
   release: (imageId: string): Promise<{ message: string }> =>
     fetchAPI(`/api/family/images/${imageId}/release`, { method: 'POST' }),
 
+  retry: (imageId: string): Promise<FamilyImage> =>
+    fetchAPI(`/api/family/images/${imageId}/retry`, { method: 'POST' }),
+
   getDownloadUrl: (imageId: string): string =>
     `${API_BASE_URL}/api/family/images/${imageId}/download`,
 

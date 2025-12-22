@@ -364,6 +364,43 @@ async def release_image(
     return {"message": "Image released"}
 
 
+@router.post("/{image_id}/retry", response_model=FamilyImageResponse)
+async def retry_image(
+    image_id: str,
+    member: FamilyMember = Depends(require_family_member),
+    db: Session = Depends(get_db),
+):
+    """
+    Reset an errored image to allow retry processing.
+    Only works on images with status = "error".
+    """
+    image = db.query(FamilyImage).filter(
+        FamilyImage.id == image_id,
+        FamilyImage.family_id == member.family_id,
+        FamilyImage.status == "error"
+    ).first()
+
+    if not image:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Image not found or not in error state"
+        )
+
+    # Reset to tagged/uploaded based on whether regions exist
+    if image.table_regions:
+        image.status = "tagged"
+    else:
+        image.status = "uploaded"
+    image.error_message = None
+    image.claimed_by = None
+    image.claimed_at = None
+
+    db.commit()
+    db.refresh(image)
+
+    return image_to_response(db, image)
+
+
 @router.get("/{image_id}/download")
 async def download_image(
     image_id: str,

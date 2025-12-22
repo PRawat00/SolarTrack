@@ -69,6 +69,15 @@ export default function FamilyImagesPage() {
     setTaggingImage(image)
   }
 
+  const handleRetry = async (imageId: string) => {
+    try {
+      await familyImagesAPI.retry(imageId)
+      loadData()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to retry image')
+    }
+  }
+
   if (loading && !imageList) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -169,6 +178,7 @@ export default function FamilyImagesPage() {
               image={image}
               onDelete={() => handleDelete(image.id)}
               onTag={() => handleTag(image)}
+              onRetry={image.status === 'error' ? () => handleRetry(image.id) : undefined}
             />
           ))}
         </div>

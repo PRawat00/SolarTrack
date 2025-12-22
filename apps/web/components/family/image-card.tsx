@@ -9,9 +9,10 @@ interface ImageCardProps {
   image: FamilyImage
   onDelete: () => void
   onTag: () => void
+  onRetry?: () => void
 }
 
-export function ImageCard({ image, onDelete, onTag }: ImageCardProps) {
+export function ImageCard({ image, onDelete, onTag, onRetry }: ImageCardProps) {
   const [imageUrl, setImageUrl] = useState<string | null>(null)
   const [loadingImage, setLoadingImage] = useState(false)
 
@@ -186,9 +187,16 @@ export function ImageCard({ image, onDelete, onTag }: ImageCardProps) {
             )}
 
             {image.status === 'error' && (
-              <p className="text-sm text-destructive">
-                Processing failed
-              </p>
+              <div className="flex items-center gap-2">
+                <p className="text-sm text-destructive">
+                  Processing failed
+                </p>
+                {onRetry && (
+                  <Button size="sm" variant="outline" onClick={onRetry}>
+                    Retry
+                  </Button>
+                )}
+              </div>
             )}
           </div>
 
