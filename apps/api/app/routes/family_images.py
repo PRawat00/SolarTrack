@@ -8,7 +8,7 @@ from fastapi.responses import Response
 from pydantic import BaseModel
 from typing import Optional, List
 from sqlalchemy.orm import Session
-from sqlalchemy import and_, or_
+from sqlalchemy import and_, or_, text
 from datetime import datetime, timedelta
 import json
 
@@ -572,7 +572,7 @@ async def get_random_image(
 
     - status_filter: "uploaded" (needs tagging), "tagged" (ready for processing)
     """
-    from sqlalchemy import text
+    from sqlalchemy.sql import func
 
     if status_filter not in ["uploaded", "tagged"]:
         raise HTTPException(
@@ -581,11 +581,11 @@ async def get_random_image(
         )
 
     # Get random image with the specified status
-    # Use DBMS_RANDOM.VALUE for Oracle (random() doesn't work in Oracle)
+    # Use Oracle's DBMS_RANDOM.VALUE function
     image = db.query(FamilyImage).filter(
         FamilyImage.family_id == member.family_id,
         FamilyImage.status == status_filter
-    ).order_by(text('DBMS_RANDOM.VALUE')).first()
+    ).order_by(text("DBMS_RANDOM.VALUE")).first()
 
     if not image:
         raise HTTPException(

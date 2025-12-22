@@ -1,11 +1,18 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { type Family, type FamilyDashboard } from '@/lib/api/client'
+import { type Family, type FamilyDashboard, type FamilyInvite, familyAPI } from '@/lib/api/client'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { MemberList } from './member-list'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 
 interface FamilyDashboardViewProps {
   family: Family
@@ -15,13 +22,58 @@ interface FamilyDashboardViewProps {
 }
 
 export function FamilyDashboardView({ family, dashboard, onRefresh, onLeave }: FamilyDashboardViewProps) {
-  const [showJoinCode, setShowJoinCode] = useState(false)
-  const [copied, setCopied] = useState(false)
+  const [invites, setInvites] = useState<FamilyInvite[]>([])
+  const [loadingInvites, setLoadingInvites] = useState(true)
+  const [creatingInvite, setCreatingInvite] = useState(false)
+  const [copiedId, setCopiedId] = useState<string | null>(null)
+  const [expiresIn, setExpiresIn] = useState<string>('168') // 7 days
+  const [maxUses, setMaxUses] = useState<string>('unlimited')
 
-  const copyJoinCode = async () => {
-    await navigator.clipboard.writeText(family.join_code)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
+  // Load invites on mount
+  useEffect(() => {
+    loadInvites()
+  }, [])
+
+  const loadInvites = async () => {
+    try {
+      setLoadingInvites(true)
+      const data = await familyAPI.listInvites()
+      setInvites(data)
+    } catch (err) {
+      console.error('Failed to load invites:', err)
+    } finally {
+      setLoadingInvites(false)
+    }
+  }
+
+  const createInvite = async () => {
+    try {
+      setCreatingInvite(true)
+      const invite = await familyAPI.createInvite({
+        expiresInHours: expiresIn === 'never' ? undefined : parseInt(expiresIn),
+        maxUses: maxUses === 'unlimited' ? undefined : parseInt(maxUses),
+      })
+      setInvites([invite, ...invites])
+    } catch (err) {
+      console.error('Failed to create invite:', err)
+    } finally {
+      setCreatingInvite(false)
+    }
+  }
+
+  const copyInvite = async (invite: FamilyInvite) => {
+    await navigator.clipboard.writeText(invite.invite_url)
+    setCopiedId(invite.id)
+    setTimeout(() => setCopiedId(null), 2000)
+  }
+
+  const deleteInvite = async (id: string) => {
+    try {
+      await familyAPI.deactivateInvite(id)
+      setInvites(invites.filter(i => i.id !== id))
+    } catch (err) {
+      console.error('Failed to delete invite:', err)
+    }
   }
 
   return (
@@ -115,45 +167,85 @@ export function FamilyDashboardView({ family, dashboard, onRefresh, onLeave }: F
         </Card>
       </div>
 
-      {/* Join Code Section */}
+      {/* Invite Members Section */}
       <Card>
         <CardHeader>
           <CardTitle>Invite Members</CardTitle>
-          <CardDescription>Share the join code and password with family members</CardDescription>
+          <CardDescription>Create shareable invite links for family members</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center gap-4">
-            <div className="flex-1">
-              <p className="text-sm text-muted-foreground mb-1">Join Code</p>
-              <div className="flex items-center gap-2">
-                <code className="text-2xl font-mono font-bold tracking-wider">
-                  {showJoinCode ? family.join_code : '********'}
-                </code>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowJoinCode(!showJoinCode)}
-                >
-                  {showJoinCode ? (
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                    </svg>
-                  ) : (
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                    </svg>
-                  )}
-                </Button>
-                <Button variant="outline" size="sm" onClick={copyJoinCode}>
-                  {copied ? 'Copied!' : 'Copy'}
-                </Button>
-              </div>
+        <CardContent className="space-y-6">
+          {/* Create new invite */}
+          <div className="flex flex-wrap items-end gap-4">
+            <div className="space-y-1">
+              <label className="text-sm text-muted-foreground">Expires in</label>
+              <Select value={expiresIn} onValueChange={setExpiresIn}>
+                <SelectTrigger className="w-[140px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1">1 hour</SelectItem>
+                  <SelectItem value="24">1 day</SelectItem>
+                  <SelectItem value="168">7 days</SelectItem>
+                  <SelectItem value="720">30 days</SelectItem>
+                  <SelectItem value="never">Never</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
+            <div className="space-y-1">
+              <label className="text-sm text-muted-foreground">Max uses</label>
+              <Select value={maxUses} onValueChange={setMaxUses}>
+                <SelectTrigger className="w-[140px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1">1 use</SelectItem>
+                  <SelectItem value="5">5 uses</SelectItem>
+                  <SelectItem value="10">10 uses</SelectItem>
+                  <SelectItem value="unlimited">Unlimited</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <Button onClick={createInvite} disabled={creatingInvite}>
+              {creatingInvite ? 'Creating...' : 'Create Invite'}
+            </Button>
           </div>
-          <p className="text-sm text-muted-foreground">
-            New members will also need the family password you set when creating the family.
-          </p>
+
+          {/* Active invites */}
+          {loadingInvites ? (
+            <div className="flex justify-center py-4">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+            </div>
+          ) : invites.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-4">
+              No active invites. Create one to invite family members.
+            </p>
+          ) : (
+            <div className="space-y-3">
+              {invites.map((invite) => (
+                <div key={invite.id} className="flex items-center justify-between p-3 bg-muted rounded-lg">
+                  <div className="flex-1 min-w-0">
+                    <code className="text-xs font-mono truncate block text-muted-foreground">
+                      {invite.invite_url}
+                    </code>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {invite.max_uses ? `${invite.use_count}/${invite.max_uses} uses` : `${invite.use_count} uses`}
+                      {invite.expires_at && ` | Expires ${new Date(invite.expires_at).toLocaleDateString()}`}
+                    </p>
+                  </div>
+                  <div className="flex gap-2 ml-4">
+                    <Button variant="outline" size="sm" onClick={() => copyInvite(invite)}>
+                      {copiedId === invite.id ? 'Copied!' : 'Copy'}
+                    </Button>
+                    {family.is_owner && (
+                      <Button variant="ghost" size="sm" onClick={() => deleteInvite(invite.id)}>
+                        Delete
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
 

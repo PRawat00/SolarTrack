@@ -1,17 +1,18 @@
 """
 Family management routes.
 Handles creating, joining, leaving families, and member management.
+Uses invite links (Discord-style) instead of passwords.
 """
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 from typing import Optional, List
 from sqlalchemy.orm import Session
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from app.middleware.auth import get_current_user, TokenData
 from app.models.base import get_db
-from app.models.models import Family, FamilyMember, FamilyImage
+from app.models.models import Family, FamilyMember, FamilyImage, FamilyInvite
 from app.config import settings
 
 router = APIRouter(prefix="/api/family", tags=["family"])
@@ -22,24 +23,46 @@ router = APIRouter(prefix="/api/family", tags=["family"])
 class FamilyCreate(BaseModel):
     """Request to create a new family."""
     name: str = Field(..., min_length=1, max_length=100)
-    password: str = Field(..., min_length=4, max_length=50)
 
 
-class FamilyJoin(BaseModel):
-    """Request to join a family."""
-    join_code: str = Field(..., min_length=6, max_length=10)
-    password: str = Field(..., min_length=1)
+class FamilyJoinByInvite(BaseModel):
+    """Request to join a family via invite token."""
+    token: str = Field(..., min_length=36, max_length=36)
 
 
 class FamilyResponse(BaseModel):
     """Family details response."""
     id: str
     name: str
-    join_code: str
     owner_id: str
     member_count: int
     is_owner: bool
     created_at: str
+
+
+class InviteCreate(BaseModel):
+    """Request to create an invite link."""
+    expires_in_hours: Optional[int] = Field(None, ge=1, le=8760)  # Max 1 year
+    max_uses: Optional[int] = Field(None, ge=1, le=1000)
+
+
+class InviteResponse(BaseModel):
+    """Invite link response."""
+    id: str
+    token: str
+    invite_url: str
+    expires_at: Optional[str]
+    max_uses: Optional[int]
+    use_count: int
+    is_active: bool
+    created_at: str
+
+
+class InviteValidation(BaseModel):
+    """Result of validating an invite token."""
+    valid: bool
+    family_name: Optional[str]
+    expires_at: Optional[str]
 
 
 class MemberResponse(BaseModel):
@@ -123,6 +146,7 @@ async def create_family(
     """
     Create a new family.
     The creating user becomes the owner.
+    Use /api/family/invites to create invite links for others to join.
     """
     # Check if user is already in a family
     existing = get_user_membership(db, current_user.user_id)
@@ -137,7 +161,6 @@ async def create_family(
         name=data.name,
         owner_id=current_user.user_id,
     )
-    family.set_password(data.password)
     db.add(family)
     db.flush()  # Get the ID
 
@@ -155,7 +178,6 @@ async def create_family(
     return FamilyResponse(
         id=family.id,
         name=family.name,
-        join_code=family.join_code,
         owner_id=family.owner_id,
         member_count=1,
         is_owner=True,
@@ -182,7 +204,6 @@ async def get_my_family(
     return FamilyResponse(
         id=family.id,
         name=family.name,
-        join_code=family.join_code,
         owner_id=family.owner_id,
         member_count=count,
         is_owner=member.role == "owner",
@@ -192,12 +213,12 @@ async def get_my_family(
 
 @router.post("/join", response_model=FamilyResponse)
 async def join_family(
-    data: FamilyJoin,
+    data: FamilyJoinByInvite,
     current_user: TokenData = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     """
-    Join an existing family using join code and password.
+    Join an existing family using an invite token.
     """
     # Check if user is already in a family
     existing = get_user_membership(db, current_user.user_id)
@@ -207,22 +228,39 @@ async def join_family(
             detail="You are already a member of a family. Leave your current family first."
         )
 
-    # Find the family by join code (case-insensitive)
-    family = db.query(Family).filter(
-        Family.join_code == data.join_code.upper()
+    # Find and validate the invite
+    now = datetime.utcnow()
+    invite = db.query(FamilyInvite).filter(
+        FamilyInvite.token == data.token,
+        FamilyInvite.is_active == 1,  # Oracle uses 1 for true
     ).first()
 
+    if not invite:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Invalid invite link"
+        )
+
+    # Check expiration
+    if invite.expires_at and invite.expires_at < now:
+        raise HTTPException(
+            status_code=status.HTTP_410_GONE,
+            detail="This invite link has expired"
+        )
+
+    # Check max uses
+    if invite.max_uses and invite.use_count >= invite.max_uses:
+        raise HTTPException(
+            status_code=status.HTTP_410_GONE,
+            detail="This invite link has reached its maximum uses"
+        )
+
+    # Get the family
+    family = db.query(Family).filter(Family.id == invite.family_id).first()
     if not family:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Family not found. Check the join code."
-        )
-
-    # Verify password
-    if not family.verify_password(data.password):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect password"
+            detail="Family not found"
         )
 
     # Check member limit
@@ -235,6 +273,9 @@ async def join_family(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"Family has reached maximum capacity of {settings.FAMILY_MAX_MEMBERS} members"
         )
+
+    # Increment invite use count
+    invite.use_count += 1
 
     # Add as member
     member = FamilyMember(
@@ -249,7 +290,6 @@ async def join_family(
     return FamilyResponse(
         id=family.id,
         name=family.name,
-        join_code=family.join_code,
         owner_id=family.owner_id,
         member_count=current_count + 1,
         is_owner=False,
@@ -300,6 +340,8 @@ async def leave_family(
             # Last member leaving - delete the family
             family = db.query(Family).filter(Family.id == family_id).first()
             if family:
+                # Delete all family invites
+                db.query(FamilyInvite).filter(FamilyInvite.family_id == family_id).delete()
                 # Delete all family images from DB (files handled separately)
                 db.query(FamilyImage).filter(FamilyImage.family_id == family_id).delete()
                 db.delete(family)
@@ -394,3 +436,147 @@ async def update_display_name(
         joined_at=member.joined_at.isoformat() if member.joined_at else datetime.utcnow().isoformat(),
         images_processed=images_processed,
     )
+
+
+# ============ Invite Endpoints ============
+
+@router.post("/invites", response_model=InviteResponse, status_code=status.HTTP_201_CREATED)
+async def create_invite(
+    data: InviteCreate,
+    member: FamilyMember = Depends(require_family_member),
+    db: Session = Depends(get_db),
+):
+    """
+    Create a new invite link for the family.
+    Any family member can create invites.
+    """
+    expires_at = None
+    if data.expires_in_hours:
+        expires_at = datetime.utcnow() + timedelta(hours=data.expires_in_hours)
+
+    invite = FamilyInvite(
+        family_id=member.family_id,
+        created_by=member.user_id,
+        expires_at=expires_at,
+        max_uses=data.max_uses,
+    )
+    db.add(invite)
+    db.commit()
+    db.refresh(invite)
+
+    # Build invite URL
+    frontend_url = getattr(settings, 'FRONTEND_URL', 'http://localhost:3000')
+    invite_url = f"{frontend_url}/family/join?token={invite.token}"
+
+    return InviteResponse(
+        id=invite.id,
+        token=invite.token,
+        invite_url=invite_url,
+        expires_at=invite.expires_at.isoformat() if invite.expires_at else None,
+        max_uses=invite.max_uses,
+        use_count=invite.use_count,
+        is_active=invite.is_active,
+        created_at=invite.created_at.isoformat() if invite.created_at else datetime.utcnow().isoformat(),
+    )
+
+
+@router.get("/invites", response_model=List[InviteResponse])
+async def list_invites(
+    member: FamilyMember = Depends(require_family_member),
+    db: Session = Depends(get_db),
+):
+    """
+    List all active invites for the current family.
+    """
+    invites = db.query(FamilyInvite).filter(
+        FamilyInvite.family_id == member.family_id,
+        FamilyInvite.is_active == 1,  # Oracle uses 1 for true
+    ).order_by(FamilyInvite.created_at.desc()).all()
+
+    frontend_url = getattr(settings, 'FRONTEND_URL', 'http://localhost:3000')
+
+    results = []
+    for invite in invites:
+        results.append(InviteResponse(
+            id=invite.id,
+            token=invite.token,
+            invite_url=f"{frontend_url}/family/join?token={invite.token}",
+            expires_at=invite.expires_at.isoformat() if invite.expires_at else None,
+            max_uses=invite.max_uses,
+            use_count=invite.use_count,
+            is_active=invite.is_active,
+            created_at=invite.created_at.isoformat() if invite.created_at else datetime.utcnow().isoformat(),
+        ))
+
+    return results
+
+
+@router.get("/invites/{token}/validate", response_model=InviteValidation)
+async def validate_invite(
+    token: str,
+    db: Session = Depends(get_db),
+):
+    """
+    Validate an invite token (public endpoint - no auth required).
+    Returns family name if valid, so users can see which family they're joining.
+    """
+    now = datetime.utcnow()
+    invite = db.query(FamilyInvite).filter(
+        FamilyInvite.token == token,
+        FamilyInvite.is_active == 1,  # Oracle uses 1 for true
+    ).first()
+
+    if not invite:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Invite not found"
+        )
+
+    # Check expiration
+    if invite.expires_at and invite.expires_at < now:
+        raise HTTPException(
+            status_code=status.HTTP_410_GONE,
+            detail="This invite has expired"
+        )
+
+    # Check max uses
+    if invite.max_uses and invite.use_count >= invite.max_uses:
+        raise HTTPException(
+            status_code=status.HTTP_410_GONE,
+            detail="This invite has reached its maximum uses"
+        )
+
+    # Get family name
+    family = db.query(Family).filter(Family.id == invite.family_id).first()
+
+    return InviteValidation(
+        valid=True,
+        family_name=family.name if family else None,
+        expires_at=invite.expires_at.isoformat() if invite.expires_at else None,
+    )
+
+
+@router.delete("/invites/{invite_id}")
+async def deactivate_invite(
+    invite_id: str,
+    owner: FamilyMember = Depends(require_family_owner),
+    db: Session = Depends(get_db),
+):
+    """
+    Deactivate an invite link (owner only).
+    """
+    invite = db.query(FamilyInvite).filter(
+        FamilyInvite.id == invite_id,
+        FamilyInvite.family_id == owner.family_id,
+    ).first()
+
+    if not invite:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Invite not found"
+        )
+
+    invite.is_active = 0  # Oracle uses 0 for false
+    db.commit()
+
+    return {"message": "Invite deactivated successfully"}

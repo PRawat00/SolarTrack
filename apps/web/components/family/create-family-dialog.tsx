@@ -22,8 +22,6 @@ interface CreateFamilyDialogProps {
 
 export function CreateFamilyDialog({ open, onOpenChange, onCreated }: CreateFamilyDialogProps) {
   const [name, setName] = useState('')
-  const [password, setPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -31,24 +29,16 @@ export function CreateFamilyDialog({ open, onOpenChange, onCreated }: CreateFami
     e.preventDefault()
     setError(null)
 
-    if (password !== confirmPassword) {
-      setError('Passwords do not match')
-      return
-    }
-
-    if (password.length < 4) {
-      setError('Password must be at least 4 characters')
+    if (name.trim().length < 1) {
+      setError('Please enter a family name')
       return
     }
 
     try {
       setLoading(true)
-      const family = await familyAPI.create(name, password)
+      const family = await familyAPI.create(name)
       onCreated(family)
-      // Reset form
       setName('')
-      setPassword('')
-      setConfirmPassword('')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create family')
     } finally {
@@ -63,7 +53,7 @@ export function CreateFamilyDialog({ open, onOpenChange, onCreated }: CreateFami
           <DialogTitle>Create a Family</DialogTitle>
           <DialogDescription>
             Create a new family to collaborate on solar data entry.
-            You&apos;ll receive a join code to share with family members.
+            You can invite members using shareable invite links.
           </DialogDescription>
         </DialogHeader>
 
@@ -78,34 +68,6 @@ export function CreateFamilyDialog({ open, onOpenChange, onCreated }: CreateFami
                 placeholder="e.g., Smith Family"
                 required
                 maxLength={100}
-              />
-            </div>
-
-            <div className="grid gap-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Family password"
-                required
-                minLength={4}
-              />
-              <p className="text-xs text-muted-foreground">
-                Share this password with family members so they can join
-              </p>
-            </div>
-
-            <div className="grid gap-2">
-              <Label htmlFor="confirmPassword">Confirm Password</Label>
-              <Input
-                id="confirmPassword"
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Confirm password"
-                required
               />
             </div>
 

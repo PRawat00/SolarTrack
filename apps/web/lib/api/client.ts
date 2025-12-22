@@ -344,11 +344,27 @@ export const geocodingAPI = {
 export interface Family {
   id: string
   name: string
-  join_code: string
   owner_id: string
   member_count: number
   is_owner: boolean
   created_at: string
+}
+
+export interface FamilyInvite {
+  id: string
+  token: string
+  invite_url: string
+  expires_at: string | null
+  max_uses: number | null
+  use_count: number
+  is_active: boolean
+  created_at: string
+}
+
+export interface InviteValidation {
+  valid: boolean
+  family_name: string | null
+  expires_at: string | null
 }
 
 export interface FamilyMember {
@@ -452,16 +468,16 @@ export const familyAPI = {
   get: (): Promise<Family | null> =>
     fetchAPI('/api/family'),
 
-  create: (name: string, password: string): Promise<Family> =>
+  create: (name: string): Promise<Family> =>
     fetchAPI('/api/family', {
       method: 'POST',
-      body: JSON.stringify({ name, password }),
+      body: JSON.stringify({ name }),
     }),
 
-  join: (joinCode: string, password: string): Promise<Family> =>
+  join: (token: string): Promise<Family> =>
     fetchAPI('/api/family/join', {
       method: 'POST',
-      body: JSON.stringify({ join_code: joinCode, password }),
+      body: JSON.stringify({ token }),
     }),
 
   leave: (): Promise<{ message: string }> =>
@@ -487,6 +503,32 @@ export const familyAPI = {
 
   getDashboard: (): Promise<FamilyDashboard> =>
     fetchAPI('/api/family/dashboard'),
+
+  // Invite management
+  createInvite: (options?: { expiresInHours?: number; maxUses?: number }): Promise<FamilyInvite> =>
+    fetchAPI('/api/family/invites', {
+      method: 'POST',
+      body: JSON.stringify({
+        expires_in_hours: options?.expiresInHours,
+        max_uses: options?.maxUses,
+      }),
+    }),
+
+  listInvites: (): Promise<FamilyInvite[]> =>
+    fetchAPI('/api/family/invites'),
+
+  validateInvite: async (token: string): Promise<InviteValidation> => {
+    const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+    const response = await fetch(`${API_BASE}/api/family/invites/${token}/validate`)
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}))
+      throw new Error(error.detail || 'Invalid invite')
+    }
+    return response.json()
+  },
+
+  deactivateInvite: (inviteId: string): Promise<{ message: string }> =>
+    fetchAPI(`/api/family/invites/${inviteId}`, { method: 'DELETE' }),
 }
 
 // ============ Family Images API ============

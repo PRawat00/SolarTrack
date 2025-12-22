@@ -36,6 +36,9 @@ class Settings(BaseSettings):
     FAMILY_MAX_MEMBERS: int = int(os.getenv("FAMILY_MAX_MEMBERS", "20"))
     FAMILY_MAX_PENDING_IMAGES: int = int(os.getenv("FAMILY_MAX_PENDING_IMAGES", "500"))
 
+    # Frontend URL (for generating invite links)
+    FRONTEND_URL: str = os.getenv("FRONTEND_URL", "http://localhost:3000")
+
     # CORS - configurable via environment variable (comma-separated)
     # Default to localhost for development
     @property
