@@ -99,6 +99,31 @@ def get_family_with_count(db: Session, family_id: str) -> tuple[Optional[Family]
     return family, count
 
 
+def get_readings_user_id(db: Session, user_id: str) -> str:
+    """Get the user_id to use for reading/stats operations.
+
+    If the user is in a family, returns the family owner's user_id.
+    This allows all family members to share the same readings data pool.
+
+    Args:
+        db: Database session
+        user_id: Current user's ID
+
+    Returns:
+        Family owner's user_id if in family, else the user's own ID
+    """
+    member = db.query(FamilyMember).filter(
+        FamilyMember.user_id == user_id
+    ).first()
+
+    if not member:
+        return user_id  # Solo user - use own ID
+
+    # Get family owner
+    family = db.query(Family).filter(Family.id == member.family_id).first()
+    return family.owner_id if family else user_id
+
+
 def get_member_images_processed(db: Session, user_id: str) -> int:
     """Get count of images processed by a user."""
     return db.query(FamilyImage).filter(

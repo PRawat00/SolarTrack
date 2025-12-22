@@ -9,6 +9,7 @@ from app.middleware.auth import get_current_user, TokenData
 from app.models.base import get_db
 from app.models.models import UserSettings, SolarReading, ApiUsage
 from app.config import settings as app_settings
+from app.routes.family import get_readings_user_id
 
 router = APIRouter(prefix="/api", tags=["settings"])
 
@@ -70,14 +71,18 @@ async def get_settings(
     Get user settings.
 
     Creates default settings if none exist for this user.
+    If user is in a family, returns family head's settings.
     """
+    # Use family head's user_id if in a family
+    effective_user_id = get_readings_user_id(db, current_user.user_id)
+
     settings = db.query(UserSettings).filter(
-        UserSettings.user_id == current_user.user_id
+        UserSettings.user_id == effective_user_id
     ).first()
 
     if not settings:
-        # Create default settings for new user
-        settings = UserSettings(user_id=current_user.user_id)
+        # Create default settings for the effective user
+        settings = UserSettings(user_id=effective_user_id)
         db.add(settings)
         db.commit()
         db.refresh(settings)
@@ -96,14 +101,18 @@ async def update_settings(
 
     Only provided fields will be updated. Creates settings if none exist.
     If location (latitude/longitude) changes, weather data is automatically cleared.
+    If user is in a family, updates family head's settings.
     """
+    # Use family head's user_id if in a family
+    effective_user_id = get_readings_user_id(db, current_user.user_id)
+
     settings = db.query(UserSettings).filter(
-        UserSettings.user_id == current_user.user_id
+        UserSettings.user_id == effective_user_id
     ).first()
 
     if not settings:
         # Create settings if they don't exist
-        settings = UserSettings(user_id=current_user.user_id)
+        settings = UserSettings(user_id=effective_user_id)
         db.add(settings)
 
     # Check if location is changing
@@ -122,7 +131,7 @@ async def update_settings(
     # Clear weather data if location changed
     if location_changed:
         readings = db.query(SolarReading).filter(
-            SolarReading.user_id == current_user.user_id
+            SolarReading.user_id == effective_user_id
         ).all()
         for reading in readings:
             reading.weather_code = None

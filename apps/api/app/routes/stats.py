@@ -9,6 +9,7 @@ from datetime import datetime
 from app.middleware.auth import get_current_user, TokenData
 from app.models.base import get_db
 from app.models.models import SolarReading, UserSettings
+from app.routes.family import get_readings_user_id
 
 router = APIRouter(prefix="/api", tags=["stats"])
 
@@ -40,19 +41,23 @@ async def get_stats(
     Get dashboard statistics calculated from user's readings.
 
     Returns total production, money saved, CO2 offset, and goal progress.
+    If user is in a family, returns family-wide stats using family head's data and settings.
     """
-    # Get user settings (or create defaults)
+    # Use family head's user_id if in a family
+    effective_user_id = get_readings_user_id(db, current_user.user_id)
+
+    # Get settings from effective user (family head if in family)
     settings = db.query(UserSettings).filter(
-        UserSettings.user_id == current_user.user_id
+        UserSettings.user_id == effective_user_id
     ).first()
 
     if not settings:
-        settings = UserSettings(user_id=current_user.user_id)
+        settings = UserSettings(user_id=effective_user_id)
         db.add(settings)
         db.commit()
         db.refresh(settings)
 
-    # Calculate totals from readings
+    # Calculate totals from readings (using family head's readings)
     result = db.query(
         func.sum(SolarReading.m1).label("total_m1"),
         func.sum(SolarReading.m2).label("total_m2"),
@@ -60,7 +65,7 @@ async def get_stats(
         func.min(SolarReading.reading_date).label("first_date"),
         func.max(SolarReading.reading_date).label("last_date"),
     ).filter(
-        SolarReading.user_id == current_user.user_id
+        SolarReading.user_id == effective_user_id
     ).first()
 
     total_m1 = float(result.total_m1 or 0)
@@ -149,10 +154,14 @@ async def get_trends(
     Get production trends aggregated by time period.
 
     Returns data points with M1, M2, and total for each period.
+    If user is in a family, returns family-wide trends.
     """
-    # Fetch all readings for the user
+    # Use family head's user_id if in a family
+    effective_user_id = get_readings_user_id(db, current_user.user_id)
+
+    # Fetch all readings for the family
     readings = db.query(SolarReading).filter(
-        SolarReading.user_id == current_user.user_id
+        SolarReading.user_id == effective_user_id
     ).order_by(SolarReading.reading_date.asc()).all()
 
     # Aggregate by period
@@ -208,10 +217,14 @@ async def get_records(
     Get production records (best day and best month).
 
     Returns the highest production day and month for the user.
+    If user is in a family, returns family-wide records.
     """
-    # Fetch all readings for the user
+    # Use family head's user_id if in a family
+    effective_user_id = get_readings_user_id(db, current_user.user_id)
+
+    # Fetch all readings for the family
     readings = db.query(SolarReading).filter(
-        SolarReading.user_id == current_user.user_id
+        SolarReading.user_id == effective_user_id
     ).all()
 
     if not readings:

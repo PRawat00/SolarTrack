@@ -7,6 +7,7 @@ from pydantic import BaseModel
 from app.middleware.auth import get_current_user, TokenData
 from app.models.base import get_db
 from app.models.models import SolarReading
+from app.routes.family import get_readings_user_id
 
 router = APIRouter(prefix="/api", tags=["readings"])
 
@@ -94,9 +95,13 @@ async def get_readings(
     Get user's solar readings with optional date filtering.
 
     Results are ordered by date descending (newest first).
+    If user is in a family, returns all family readings (using family head's data).
     """
+    # Use family head's user_id if in a family
+    effective_user_id = get_readings_user_id(db, current_user.user_id)
+
     query = db.query(SolarReading).filter(
-        SolarReading.user_id == current_user.user_id
+        SolarReading.user_id == effective_user_id
     )
 
     if start_date:
@@ -121,9 +126,15 @@ async def create_reading(
     current_user: TokenData = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Create a single solar reading."""
+    """Create a single solar reading.
+
+    If user is in a family, reading is stored under family head's user_id.
+    """
+    # Use family head's user_id if in a family
+    effective_user_id = get_readings_user_id(db, current_user.user_id)
+
     db_reading = SolarReading(
-        user_id=current_user.user_id,
+        user_id=effective_user_id,
         reading_date=datetime.fromisoformat(reading.date),
         reading_time=reading.time,
         m1=reading.m1,
@@ -148,6 +159,7 @@ async def create_readings_bulk(
     Create multiple readings at once.
 
     Used for confirming AI-extracted readings from uploaded images.
+    If user is in a family, readings are stored under family head's user_id.
     """
     if not readings:
         raise HTTPException(status_code=400, detail="No readings provided")
@@ -155,10 +167,13 @@ async def create_readings_bulk(
     if len(readings) > 500:
         raise HTTPException(status_code=400, detail="Maximum 500 readings per request")
 
+    # Use family head's user_id if in a family
+    effective_user_id = get_readings_user_id(db, current_user.user_id)
+
     db_readings = []
     for reading in readings:
         db_reading = SolarReading(
-            user_id=current_user.user_id,
+            user_id=effective_user_id,
             reading_date=datetime.fromisoformat(reading.date),
             reading_time=reading.time,
             m1=reading.m1,
@@ -184,10 +199,16 @@ async def delete_reading(
     current_user: TokenData = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Delete a solar reading."""
+    """Delete a solar reading.
+
+    If user is in a family, can delete any family reading.
+    """
+    # Use family head's user_id if in a family
+    effective_user_id = get_readings_user_id(db, current_user.user_id)
+
     reading = db.query(SolarReading).filter(
         SolarReading.id == reading_id,
-        SolarReading.user_id == current_user.user_id,
+        SolarReading.user_id == effective_user_id,
     ).first()
 
     if not reading:
@@ -206,10 +227,16 @@ async def update_reading(
     current_user: TokenData = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Update a solar reading."""
+    """Update a solar reading.
+
+    If user is in a family, can update any family reading.
+    """
+    # Use family head's user_id if in a family
+    effective_user_id = get_readings_user_id(db, current_user.user_id)
+
     reading = db.query(SolarReading).filter(
         SolarReading.id == reading_id,
-        SolarReading.user_id == current_user.user_id,
+        SolarReading.user_id == effective_user_id,
     ).first()
 
     if not reading:
@@ -238,9 +265,15 @@ async def delete_all_readings(
     current_user: TokenData = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Delete all readings for the current user. This action is irreversible."""
+    """Delete all readings for the current user/family. This action is irreversible.
+
+    If user is in a family, deletes all family readings.
+    """
+    # Use family head's user_id if in a family
+    effective_user_id = get_readings_user_id(db, current_user.user_id)
+
     count = db.query(SolarReading).filter(
-        SolarReading.user_id == current_user.user_id
+        SolarReading.user_id == effective_user_id
     ).delete()
     db.commit()
     return {"message": f"Deleted {count} readings", "deleted_count": count}
