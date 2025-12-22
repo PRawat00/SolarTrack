@@ -11,6 +11,9 @@ from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_, text
 from datetime import datetime, timedelta
 import json
+import logging
+
+logger = logging.getLogger(__name__)
 
 from app.middleware.auth import get_current_user, TokenData
 from app.models.base import get_db
@@ -192,7 +195,8 @@ async def upload_images(
             )
             image.storage_path = storage_path
         except Exception as e:
-            # If file save fails, skip this image
+            # Log the error and skip this image
+            logger.error(f"Failed to save image {file.filename} for family {member.family_id}: {e}")
             continue
 
         db.add(image)

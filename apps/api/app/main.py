@@ -16,6 +16,7 @@ from app.routes import (
     family_images_router,
     family_stats_router,
 )
+from app.services.file_storage import FileStorageService
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -51,6 +52,20 @@ app.include_router(weather_router)
 app.include_router(family_router)
 app.include_router(family_images_router)
 app.include_router(family_stats_router)
+
+
+# Startup event
+@app.on_event("startup")
+async def startup_event():
+    """Initialize storage directories on startup."""
+    try:
+        FileStorageService.ensure_base_path()
+        logger.info(f"Storage directory ready: {FileStorageService.BASE_PATH}")
+    except PermissionError as e:
+        logger.error(f"Cannot create storage directory {FileStorageService.BASE_PATH}: {e}")
+        logger.error("Image uploads will fail! Please create the directory manually with proper permissions.")
+    except Exception as e:
+        logger.error(f"Error initializing storage directory: {e}")
 
 
 # Health check endpoint
