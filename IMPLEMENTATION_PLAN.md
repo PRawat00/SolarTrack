@@ -1,8 +1,8 @@
-# SolarLog AI - Complete Rebuild Plan
+# SolarTrack - Complete Rebuild Plan
 
 ## Project Overview
 
-Rebuilding SolarLog AI from scratch with modern, production-ready tech stack:
+Rebuilding SolarTrack from scratch with modern, production-ready tech stack:
 - **Frontend:** Next.js 15 (App Router) + shadcn/ui + Tailwind CSS → Vercel
 - **Backend:** Python FastAPI → Railway
 - **Database:** Supabase (PostgreSQL + Auth + Storage)
@@ -108,7 +108,7 @@ All tables have RLS enabled with policies:
 ## API Design (FastAPI)
 
 ### Base URL
-- Production: `https://api.solarlog.railway.app`
+- Production: `https://api.solartrack.railway.app`
 - Development: `http://localhost:8000`
 
 ### Authentication
@@ -510,7 +510,7 @@ All MVP features retained:
 
 ## Summary
 
-This plan rebuilds SolarLog AI as a production-ready, multi-user SaaS application with:
+This plan rebuilds SolarTrack as a production-ready, multi-user SaaS application with:
 - Modern tech stack (Next.js 15, FastAPI, Supabase)
 - Provider-agnostic AI (no vendor lock-in)
 - Clean VC startup design (shadcn/ui)

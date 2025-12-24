@@ -27,8 +27,8 @@ logger = logging.getLogger(__name__)
 # Disable docs in production for security
 is_production = settings.ENVIRONMENT == "production"
 app = FastAPI(
-    title="SolarLog AI API",
-    description="Backend API for SolarLog AI - AI-powered solar log digitization",
+    title="SolarTrack API",
+    description="Backend API for SolarTrack - AI-powered solar production tracking",
     version="0.1.0",
     docs_url=None if is_production else "/docs",
     openapi_url=None if is_production else "/openapi.json",
@@ -89,7 +89,7 @@ async def health_check():
 async def root():
     """Root endpoint with API info"""
     return {
-        "name": "SolarLog AI API",
+        "name": "SolarTrack API",
         "version": "0.1.0",
         "docs": "/docs",
         "health": "/health",

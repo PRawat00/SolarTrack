@@ -1,4 +1,4 @@
-# SolarLog AI - FastAPI Backend
+# SolarTrack - FastAPI Backend
 
 ## Setup
 

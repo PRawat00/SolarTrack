@@ -6,8 +6,8 @@ import './globals.css'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'SolarLog AI',
-  description: 'Digitizing handwritten solar production logs with AI',
+  title: 'SolarTrack',
+  description: 'Track and analyze your solar production with AI-powered digitization',
 }
 
 export default function RootLayout({

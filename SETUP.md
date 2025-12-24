@@ -1,8 +1,8 @@
-# SolarLog AI - Local Development Setup Guide
+# SolarTrack - Local Development Setup Guide
 
 ## Overview
 
-This guide will help you set up the complete SolarLog AI development environment locally with:
+This guide will help you set up the complete SolarTrack development environment locally with:
 - **Supabase** (PostgreSQL, Auth, Storage) via Docker
 - **FastAPI** backend on `localhost:8000`
 - **Next.js** frontend on `localhost:3000`
@@ -162,7 +162,7 @@ Should return:
 ```
 
 ### Test Frontend
-Open `http://localhost:3000` in your browser. You should see the SolarLog AI landing page.
+Open `http://localhost:3000` in your browser. You should see the SolarTrack landing page.
 
 ## Access Points
 

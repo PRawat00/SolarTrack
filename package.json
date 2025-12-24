@@ -1,7 +1,7 @@
 {
-  "name": "solarlog-ai",
+  "name": "solartrack",
   "version": "0.1.0",
-  "description": "SolarLog AI - Digitizing handwritten solar production logs with AI",
+  "description": "SolarTrack - Track and analyze your solar production with AI",
   "private": true,
   "type": "module",
   "scripts": {

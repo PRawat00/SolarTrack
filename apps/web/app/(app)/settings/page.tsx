@@ -76,6 +76,9 @@ export default function SettingsPage() {
   const [deleteMessage, setDeleteMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
   const [suggestions, setSuggestions] = useState<LocationSuggestionsResponse | null>(null)
   const [showSuggestions, setShowSuggestions] = useState(false)
+  const [initialSettingsLoaded, setInitialSettingsLoaded] = useState(false)
+  const [storedCountryCode, setStoredCountryCode] = useState<string | null>(null)
+  const [storedStateCode, setStoredStateCode] = useState<string | null>(null)
 
   const {
     register,
@@ -106,6 +109,10 @@ export default function SettingsPage() {
           longitude: data.longitude,
         })
         setLocationSearch(data.location_name || '')
+        // Store country/state codes for auto-suggestions
+        setStoredCountryCode(data.country_code || null)
+        setStoredStateCode(data.state_code || null)
+        setInitialSettingsLoaded(true)
       } catch (err) {
         setMessage({
           type: 'error',
@@ -131,6 +138,33 @@ export default function SettingsPage() {
     }
     loadUsage()
   }, [])
+
+  // Auto-show suggestions for first-time users
+  useEffect(() => {
+    if (!initialSettingsLoaded) return
+
+    // Check if user has already seen/applied suggestions
+    const suggestionsHandled = localStorage.getItem('solartrack_suggestions_handled')
+    if (suggestionsHandled) return
+
+    // Only show if we have country_code stored (means location was properly set)
+    if (!storedCountryCode) return
+
+    // Fetch suggestions based on stored location codes
+    const fetchInitialSuggestions = async () => {
+      try {
+        const suggestionData = await locationAPI.getSuggestions({
+          country_code: storedCountryCode,
+          state_code: storedStateCode || undefined,
+        })
+        setSuggestions(suggestionData)
+        setShowSuggestions(true)
+      } catch (err) {
+        console.error('Failed to get initial suggestions:', err)
+      }
+    }
+    fetchInitialSuggestions()
+  }, [initialSettingsLoaded, storedCountryCode, storedStateCode])
 
   // Debounced search
   const searchLocation = useCallback(async (query: string) => {
@@ -189,10 +223,18 @@ export default function SettingsPage() {
     setValue('cost_per_kwh', suggestions.suggestions.electricity_price)
     setValue('currency_symbol', suggestions.suggestions.currency_symbol)
     setShowSuggestions(false)
+    // Mark as handled so we don't show again
+    localStorage.setItem('solartrack_suggestions_handled', 'true')
     setMessage({
       type: 'success',
       text: `Applied suggestions for ${suggestions.detected_state_name || suggestions.detected_country_name || 'your location'}. Remember to save your settings.`
     })
+  }
+
+  const dismissSuggestions = () => {
+    setShowSuggestions(false)
+    // Mark as handled so we don't show again
+    localStorage.setItem('solartrack_suggestions_handled', 'true')
   }
 
   const onSubmit = async (formData: SettingsFormData) => {
@@ -312,7 +354,7 @@ export default function SettingsPage() {
                     type="button"
                     size="sm"
                     variant="outline"
-                    onClick={() => setShowSuggestions(false)}
+                    onClick={dismissSuggestions}
                   >
                     Keep Current Values
                   </Button>

@@ -1,6 +1,6 @@
-# SolarLog AI
+# SolarTrack
 
-**Digitizing handwritten solar production logs with AI**
+**Track and analyze your solar production with AI-powered digitization**
 
 A modern, full-stack application for converting photos of handwritten solar panel logbooks into structured, searchable databases. Built with Next.js, FastAPI, and Supabase.
 

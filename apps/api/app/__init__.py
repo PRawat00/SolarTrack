@@ -1,1 +1,1 @@
-# SolarLog AI Backend
+# SolarTrack Backend

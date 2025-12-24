@@ -1,4 +1,4 @@
-# SolarLog AI - Next.js Frontend
+# SolarTrack - Next.js Frontend
 
 ## Setup
 

@@ -73,7 +73,7 @@ export function AppNav({ user }: AppNavProps) {
                 </svg>
               </Link>
               <Link href="/dashboard" className="font-bold text-xl">
-                SolarLog AI
+                SolarTrack
               </Link>
             </div>
             <nav className="hidden md:flex items-center gap-6">
