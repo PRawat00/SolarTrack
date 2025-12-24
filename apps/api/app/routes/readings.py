@@ -47,6 +47,8 @@ class ReadingResponse(BaseModel):
     temp_max: Optional[float]
     sunshine_hours: Optional[float]
     radiation_sum: Optional[float]
+    # Attribution
+    created_by: Optional[str] = None  # User who actually created this reading
     created_at: str
     updated_at: str
 
@@ -77,6 +79,7 @@ def _reading_to_response(reading: SolarReading) -> ReadingResponse:
         temp_max=float(reading.temp_max) if reading.temp_max is not None else None,
         sunshine_hours=float(reading.sunshine_hours) if reading.sunshine_hours is not None else None,
         radiation_sum=float(reading.radiation_sum) if reading.radiation_sum is not None else None,
+        created_by=reading.created_by,
         created_at=reading.created_at.isoformat() if reading.created_at else "",
         updated_at=reading.updated_at.isoformat() if reading.updated_at else "",
     )
@@ -135,6 +138,7 @@ async def create_reading(
 
     db_reading = SolarReading(
         user_id=effective_user_id,
+        created_by=current_user.user_id,  # Track who actually created this
         reading_date=datetime.fromisoformat(reading.date),
         reading_time=reading.time,
         m1=reading.m1,
@@ -174,6 +178,7 @@ async def create_readings_bulk(
     for reading in readings:
         db_reading = SolarReading(
             user_id=effective_user_id,
+            created_by=current_user.user_id,  # Track who actually created this
             reading_date=datetime.fromisoformat(reading.date),
             reading_time=reading.time,
             m1=reading.m1,
@@ -267,10 +272,17 @@ async def delete_all_readings(
 ):
     """Delete all readings for the current user/family. This action is irreversible.
 
-    If user is in a family, deletes all family readings.
+    If user is in a family, only the family owner can delete all readings.
     """
     # Use family head's user_id if in a family
     effective_user_id = get_readings_user_id(db, current_user.user_id)
+
+    # Only family owner can delete all readings
+    if effective_user_id != current_user.user_id:
+        raise HTTPException(
+            status_code=403,
+            detail="Only family owner can delete all readings"
+        )
 
     count = db.query(SolarReading).filter(
         SolarReading.user_id == effective_user_id

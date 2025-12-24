@@ -143,6 +143,8 @@ export interface ReadingResponse {
   sunshine_hours: number | null
   radiation_sum: number | null
   snowfall: number | null
+  // Attribution
+  created_by: string | null
   created_at: string
   updated_at: string
 }
@@ -165,6 +167,8 @@ export interface SettingsResponse {
   location_name: string
   latitude: number
   longitude: number
+  country_code: string | null
+  state_code: string | null
   theme: string
 }
 
@@ -190,7 +194,47 @@ export interface SettingsUpdate {
   location_name?: string
   latitude?: number
   longitude?: number
+  country_code?: string
+  state_code?: string
   theme?: string
+}
+
+// ============ Location Suggestions Types ============
+
+export interface LocationSuggestion {
+  co2_factor: number
+  co2_source: string
+  electricity_price: number
+  electricity_source: string
+  currency_symbol: string
+  expected_yield: number
+  expected_yield_source: string
+}
+
+export interface LocationSuggestionsResponse {
+  detected_country: string | null
+  detected_country_name: string | null
+  detected_state: string | null
+  detected_state_name: string | null
+  suggestions: LocationSuggestion
+  tree_co2_absorption: number
+  tree_source: string
+}
+
+export interface USStateData {
+  code: string
+  name: string
+  co2_factor: number
+  electricity_price: number
+  expected_yield: number
+  egrid_subregion: string
+}
+
+export interface USStatesResponse {
+  states: USStateData[]
+  source_co2: string
+  source_electricity: string
+  source_solar: string
 }
 
 export interface StatsResponse {
@@ -329,6 +373,60 @@ export const geocodingAPI = {
   search: async (query: string): Promise<GeoSearchResponse> => {
     const url = `${API_BASE_URL}/api/geocode/search?q=${encodeURIComponent(query)}`
     const response = await fetch(url, {
+      headers: { 'Content-Type': 'application/json' },
+    })
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}))
+      throw new Error(error.detail || `API error: ${response.statusText}`)
+    }
+    return response.json()
+  },
+}
+
+// ============ Location Suggestions API ============
+// Provides accurate CO2 factors, electricity prices, and solar yield based on location
+// Data sources: EPA eGRID (US CO2), EIA (US electricity), NREL (US solar), Ember (global CO2)
+
+export const locationAPI = {
+  // Get suggestions based on country/state from geocoding response
+  getSuggestions: async (params: {
+    country?: string       // Country name from geocoding (e.g., "United States")
+    admin1?: string        // State/region from geocoding (e.g., "New York")
+    country_code?: string  // ISO 3166-1 alpha-2 (e.g., "US")
+    state_code?: string    // US state code (e.g., "NY")
+  }): Promise<LocationSuggestionsResponse> => {
+    const searchParams = new URLSearchParams()
+    if (params.country) searchParams.set('country', params.country)
+    if (params.admin1) searchParams.set('admin1', params.admin1)
+    if (params.country_code) searchParams.set('country_code', params.country_code)
+    if (params.state_code) searchParams.set('state_code', params.state_code)
+
+    const url = `${API_BASE_URL}/api/location/suggestions?${searchParams.toString()}`
+    const response = await fetch(url, {
+      headers: { 'Content-Type': 'application/json' },
+    })
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}))
+      throw new Error(error.detail || `API error: ${response.statusText}`)
+    }
+    return response.json()
+  },
+
+  // Get list of all US states with their data
+  getUSStates: async (): Promise<USStatesResponse> => {
+    const response = await fetch(`${API_BASE_URL}/api/location/us-states`, {
+      headers: { 'Content-Type': 'application/json' },
+    })
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}))
+      throw new Error(error.detail || `API error: ${response.statusText}`)
+    }
+    return response.json()
+  },
+
+  // Get data sources for transparency
+  getSources: async (): Promise<{ sources: Record<string, string> }> => {
+    const response = await fetch(`${API_BASE_URL}/api/location/sources`, {
       headers: { 'Content-Type': 'application/json' },
     })
     if (!response.ok) {
@@ -607,3 +705,4 @@ export const familyImagesAPI = {
       body: JSON.stringify({ readings_count: readingsCount }),
     }),
 }
+

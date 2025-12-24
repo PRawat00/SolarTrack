@@ -101,10 +101,17 @@ async def update_settings(
 
     Only provided fields will be updated. Creates settings if none exist.
     If location (latitude/longitude) changes, weather data is automatically cleared.
-    If user is in a family, updates family head's settings.
+    Only family owner can modify settings (members have read-only access).
     """
     # Use family head's user_id if in a family
     effective_user_id = get_readings_user_id(db, current_user.user_id)
+
+    # Only family owner can modify settings
+    if effective_user_id != current_user.user_id:
+        raise HTTPException(
+            status_code=403,
+            detail="Only family owner can modify settings"
+        )
 
     settings = db.query(UserSettings).filter(
         UserSettings.user_id == effective_user_id

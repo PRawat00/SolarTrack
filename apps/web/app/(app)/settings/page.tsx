@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { settingsAPI, geocodingAPI, usageAPI, readingsAPI, GeoLocation, UsageResponse } from '@/lib/api/client'
+import { settingsAPI, geocodingAPI, usageAPI, readingsAPI, locationAPI, GeoLocation, UsageResponse, LocationSuggestionsResponse } from '@/lib/api/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -35,6 +35,10 @@ const settingsSchema = z.object({
     .number({ invalid_type_error: 'Must be a number' })
     .min(0, 'Goal cannot be negative')
     .max(1000000, 'Goal seems too high'),
+  system_capacity: z
+    .number({ invalid_type_error: 'Must be a number' })
+    .min(0, 'Capacity cannot be negative')
+    .max(10000, 'Capacity seems too high'),
   location_name: z.string().optional(),
   latitude: z
     .number({ invalid_type_error: 'Must be a number' })
@@ -51,8 +55,9 @@ type SettingsFormData = z.infer<typeof settingsSchema>
 const defaultSettings: SettingsFormData = {
   currency_symbol: '$',
   cost_per_kwh: 0.15,
-  co2_factor: 0.85,
+  co2_factor: 0.37,  // US national average (EPA eGRID)
   yearly_goal: 12000,
+  system_capacity: 5.0,
   location_name: 'Bangkok, Thailand',
   latitude: 13.7563,
   longitude: 100.5018,
@@ -69,6 +74,8 @@ export default function SettingsPage() {
   const [deleteConfirmation, setDeleteConfirmation] = useState('')
   const [isDeleting, setIsDeleting] = useState(false)
   const [deleteMessage, setDeleteMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+  const [suggestions, setSuggestions] = useState<LocationSuggestionsResponse | null>(null)
+  const [showSuggestions, setShowSuggestions] = useState(false)
 
   const {
     register,
@@ -93,6 +100,7 @@ export default function SettingsPage() {
           cost_per_kwh: data.cost_per_kwh,
           co2_factor: data.co2_factor,
           yearly_goal: data.yearly_goal,
+          system_capacity: data.system_capacity,
           location_name: data.location_name,
           latitude: data.latitude,
           longitude: data.longitude,
@@ -154,13 +162,37 @@ export default function SettingsPage() {
     return () => clearTimeout(timer)
   }, [locationSearch, currentLocationName, searchLocation])
 
-  const selectLocation = (location: GeoLocation) => {
+  const selectLocation = async (location: GeoLocation) => {
     setValue('location_name', location.display_name)
     setValue('latitude', location.latitude)
     setValue('longitude', location.longitude)
     setLocationSearch(location.display_name)
     setShowResults(false)
     setSearchResults([])
+
+    // Fetch location-based suggestions
+    try {
+      const suggestionData = await locationAPI.getSuggestions({
+        country: location.country,
+        admin1: location.admin1 || undefined,
+      })
+      setSuggestions(suggestionData)
+      setShowSuggestions(true)
+    } catch (err) {
+      console.error('Failed to get location suggestions:', err)
+    }
+  }
+
+  const applySuggestions = () => {
+    if (!suggestions) return
+    setValue('co2_factor', suggestions.suggestions.co2_factor)
+    setValue('cost_per_kwh', suggestions.suggestions.electricity_price)
+    setValue('currency_symbol', suggestions.suggestions.currency_symbol)
+    setShowSuggestions(false)
+    setMessage({
+      type: 'success',
+      text: `Applied suggestions for ${suggestions.detected_state_name || suggestions.detected_country_name || 'your location'}. Remember to save your settings.`
+    })
   }
 
   const onSubmit = async (formData: SettingsFormData) => {
@@ -238,6 +270,56 @@ export default function SettingsPage() {
               </div>
             )}
 
+            {/* Location-Based Suggestions Panel */}
+            {showSuggestions && suggestions && (
+              <div className="p-4 border rounded-lg bg-blue-500/5 border-blue-500/20">
+                <h3 className="font-medium text-blue-400 mb-3">
+                  Suggestions for {suggestions.detected_state_name || suggestions.detected_country_name || 'your location'}
+                </h3>
+                <div className="space-y-2 text-sm mb-4">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">CO2 Factor:</span>
+                    <span className="font-mono">{suggestions.suggestions.co2_factor} kg/kWh</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground pl-4">
+                    Source: {suggestions.suggestions.co2_source}
+                  </p>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Electricity Price:</span>
+                    <span className="font-mono">{suggestions.suggestions.currency_symbol}{suggestions.suggestions.electricity_price}/kWh</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground pl-4">
+                    Source: {suggestions.suggestions.electricity_source}
+                  </p>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Expected Solar Yield:</span>
+                    <span className="font-mono">{suggestions.suggestions.expected_yield} kWh/kWp/year</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground pl-4">
+                    Source: {suggestions.suggestions.expected_yield_source}
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={applySuggestions}
+                    className="bg-blue-500 hover:bg-blue-600"
+                  >
+                    Apply Suggestions
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setShowSuggestions(false)}
+                  >
+                    Keep Current Values
+                  </Button>
+                </div>
+              </div>
+            )}
+
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="currency_symbol">Currency Symbol</Label>
@@ -271,15 +353,15 @@ export default function SettingsPage() {
                 <Input
                   id="co2_factor"
                   type="number"
-                  step="0.01"
+                  step="0.001"
                   {...register('co2_factor', { valueAsNumber: true })}
-                  placeholder="0.85"
+                  placeholder="0.37"
                 />
                 {errors.co2_factor && (
                   <p className="text-sm text-destructive">{errors.co2_factor.message}</p>
                 )}
                 <p className="text-xs text-muted-foreground">
-                  Average kg of CO2 per kWh in your region
+                  kg CO2 per kWh for your grid. US avg: 0.37, NY: 0.125, WV: 0.87 (EPA eGRID)
                 </p>
               </div>
 
@@ -295,6 +377,23 @@ export default function SettingsPage() {
                 {errors.yearly_goal && (
                   <p className="text-sm text-destructive">{errors.yearly_goal.message}</p>
                 )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="system_capacity">System Capacity (kWp)</Label>
+                <Input
+                  id="system_capacity"
+                  type="number"
+                  step="0.1"
+                  {...register('system_capacity', { valueAsNumber: true })}
+                  placeholder="5.0"
+                />
+                {errors.system_capacity && (
+                  <p className="text-sm text-destructive">{errors.system_capacity.message}</p>
+                )}
+                <p className="text-xs text-muted-foreground">
+                  Your solar system&apos;s rated capacity in kilowatt-peak
+                </p>
               </div>
             </div>
 

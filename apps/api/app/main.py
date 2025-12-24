@@ -15,6 +15,7 @@ from app.routes import (
     family_router,
     family_images_router,
     family_stats_router,
+    location_router,
 )
 from app.services.file_storage import FileStorageService
 
@@ -52,6 +53,7 @@ app.include_router(weather_router)
 app.include_router(family_router)
 app.include_router(family_images_router)
 app.include_router(family_stats_router)
+app.include_router(location_router)
 
 
 # Startup event

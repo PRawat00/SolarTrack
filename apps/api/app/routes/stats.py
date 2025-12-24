@@ -81,7 +81,9 @@ async def get_stats(
 
     money_saved = total_production * cost_per_kwh
     co2_offset = total_production * co2_factor
-    trees_equivalent = co2_offset / 21  # Average tree absorbs ~21 kg CO2/year
+    # EPA official: urban tree sequesters 0.060 metric tons CO2/year = 60 kg CO2/year
+    # Source: https://www.epa.gov/energy/greenhouse-gas-equivalencies-calculator-calculations-and-references
+    trees_equivalent = co2_offset / 60
     specific_yield = (total_production / system_capacity) if system_capacity > 0 else 0
 
     # Calculate goal progress

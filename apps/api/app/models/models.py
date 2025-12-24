@@ -23,6 +23,8 @@ class UserSettings(Base):
     location_name = Column(String(255), default="Bangkok, Thailand")  # Human-readable location
     latitude = Column(Numeric(10, 6), default=13.7563)  # Default: Bangkok
     longitude = Column(Numeric(10, 6), default=100.5018)  # Default: Bangkok
+    country_code = Column(String(2), nullable=True)  # ISO 3166-1 alpha-2 (e.g., "US", "TH")
+    state_code = Column(String(2), nullable=True)  # US state code (e.g., "NY", "CA")
     theme = Column(String(10), default="dark")
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
@@ -46,6 +48,8 @@ class SolarReading(Base):
     sunshine_hours = Column(Numeric(5, 2), nullable=True)  # Hours of sunshine
     radiation_sum = Column(Numeric(8, 2), nullable=True)  # Solar radiation MJ/m2
     snowfall = Column(Numeric(5, 2), nullable=True)  # Daily snowfall in cm
+    # Attribution - who actually created this reading (for family sharing)
+    created_by = Column(String(255), nullable=True)  # Actual user who created this
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
 

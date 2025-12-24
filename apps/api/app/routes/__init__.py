@@ -7,6 +7,7 @@ from .weather import router as weather_router
 from .family import router as family_router
 from .family_images import router as family_images_router
 from .family_stats import router as family_stats_router
+from .location_suggestions import router as location_router
 
 __all__ = [
     "settings_router",
@@ -18,4 +19,5 @@ __all__ = [
     "family_router",
     "family_images_router",
     "family_stats_router",
+    "location_router",
 ]

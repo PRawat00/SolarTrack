@@ -316,6 +316,7 @@ export default function DatabasePage() {
                       <th className="text-right p-2 font-medium">Radiation</th>
                       <th className="text-right p-2 font-medium">Snow (cm)</th>
                       <th className="text-left p-2 font-medium">Notes</th>
+                      <th className="text-left p-2 font-medium">Contributed by</th>
                       <th className="text-right p-2 font-medium">Actions</th>
                     </tr>
                   </thead>
@@ -395,6 +396,15 @@ export default function DatabasePage() {
                             placeholder="-"
                             className="w-full px-2 py-1 bg-transparent border rounded text-sm focus:outline-none focus:ring-1 focus:ring-primary"
                           />
+                        </td>
+                        <td className="p-2 text-left text-xs text-muted-foreground">
+                          {reading.created_by ? (
+                            <span title={reading.created_by}>
+                              {reading.created_by.slice(0, 8)}...
+                            </span>
+                          ) : (
+                            <span>-</span>
+                          )}
                         </td>
                         <td className="p-2 text-right">
                           <Button
