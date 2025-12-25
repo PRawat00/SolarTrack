@@ -198,6 +198,32 @@ async def create_readings_bulk(
     return [_reading_to_response(r) for r in db_readings]
 
 
+@router.delete("/readings/all")
+async def delete_all_readings(
+    current_user: TokenData = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Delete all readings for the current user/family. This action is irreversible.
+
+    If user is in a family, only the family owner can delete all readings.
+    """
+    # Use family head's user_id if in a family
+    effective_user_id = get_readings_user_id(db, current_user.user_id)
+
+    # Only family owner can delete all readings
+    if effective_user_id != current_user.user_id:
+        raise HTTPException(
+            status_code=403,
+            detail="Only family owner can delete all readings"
+        )
+
+    count = db.query(SolarReading).filter(
+        SolarReading.user_id == effective_user_id
+    ).delete()
+    db.commit()
+    return {"message": f"Deleted {count} readings", "deleted_count": count}
+
+
 @router.delete("/readings/{reading_id}")
 async def delete_reading(
     reading_id: str,
@@ -263,29 +289,3 @@ async def update_reading(
     db.refresh(reading)
 
     return _reading_to_response(reading)
-
-
-@router.delete("/readings/all")
-async def delete_all_readings(
-    current_user: TokenData = Depends(get_current_user),
-    db: Session = Depends(get_db),
-):
-    """Delete all readings for the current user/family. This action is irreversible.
-
-    If user is in a family, only the family owner can delete all readings.
-    """
-    # Use family head's user_id if in a family
-    effective_user_id = get_readings_user_id(db, current_user.user_id)
-
-    # Only family owner can delete all readings
-    if effective_user_id != current_user.user_id:
-        raise HTTPException(
-            status_code=403,
-            detail="Only family owner can delete all readings"
-        )
-
-    count = db.query(SolarReading).filter(
-        SolarReading.user_id == effective_user_id
-    ).delete()
-    db.commit()
-    return {"message": f"Deleted {count} readings", "deleted_count": count}
