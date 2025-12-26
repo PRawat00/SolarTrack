@@ -87,8 +87,6 @@ export default function DashboardPage() {
     )
   }
 
-  const hasReadings = stats && stats.reading_count > 0
-
   return (
     <div className="space-y-6">
       {/* Top Stats Row */}
@@ -154,59 +152,33 @@ export default function DashboardPage() {
       )}
 
       {/* Main Content Area */}
-      {hasReadings ? (
-        <>
-          <div className="grid lg:grid-cols-[minmax(0,1fr),320px] gap-6">
-            {/* Chart */}
-            <GiftWrap id="gift-trend-chart">
-              <ProductionTrendChart />
-            </GiftWrap>
+      <div className="grid lg:grid-cols-[minmax(0,1fr),320px] gap-6">
+        {/* Chart */}
+        <GiftWrap id="gift-trend-chart">
+          <ProductionTrendChart />
+        </GiftWrap>
 
-            {/* Sidebar */}
-            <GiftWrap id="gift-impact-sidebar">
-              <ImpactSidebar
-                treesEquivalent={stats?.trees_equivalent || 0}
-                specificYield={stats?.specific_yield || 0}
-                yearlyGoal={stats?.yearly_goal || 0}
-                totalProduction={stats?.total_production || 0}
-                goalProgress={stats?.goal_progress || 0}
-              />
-            </GiftWrap>
-          </div>
+        {/* Sidebar */}
+        <GiftWrap id="gift-impact-sidebar">
+          <ImpactSidebar
+            treesEquivalent={stats?.trees_equivalent || 0}
+            specificYield={stats?.specific_yield || 0}
+            yearlyGoal={stats?.yearly_goal || 0}
+            totalProduction={stats?.total_production || 0}
+            goalProgress={stats?.goal_progress || 0}
+          />
+        </GiftWrap>
+      </div>
 
-          {/* Heatmap */}
-          <div className="grid lg:grid-cols-[minmax(0,1fr),320px] gap-6">
-            <GiftWrap id="gift-heatmap">
-              <ProductionHeatmap year={heatmapYear} onYearChange={setHeatmapYear} />
-            </GiftWrap>
-            <GiftWrap id="gift-best-days">
-              <BestDaysSidebar year={heatmapYear} />
-            </GiftWrap>
-          </div>
-        </>
-      ) : (
-        /* Empty State */
-        <div className="rounded-xl bg-card p-8 text-center">
-          <div className="max-w-md mx-auto">
-            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
-              <svg className="w-8 h-8 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-              </svg>
-            </div>
-            <h3 className="text-lg font-semibold mb-2">Get Started</h3>
-            <p className="text-muted-foreground mb-4">
-              Upload your first solar production log to see your stats and trends.
-              Click the "Add Readings" card above to upload images of your handwritten logs.
-            </p>
-            <button
-              onClick={() => setShowUpload(true)}
-              className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-medium transition-colors"
-            >
-              Upload Your First Log
-            </button>
-          </div>
-        </div>
-      )}
+      {/* Heatmap */}
+      <div className="grid lg:grid-cols-[minmax(0,1fr),320px] gap-6">
+        <GiftWrap id="gift-heatmap">
+          <ProductionHeatmap year={heatmapYear} onYearChange={setHeatmapYear} />
+        </GiftWrap>
+        <GiftWrap id="gift-best-days">
+          <BestDaysSidebar year={heatmapYear} />
+        </GiftWrap>
+      </div>
 
     </div>
   )
