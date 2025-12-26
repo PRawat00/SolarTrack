@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 import { resetAllGifts } from '@/components/christmas/gift-wrap'
+import { createClient } from '@/lib/supabase/client'
 
 const settingsSchema = z.object({
   currency_symbol: z
@@ -79,6 +80,7 @@ export default function SettingsPage() {
   const [initialSettingsLoaded, setInitialSettingsLoaded] = useState(false)
   const [storedCountryCode, setStoredCountryCode] = useState<string | null>(null)
   const [storedStateCode, setStoredStateCode] = useState<string | null>(null)
+  const [userId, setUserId] = useState<string | undefined>()
 
   const {
     register,
@@ -123,7 +125,14 @@ export default function SettingsPage() {
       }
     }
 
+    const getUser = async () => {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      setUserId(user?.id)
+    }
+
     loadSettings()
+    getUser()
   }, [reset])
 
   // Load usage stats
@@ -588,7 +597,7 @@ export default function SettingsPage() {
             </p>
             <Button
               variant="outline"
-              onClick={resetAllGifts}
+              onClick={() => resetAllGifts(userId)}
               className="border-green-500 text-green-500 hover:bg-green-500/10"
             >
               Re-wrap All Gifts
