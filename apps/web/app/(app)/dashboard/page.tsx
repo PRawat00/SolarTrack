@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { statsAPI, type StatsResponse } from '@/lib/api/client'
+import { createClient } from '@/lib/supabase/client'
 import { StatsCard, AddReadingsCard } from '@/components/dashboard/stats-card'
 import { UploadPanel } from '@/components/dashboard/upload-panel'
 import { ImpactSidebar } from '@/components/dashboard/impact-sidebar'
@@ -15,6 +16,7 @@ export default function DashboardPage() {
   const [error, setError] = useState<string | null>(null)
   const [showUpload, setShowUpload] = useState(false)
   const [heatmapYear, setHeatmapYear] = useState(new Date().getFullYear())
+  const [userId, setUserId] = useState<string | undefined>()
 
   const loadStats = async () => {
     try {
@@ -30,6 +32,13 @@ export default function DashboardPage() {
 
   useEffect(() => {
     loadStats()
+    // Get user ID for gift wrap state
+    const getUser = async () => {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      setUserId(user?.id)
+    }
+    getUser()
   }, [])
 
   const formatNumber = (num: number, decimals = 0) => {
@@ -92,7 +101,7 @@ export default function DashboardPage() {
       {/* Top Stats Row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Add Readings Card */}
-        <GiftWrap id="gift-add-readings">
+        <GiftWrap id="gift-add-readings" userId={userId}>
           <AddReadingsCard
             isActive={showUpload}
             onClick={() => setShowUpload(!showUpload)}
@@ -100,7 +109,7 @@ export default function DashboardPage() {
         </GiftWrap>
 
         {/* Estimated Generation */}
-        <GiftWrap id="gift-generation">
+        <GiftWrap id="gift-generation" userId={userId}>
           <StatsCard
             icon={
               <svg className="w-5 h-5 text-amber-900" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -114,7 +123,7 @@ export default function DashboardPage() {
         </GiftWrap>
 
         {/* Estimated Savings */}
-        <GiftWrap id="gift-savings">
+        <GiftWrap id="gift-savings" userId={userId}>
           <StatsCard
             icon={
               <svg className="w-5 h-5 text-green-900" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -128,7 +137,7 @@ export default function DashboardPage() {
         </GiftWrap>
 
         {/* CO2 Offset */}
-        <GiftWrap id="gift-co2">
+        <GiftWrap id="gift-co2" userId={userId}>
           <StatsCard
             icon={
               <svg className="w-5 h-5 text-emerald-900" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -154,12 +163,12 @@ export default function DashboardPage() {
       {/* Main Content Area */}
       <div className="grid lg:grid-cols-[minmax(0,1fr),320px] gap-6">
         {/* Chart */}
-        <GiftWrap id="gift-trend-chart">
+        <GiftWrap id="gift-trend-chart" userId={userId}>
           <ProductionTrendChart />
         </GiftWrap>
 
         {/* Sidebar */}
-        <GiftWrap id="gift-impact-sidebar">
+        <GiftWrap id="gift-impact-sidebar" userId={userId}>
           <ImpactSidebar
             treesEquivalent={stats?.trees_equivalent || 0}
             specificYield={stats?.specific_yield || 0}
@@ -172,10 +181,10 @@ export default function DashboardPage() {
 
       {/* Heatmap */}
       <div className="grid lg:grid-cols-[minmax(0,1fr),320px] gap-6">
-        <GiftWrap id="gift-heatmap">
+        <GiftWrap id="gift-heatmap" userId={userId}>
           <ProductionHeatmap year={heatmapYear} onYearChange={setHeatmapYear} />
         </GiftWrap>
-        <GiftWrap id="gift-best-days">
+        <GiftWrap id="gift-best-days" userId={userId}>
           <BestDaysSidebar year={heatmapYear} />
         </GiftWrap>
       </div>

@@ -5,45 +5,50 @@ import { cn } from '@/lib/utils'
 
 interface GiftWrapProps {
   id: string
+  userId?: string
   children: ReactNode
   className?: string
   disabled?: boolean
 }
 
-const STORAGE_KEY = 'solartrack-unwrapped-gifts'
+function getStorageKey(userId?: string) {
+  return userId
+    ? `solartrack-unwrapped-gifts-${userId}`
+    : 'solartrack-unwrapped-gifts'
+}
 
-function getUnwrappedGifts(): Set<string> {
+function getUnwrappedGifts(userId?: string): Set<string> {
   if (typeof window === 'undefined') return new Set()
   try {
-    const stored = localStorage.getItem(STORAGE_KEY)
+    const stored = localStorage.getItem(getStorageKey(userId))
     return new Set(stored ? JSON.parse(stored) : [])
   } catch {
     return new Set()
   }
 }
 
-function saveUnwrappedGift(id: string) {
+function saveUnwrappedGift(id: string, userId?: string) {
   try {
-    const unwrapped = getUnwrappedGifts()
+    const unwrapped = getUnwrappedGifts(userId)
     unwrapped.add(id)
-    localStorage.setItem(STORAGE_KEY, JSON.stringify([...unwrapped]))
+    localStorage.setItem(getStorageKey(userId), JSON.stringify([...unwrapped]))
   } catch {
     // Ignore storage errors
   }
 }
 
-export function GiftWrap({ id, children, className, disabled }: GiftWrapProps) {
+export function GiftWrap({ id, userId, children, className, disabled }: GiftWrapProps) {
   const [isWrapped, setIsWrapped] = useState(true)
   const [isUnwrapping, setIsUnwrapping] = useState(false)
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
     setMounted(true)
-    const unwrapped = getUnwrappedGifts()
+    const unwrapped = getUnwrappedGifts(userId)
     if (unwrapped.has(id)) {
       setIsWrapped(false)
     }
-  }, [id])
+  }, [id, userId])
 
   const handleUnwrap = () => {
     if (!isWrapped || isUnwrapping || disabled) return
@@ -54,7 +59,7 @@ export function GiftWrap({ id, children, className, disabled }: GiftWrapProps) {
     setTimeout(() => {
       setIsWrapped(false)
       setIsUnwrapping(false)
-      saveUnwrappedGift(id)
+      saveUnwrappedGift(id, userId)
     }, 800)
   }
 
@@ -174,9 +179,9 @@ function WrapOverlay({ isUnwrapping, onClick }: WrapOverlayProps) {
 }
 
 // Utility to reset all gifts (for testing)
-export function resetAllGifts() {
+export function resetAllGifts(userId?: string) {
   if (typeof window !== 'undefined') {
-    localStorage.removeItem(STORAGE_KEY)
+    localStorage.removeItem(getStorageKey(userId))
     window.location.reload()
   }
 }
