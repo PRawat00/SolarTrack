@@ -44,10 +44,13 @@ export function GiftWrap({ id, userId, children, className, disabled }: GiftWrap
 
   useEffect(() => {
     setMounted(true)
-    const unwrapped = getUnwrappedGifts(userId)
-    if (unwrapped.has(id)) {
-      setIsWrapped(false)
+    // Only check localStorage when we have a userId
+    // This prevents reading from the old non-user-specific key
+    if (userId) {
+      const unwrapped = getUnwrappedGifts(userId)
+      setIsWrapped(!unwrapped.has(id))
     }
+    // When userId is undefined, keep the initial wrapped state (true)
   }, [id, userId])
 
   const handleUnwrap = () => {
