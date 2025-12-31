@@ -10,6 +10,7 @@ import { Sun } from './Sun'
 import { StarField } from './StarField'
 import { CameraController } from './CameraController'
 import { SpeedControls } from './SpeedControls'
+import { LocationInstruction } from './LocationInstruction'
 import { LocationModal } from './LocationModal'
 import { LoadingScreen } from './LoadingScreen'
 import { FadeOverlay } from './FadeOverlay'
@@ -172,6 +173,7 @@ export function EarthScene() {
 
       {/* UI Overlays */}
       <SpeedControls />
+      <LocationInstruction />
       <LocationModal />
       <FadeOverlay />
     </div>
