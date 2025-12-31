@@ -29,7 +29,7 @@ export function SpeedControls() {
 
   return (
     <div className="absolute top-4 right-4 z-10">
-      <div className="bg-black/60 backdrop-blur-md rounded-lg p-4 border border-white/10 space-y-4">
+      <div className="w-80 bg-black/60 backdrop-blur-md rounded-lg p-4 border border-white/10 space-y-4">
         {/* Earth Speed */}
         <div>
           <div className="text-xs text-white/60 uppercase tracking-wider mb-2">

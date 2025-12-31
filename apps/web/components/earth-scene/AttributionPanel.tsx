@@ -16,10 +16,10 @@ export function AttributionPanel() {
     <div className="absolute bottom-4 right-4 z-10 px-4 pointer-events-auto">
       <div
         className={cn(
+          'w-80',
           'bg-black/60 backdrop-blur-md rounded-lg p-3 sm:p-4',
           'border border-white/10',
           'shadow-lg shadow-black/20',
-          'max-w-[280px] sm:max-w-xs md:max-w-sm',
           'animate-in fade-in slide-in-from-right-4 duration-700',
           'flex gap-2 items-start'
         )}
