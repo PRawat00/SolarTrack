@@ -46,7 +46,7 @@ docker --version
 
 ### 2. Clone & Setup
 ```bash
-git clone <repo-url>
+git clone https://github.com/PRawat00/solartrack.git
 cd SolarTrack
 
 # Install dependencies
@@ -94,7 +94,6 @@ Visit `http://localhost:3000`
 
 - **SETUP.md** - Complete setup guide with prerequisites
 - **START.md** - Quick reference for starting services
-- **IMPLEMENTATION_PLAN.md** - Detailed architecture and roadmap
 - **apps/web/README.md** - Frontend documentation
 - **apps/api/README.md** - Backend documentation
 
@@ -109,8 +108,7 @@ Visit `http://localhost:3000`
 ├── supabase/
 │   └── migrations/   # Database migrations
 ├── SETUP.md          # Setup guide
-├── START.md          # Quick start
-└── IMPLEMENTATION_PLAN.md
+└── START.md          # Quick start
 ```
 
 ## Development

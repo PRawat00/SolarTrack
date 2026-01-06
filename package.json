@@ -2,7 +2,25 @@
   "name": "solartrack",
   "version": "0.1.0",
   "description": "SolarTrack - Track and analyze your solar production with AI",
-  "private": true,
+  "license": "MIT",
+  "author": "SolarTrack Contributors",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PRawat00/solartrack.git"
+  },
+  "homepage": "https://github.com/PRawat00/solartrack#readme",
+  "bugs": {
+    "url": "https://github.com/PRawat00/solartrack/issues"
+  },
+  "keywords": [
+    "solar",
+    "tracking",
+    "ai",
+    "ocr",
+    "nextjs",
+    "supabase",
+    "gemini"
+  ],
   "type": "module",
   "scripts": {
     "dev": "pnpm -r dev",

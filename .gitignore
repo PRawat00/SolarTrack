@@ -52,6 +52,10 @@ pnpm-debug.log*
 # Claude Code (local settings)
 .claude/
 
+# Internal documentation (not for public repo)
+PORTFOLIO_CASE_STUDY.md
+IMPLEMENTATION_PLAN.md
+
 # Oracle Wallet (contains database credentials)
 Wallet_SolarTrack/
 Wallet_*/
