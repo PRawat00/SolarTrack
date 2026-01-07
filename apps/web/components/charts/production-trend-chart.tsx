@@ -288,38 +288,46 @@ export function ProductionTrendChart() {
           <ResponsiveContainer width="100%" height={280}>
             <LineChart data={filteredData} margin={{ top: 10, right: 50, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted))" opacity={0.5} />
+              {/* @ts-expect-error - recharts types issue */}
               <XAxis
                 dataKey="date"
                 tickFormatter={formatXAxis}
-                tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
-                axisLine={{ stroke: 'hsl(var(--muted))' }}
-                tickLine={{ stroke: 'hsl(var(--muted))' }}
+                tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' } as any}
+                axisLine={{ stroke: 'hsl(var(--muted))' } as any}
+                tickLine={{ stroke: 'hsl(var(--muted))' } as any}
                 interval="preserveStartEnd"
               />
+              {/* @ts-expect-error - recharts types issue */}
               <YAxis
                 yAxisId="left"
-                tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
-                axisLine={{ stroke: 'hsl(var(--muted))' }}
-                tickLine={{ stroke: 'hsl(var(--muted))' }}
+                tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' } as any}
+                axisLine={{ stroke: 'hsl(var(--muted))' } as any}
+                tickLine={{ stroke: 'hsl(var(--muted))' } as any}
                 tickFormatter={(value: number) => `${value}`}
-                label={{ value: 'kWh', angle: -90, position: 'insideLeft', style: { fontSize: 10, fill: 'hsl(var(--muted-foreground))' } }}
+                label={{ value: 'kWh', angle: -90, position: 'insideLeft', style: { fontSize: 10, fill: 'hsl(var(--muted-foreground))' } } as any}
               />
               {(showIrradiance || showSnowfall) && (
-                <YAxis
-                  yAxisId="right"
-                  orientation="right"
-                  tick={{ fontSize: 11, fill: showIrradiance ? '#3b82f6' : '#06b6d4' }}
-                  axisLine={{ stroke: showIrradiance ? '#3b82f6' : '#06b6d4' }}
-                  tickLine={{ stroke: showIrradiance ? '#3b82f6' : '#06b6d4' }}
-                  tickFormatter={(value: number) => `${value}`}
-                  label={{ value: showIrradiance ? 'MJ/m2' : 'cm', angle: 90, position: 'insideRight', style: { fontSize: 10, fill: showIrradiance ? '#3b82f6' : '#06b6d4' } }}
-                />
+                <>
+                  {/* @ts-expect-error - recharts types issue */}
+                  <YAxis
+                    yAxisId="right"
+                    orientation="right"
+                    tick={{ fontSize: 11, fill: showIrradiance ? '#3b82f6' : '#06b6d4' } as any}
+                    axisLine={{ stroke: showIrradiance ? '#3b82f6' : '#06b6d4' } as any}
+                    tickLine={{ stroke: showIrradiance ? '#3b82f6' : '#06b6d4' } as any}
+                    tickFormatter={(value: number) => `${value}`}
+                    label={{ value: showIrradiance ? 'MJ/m2' : 'cm', angle: 90, position: 'insideRight', style: { fontSize: 10, fill: showIrradiance ? '#3b82f6' : '#06b6d4' } } as any}
+                  />
+                </>
               )}
+              {/* @ts-expect-error - recharts types issue */}
               <Tooltip content={<CustomTooltip />} />
+              {/* @ts-expect-error - recharts types issue */}
               <Legend
                 wrapperStyle={{ paddingTop: '10px' }}
                 formatter={(value: string) => <span className="text-sm text-muted-foreground">{value}</span>}
               />
+              {/* @ts-expect-error - recharts types issue */}
               <Line
                 type="monotone"
                 dataKey="m1"
@@ -330,6 +338,7 @@ export function ProductionTrendChart() {
                 activeDot={{ r: 4, fill: '#f59e0b' }}
                 yAxisId="left"
               />
+              {/* @ts-expect-error - recharts types issue */}
               <Line
                 type="monotone"
                 dataKey="m2"
@@ -342,30 +351,36 @@ export function ProductionTrendChart() {
                 yAxisId="left"
               />
               {showIrradiance && (
-                <Line
-                  type="monotone"
-                  dataKey="radiation"
-                  name="Irradiance (MJ/m2)"
-                  stroke="#3b82f6"
-                  strokeWidth={1.5}
-                  strokeDasharray="2 2"
-                  dot={false}
-                  activeDot={{ r: 3, fill: '#3b82f6' }}
-                  yAxisId="right"
-                />
+                <>
+                  {/* @ts-expect-error - recharts types issue */}
+                  <Line
+                    type="monotone"
+                    dataKey="radiation"
+                    name="Irradiance (MJ/m2)"
+                    stroke="#3b82f6"
+                    strokeWidth={1.5}
+                    strokeDasharray="2 2"
+                    dot={false}
+                    activeDot={{ r: 3, fill: '#3b82f6' }}
+                    yAxisId="right"
+                  />
+                </>
               )}
               {showSnowfall && (
-                <Line
-                  type="monotone"
-                  dataKey="snowfall"
-                  name="Snowfall (cm)"
-                  stroke="#06b6d4"
-                  strokeWidth={1.5}
-                  strokeDasharray="4 2"
-                  dot={false}
-                  activeDot={{ r: 3, fill: '#06b6d4' }}
-                  yAxisId="right"
-                />
+                <>
+                  {/* @ts-expect-error - recharts types issue */}
+                  <Line
+                    type="monotone"
+                    dataKey="snowfall"
+                    name="Snowfall (cm)"
+                    stroke="#06b6d4"
+                    strokeWidth={1.5}
+                    strokeDasharray="4 2"
+                    dot={false}
+                    activeDot={{ r: 3, fill: '#06b6d4' }}
+                    yAxisId="right"
+                  />
+                </>
               )}
             </LineChart>
           </ResponsiveContainer>

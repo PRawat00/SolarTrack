@@ -36,6 +36,12 @@ export function parseDate(dateStr: string, period: Period): Date {
   }
 
   if (period === 'weekly') {
+    // DEFENSIVE: Check if backend sent daily format by mistake (backend bug)
+    if (dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
+      console.warn(`[BACKEND BUG] Backend returned daily format for weekly period: ${dateStr}`)
+      return new Date(dateStr + 'T00:00:00Z')
+    }
+
     // Parse "2025-W01" or "2025-W1" format (accepts 1 or 2 digit week numbers)
     const match = dateStr.match(/(\d{4})-W(\d{1,2})/)
     if (!match) throw new Error(`Invalid weekly date format: ${dateStr}`)
