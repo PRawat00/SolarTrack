@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 import {
   LineChart,
   Line,
@@ -23,10 +23,67 @@ export function ProductionTrendChart() {
   const [data, setData] = useState<TrendDataPoint[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  // Separate input state (what user types) from filter state (what triggers filtering)
+  const [startDateInput, setStartDateInput] = useState<string>('')
+  const [endDateInput, setEndDateInput] = useState<string>('')
   const [startDate, setStartDate] = useState<string>('')
   const [endDate, setEndDate] = useState<string>('')
   const [showIrradiance, setShowIrradiance] = useState(true)
   const [showSnowfall, setShowSnowfall] = useState(true)
+
+  // Refs for debounce timeouts
+  const startDateTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined)
+  const endDateTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined)
+
+  // Debounced date change handler for start date
+  const handleStartDateChange = useCallback((value: string) => {
+    setStartDateInput(value) // Update input immediately for responsive UI
+    // Clear previous timeout
+    if (startDateTimeoutRef.current) {
+      clearTimeout(startDateTimeoutRef.current)
+    }
+    // Debounce the actual filter update (500ms delay)
+    startDateTimeoutRef.current = setTimeout(() => {
+      setStartDate(value)
+    }, 500)
+  }, [])
+
+  // Debounced date change handler for end date
+  const handleEndDateChange = useCallback((value: string) => {
+    setEndDateInput(value) // Update input immediately for responsive UI
+    // Clear previous timeout
+    if (endDateTimeoutRef.current) {
+      clearTimeout(endDateTimeoutRef.current)
+    }
+    // Debounce the actual filter update (500ms delay)
+    endDateTimeoutRef.current = setTimeout(() => {
+      setEndDate(value)
+    }, 500)
+  }, [])
+
+  // Handle Enter key to apply filter immediately (bypass debounce)
+  const handleStartDateKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      // Clear pending debounce timeout
+      if (startDateTimeoutRef.current) {
+        clearTimeout(startDateTimeoutRef.current)
+      }
+      // Apply filter immediately
+      setStartDate(startDateInput)
+    }
+  }, [startDateInput])
+
+  // Handle Enter key to apply filter immediately (bypass debounce)
+  const handleEndDateKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      // Clear pending debounce timeout
+      if (endDateTimeoutRef.current) {
+        clearTimeout(endDateTimeoutRef.current)
+      }
+      // Apply filter immediately
+      setEndDate(endDateInput)
+    }
+  }, [endDateInput])
 
   // Calculate range duration in days
   const rangeDays = useMemo(() => {
@@ -208,22 +265,33 @@ export function ProductionTrendChart() {
           <div className="flex flex-wrap items-center gap-2">
             <input
               type="date"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
+              value={startDateInput}
+              onChange={(e) => handleStartDateChange(e.target.value)}
+              onKeyDown={handleStartDateKeyDown}
+              placeholder="Start date"
+              title="Enter start date, press Enter to apply"
               className="bg-muted/50 border-0 rounded-md px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-orange-500"
             />
             <span className="text-muted-foreground text-xs">to</span>
             <input
               type="date"
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
+              value={endDateInput}
+              onChange={(e) => handleEndDateChange(e.target.value)}
+              onKeyDown={handleEndDateKeyDown}
+              placeholder="End date"
+              title="Enter end date, press Enter to apply"
               className="bg-muted/50 border-0 rounded-md px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-orange-500"
             />
             {(startDate || endDate) && (
               <button
                 onClick={() => {
+                  setStartDateInput('')
+                  setEndDateInput('')
                   setStartDate('')
                   setEndDate('')
+                  // Clear any pending debounce timeouts
+                  if (startDateTimeoutRef.current) clearTimeout(startDateTimeoutRef.current)
+                  if (endDateTimeoutRef.current) clearTimeout(endDateTimeoutRef.current)
                 }}
                 className="text-xs text-muted-foreground hover:text-foreground"
               >
