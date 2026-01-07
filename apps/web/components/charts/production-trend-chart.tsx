@@ -88,6 +88,7 @@ export function ProductionTrendChart() {
       try {
         setLoading(true)
         setError(null)
+        setData([]) // Clear old data to prevent race condition when switching periods
         const response = await statsAPI.getTrends(period)
         setData(response.data)
       } catch (err) {
