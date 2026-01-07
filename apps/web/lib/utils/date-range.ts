@@ -230,7 +230,8 @@ export function fillDataGaps(
       rangeEnd = parseDate(dates[dates.length - 1], period)
     } catch (error) {
       console.error('Failed to parse data dates:', { firstDate: dates[0], lastDate: dates[dates.length - 1], period, error })
-      throw error
+      // Return empty array instead of crashing - gracefully degrade
+      return []
     }
   }
 

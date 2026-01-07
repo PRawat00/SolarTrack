@@ -14,7 +14,7 @@ import {
 import { statsAPI, type TrendDataPoint } from '@/lib/api/client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
-import { fillDataGaps } from '@/lib/utils/date-range'
+import { fillDataGaps, parseDate } from '@/lib/utils/date-range'
 
 type Period = 'daily' | 'weekly' | 'monthly'
 
@@ -51,18 +51,30 @@ export function ProductionTrendChart() {
 
   // Filter data based on date range and fill gaps for continuous series
   const filteredData = useMemo(() => {
+    // Don't process data while loading or if data is empty - prevents race condition
+    if (loading || data.length === 0) {
+      return []
+    }
+
     // Step 1: Apply date range filter
     let filtered = data
     if (startDate || endDate) {
       filtered = data.filter(item => {
-        // For weekly format (2025-W01), extract year and approximate date
+        // For weekly format (2025-W01), use accurate ISO week parsing
         if (item.date.includes('W')) {
-          const [year, week] = item.date.split('-W')
-          // Approximate: week 1 starts around Jan 1
-          const approxDate = new Date(parseInt(year), 0, 1 + (parseInt(week) - 1) * 7)
-          if (startDate && approxDate < new Date(startDate)) return false
-          if (endDate && approxDate > new Date(endDate)) return false
-          return true
+          try {
+            // Use the same parseDate utility that fillDataGaps uses for consistency
+            const weekStartDate = parseDate(item.date, 'weekly')
+            const filterStart = startDate ? new Date(startDate + 'T00:00:00Z') : null
+            const filterEnd = endDate ? new Date(endDate + 'T00:00:00Z') : null
+
+            if (filterStart && weekStartDate < filterStart) return false
+            if (filterEnd && weekStartDate > filterEnd) return false
+            return true
+          } catch (error) {
+            console.error(`Failed to parse weekly date: ${item.date}`, error)
+            return false  // Exclude malformed dates
+          }
         }
         // For monthly format (2025-01), use first day of month
         if (item.date.match(/^\d{4}-\d{2}$/)) {
@@ -81,7 +93,7 @@ export function ProductionTrendChart() {
 
     // Step 2: Fill gaps for continuous series
     return fillDataGaps(filtered, period, startDate, endDate)
-  }, [data, startDate, endDate, period])
+  }, [data, startDate, endDate, period, loading])
 
   useEffect(() => {
     const loadTrends = async () => {
