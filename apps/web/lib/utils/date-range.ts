@@ -36,8 +36,8 @@ export function parseDate(dateStr: string, period: Period): Date {
   }
 
   if (period === 'weekly') {
-    // Parse "2025-W01" format
-    const match = dateStr.match(/(\d{4})-W(\d{2})/)
+    // Parse "2025-W01" or "2025-W1" format (accepts 1 or 2 digit week numbers)
+    const match = dateStr.match(/(\d{4})-W(\d{1,2})/)
     if (!match) throw new Error(`Invalid weekly date format: ${dateStr}`)
 
     const year = parseInt(match[1])
@@ -219,8 +219,13 @@ export function fillDataGaps(
   } else {
     // Use first and last dates from data (period-specific format)
     const dates = Array.from(dataMap.keys()).sort()
-    rangeStart = parseDate(dates[0], period)
-    rangeEnd = parseDate(dates[dates.length - 1], period)
+    try {
+      rangeStart = parseDate(dates[0], period)
+      rangeEnd = parseDate(dates[dates.length - 1], period)
+    } catch (error) {
+      console.error('Failed to parse data dates:', { firstDate: dates[0], lastDate: dates[dates.length - 1], period, error })
+      throw error
+    }
   }
 
   // Generate complete date series for range
