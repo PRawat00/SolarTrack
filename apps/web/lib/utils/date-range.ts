@@ -170,10 +170,10 @@ export function generateDateSeries(
  * Creates a continuous series for the date range and maps existing data to it.
  * Uses Map for O(1) lookups when building the result.
  *
- * @param data - Array of data points from API
+ * @param data - Array of data points from API (dates in period-specific format)
  * @param period - Current period (daily/weekly/monthly/yearly)
- * @param startDate - Optional filter start date (same format as period)
- * @param endDate - Optional filter end date (same format as period)
+ * @param startDate - Filter start date in DAILY format (YYYY-MM-DD from HTML5 input)
+ * @param endDate - Filter end date in DAILY format (YYYY-MM-DD from HTML5 input)
  * @returns Array with gaps filled, guaranteed one point per date in range
  */
 export function fillDataGaps(
@@ -188,8 +188,9 @@ export function fillDataGaps(
       return []
     }
     // If filters are set but no data, fill entire range with zeros
-    const rangeStart = parseDate(startDate, period)
-    const rangeEnd = parseDate(endDate, period)
+    // Filter dates are ALWAYS in daily format (YYYY-MM-DD) from HTML5 input
+    const rangeStart = new Date(startDate + 'T00:00:00Z')
+    const rangeEnd = new Date(endDate + 'T00:00:00Z')
     const series = generateDateSeries(rangeStart, rangeEnd, period)
     return series.map(date => ({
       date,
@@ -212,10 +213,11 @@ export function fillDataGaps(
   let rangeEnd: Date
 
   if (startDate && endDate) {
-    rangeStart = parseDate(startDate, period)
-    rangeEnd = parseDate(endDate, period)
+    // Filter dates are ALWAYS in daily format (YYYY-MM-DD) from HTML5 input
+    rangeStart = new Date(startDate + 'T00:00:00Z')
+    rangeEnd = new Date(endDate + 'T00:00:00Z')
   } else {
-    // Use first and last dates from data
+    // Use first and last dates from data (period-specific format)
     const dates = Array.from(dataMap.keys()).sort()
     rangeStart = parseDate(dates[0], period)
     rangeEnd = parseDate(dates[dates.length - 1], period)
