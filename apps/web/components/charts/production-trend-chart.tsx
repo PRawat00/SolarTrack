@@ -30,6 +30,8 @@ export function ProductionTrendChart() {
   const [endDate, setEndDate] = useState<string>('')
   const [showIrradiance, setShowIrradiance] = useState(true)
   const [showSnowfall, setShowSnowfall] = useState(true)
+  const [fillGaps, setFillGaps] = useState(true)
+  const [connectLines, setConnectLines] = useState(false)
 
   // Refs for debounce timeouts
   const startDateTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined)
@@ -148,9 +150,9 @@ export function ProductionTrendChart() {
       })
     }
 
-    // Step 2: Fill gaps for continuous series
-    return fillDataGaps(filtered, period, startDate, endDate)
-  }, [data, startDate, endDate, period, loading])
+    // Step 2: Optionally fill gaps for continuous series
+    return fillGaps ? fillDataGaps(filtered, period, startDate, endDate) : filtered
+  }, [data, startDate, endDate, period, loading, fillGaps])
 
   useEffect(() => {
     const loadTrends = async () => {
@@ -348,6 +350,34 @@ export function ProductionTrendChart() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 2v20M2 12h20M4.93 4.93l14.14 14.14M19.07 4.93L4.93 19.07" />
               </svg>
             </button>
+            <button
+              onClick={() => setFillGaps(!fillGaps)}
+              className={cn(
+                'p-1.5 rounded-md transition-all',
+                fillGaps
+                  ? 'border border-green-500 text-green-500'
+                  : 'border border-transparent text-muted-foreground hover:text-foreground'
+              )}
+              title={fillGaps ? 'Disable gap filling (show actual data only)' : 'Enable gap filling (continuous view)'}
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+            <button
+              onClick={() => setConnectLines(!connectLines)}
+              className={cn(
+                'p-1.5 rounded-md transition-all',
+                connectLines
+                  ? 'border border-purple-500 text-purple-500'
+                  : 'border border-transparent text-muted-foreground hover:text-foreground'
+              )}
+              title={connectLines ? 'Disconnect lines at gaps' : 'Connect lines through gaps'}
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+              </svg>
+            </button>
           </div>
         </div>
       </CardHeader>
@@ -417,6 +447,7 @@ export function ProductionTrendChart() {
                 dot={false}
                 activeDot={{ r: 4, fill: '#f59e0b' }}
                 yAxisId="left"
+                connectNulls={connectLines}
               />
               {/* @ts-ignore - recharts types issue */}
               <Line
@@ -429,6 +460,7 @@ export function ProductionTrendChart() {
                 dot={false}
                 activeDot={{ r: 4, fill: '#fbbf24' }}
                 yAxisId="left"
+                connectNulls={connectLines}
               />
               {showIrradiance && (
                 <>
@@ -443,6 +475,7 @@ export function ProductionTrendChart() {
                     dot={false}
                     activeDot={{ r: 3, fill: '#3b82f6' }}
                     yAxisId="right"
+                    connectNulls={connectLines}
                   />
                 </>
               )}
@@ -459,6 +492,7 @@ export function ProductionTrendChart() {
                     dot={false}
                     activeDot={{ r: 3, fill: '#06b6d4' }}
                     yAxisId="right"
+                    connectNulls={connectLines}
                   />
                 </>
               )}
