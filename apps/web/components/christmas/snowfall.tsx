@@ -44,7 +44,7 @@ export function Snowfall() {
         />
       ))}
 
-      {/* @ts-expect-error - styled-jsx syntax */}
+      {/* @ts-ignore - styled-jsx syntax */}
       <style jsx>{`
         @keyframes snowfall {
           0% {

@@ -19,7 +19,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* @ts-expect-error - next-themes types issue */}
+      {/* @ts-ignore - next-themes types issue */}
       <NextThemesProvider
         attribute="class"
         defaultTheme="dark"

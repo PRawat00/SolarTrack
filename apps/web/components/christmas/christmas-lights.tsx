@@ -55,7 +55,7 @@ export function ChristmasLights() {
         ))}
       </div>
 
-      {/* @ts-expect-error - styled-jsx syntax */}
+      {/* @ts-ignore - styled-jsx syntax */}
       <style jsx>{`
         @keyframes twinkle {
           0%, 100% {
