@@ -458,6 +458,7 @@ export function ProductionTrendChart() {
                     dot={false}
                     activeDot={{ r: 3, fill: '#3b82f6' }}
                     yAxisId="right"
+                    connectNulls={false}
                   />
                 </>
               )}
@@ -474,6 +475,7 @@ export function ProductionTrendChart() {
                     dot={false}
                     activeDot={{ r: 3, fill: '#06b6d4' }}
                     yAxisId="right"
+                    connectNulls={false}
                   />
                 </>
               )}
