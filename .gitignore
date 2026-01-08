@@ -1,4 +1,5 @@
 # Dependencies
+data_mike/
 node_modules/
 .pnpm-store/
 *.egg-info/
