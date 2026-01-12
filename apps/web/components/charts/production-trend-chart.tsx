@@ -401,19 +401,17 @@ export function ProductionTrendChart() {
                 tickFormatter={(value: number) => `${value}`}
                 label={{ value: 'kWh', angle: -90, position: 'insideLeft', style: { fontSize: 10, fill: 'hsl(var(--muted-foreground))' } } as any}
               />
+              {/* @ts-ignore - recharts types issue */}
               {(showIrradiance || showSnowfall) && (
-                <>
-                  {/* @ts-ignore - recharts types issue */}
-                  <YAxis
-                    yAxisId="right"
-                    orientation="right"
-                    tick={{ fontSize: 11, fill: showIrradiance ? '#3b82f6' : '#06b6d4' } as any}
-                    axisLine={{ stroke: showIrradiance ? '#3b82f6' : '#06b6d4' } as any}
-                    tickLine={{ stroke: showIrradiance ? '#3b82f6' : '#06b6d4' } as any}
-                    tickFormatter={(value: number) => `${value}`}
-                    label={{ value: showIrradiance ? 'MJ/m2' : 'cm', angle: 90, position: 'insideRight', style: { fontSize: 10, fill: showIrradiance ? '#3b82f6' : '#06b6d4' } } as any}
-                  />
-                </>
+                <YAxis
+                  yAxisId="right"
+                  orientation="right"
+                  tick={{ fontSize: 11, fill: showIrradiance ? '#3b82f6' : '#06b6d4' } as any}
+                  axisLine={{ stroke: showIrradiance ? '#3b82f6' : '#06b6d4' } as any}
+                  tickLine={{ stroke: showIrradiance ? '#3b82f6' : '#06b6d4' } as any}
+                  tickFormatter={(value: number) => `${value}`}
+                  label={{ value: showIrradiance ? 'MJ/m2' : 'cm', angle: 90, position: 'insideRight', style: { fontSize: 10, fill: showIrradiance ? '#3b82f6' : '#06b6d4' } } as any}
+                />
               )}
               {/* @ts-ignore - recharts types issue */}
               <Tooltip content={<CustomTooltip />} />
@@ -445,39 +443,35 @@ export function ProductionTrendChart() {
                 activeDot={{ r: 4, fill: '#fbbf24' }}
                 yAxisId="left"
               />
+              {/* @ts-ignore - recharts types issue */}
               {showIrradiance && (
-                <>
-                  {/* @ts-ignore - recharts types issue */}
-                  <Line
-                    type="monotone"
-                    dataKey="radiation"
-                    name="Irradiance (MJ/m2)"
-                    stroke="#3b82f6"
-                    strokeWidth={1.5}
-                    strokeDasharray="2 2"
-                    dot={false}
-                    activeDot={{ r: 3, fill: '#3b82f6' }}
-                    yAxisId="right"
-                    connectNulls={false}
-                  />
-                </>
+                <Line
+                  type="monotone"
+                  dataKey="radiation"
+                  name="Irradiance (MJ/m2)"
+                  stroke="#3b82f6"
+                  strokeWidth={1.5}
+                  strokeDasharray="2 2"
+                  dot={false}
+                  activeDot={{ r: 3, fill: '#3b82f6' }}
+                  yAxisId="right"
+                  connectNulls={false}
+                />
               )}
+              {/* @ts-ignore - recharts types issue */}
               {showSnowfall && (
-                <>
-                  {/* @ts-ignore - recharts types issue */}
-                  <Line
-                    type="monotone"
-                    dataKey="snowfall"
-                    name="Snowfall (cm)"
-                    stroke="#06b6d4"
-                    strokeWidth={1.5}
-                    strokeDasharray="4 2"
-                    dot={false}
-                    activeDot={{ r: 3, fill: '#06b6d4' }}
-                    yAxisId="right"
-                    connectNulls={false}
-                  />
-                </>
+                <Line
+                  type="monotone"
+                  dataKey="snowfall"
+                  name="Snowfall (cm)"
+                  stroke="#06b6d4"
+                  strokeWidth={1.5}
+                  strokeDasharray="4 2"
+                  dot={false}
+                  activeDot={{ r: 3, fill: '#06b6d4' }}
+                  yAxisId="right"
+                  connectNulls={false}
+                />
               )}
             </LineChart>
           </ResponsiveContainer>
