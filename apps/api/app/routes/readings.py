@@ -20,6 +20,12 @@ class ReadingCreate(BaseModel):
     m2: Optional[float] = None  # Meter 2 reading (kWh)
     notes: Optional[str] = None
     is_verified: bool = False
+    # Weather data (optional - for CSV imports with weather data)
+    weather_code: Optional[int] = None
+    temp_max: Optional[float] = None
+    sunshine_hours: Optional[float] = None
+    radiation_sum: Optional[float] = None
+    snowfall: Optional[float] = None
 
 
 class ReadingUpdate(BaseModel):
@@ -47,6 +53,7 @@ class ReadingResponse(BaseModel):
     temp_max: Optional[float]
     sunshine_hours: Optional[float]
     radiation_sum: Optional[float]
+    snowfall: Optional[float]
     # Attribution
     created_by: Optional[str] = None  # User who actually created this reading
     created_at: str
@@ -79,6 +86,7 @@ def _reading_to_response(reading: SolarReading) -> ReadingResponse:
         temp_max=float(reading.temp_max) if reading.temp_max is not None else None,
         sunshine_hours=float(reading.sunshine_hours) if reading.sunshine_hours is not None else None,
         radiation_sum=float(reading.radiation_sum) if reading.radiation_sum is not None else None,
+        snowfall=float(reading.snowfall) if reading.snowfall is not None else None,
         created_by=reading.created_by,
         created_at=reading.created_at.isoformat() if reading.created_at else "",
         updated_at=reading.updated_at.isoformat() if reading.updated_at else "",
@@ -145,6 +153,12 @@ async def create_reading(
         m2=reading.m2,
         notes=reading.notes,
         is_verified=1 if reading.is_verified else 0,
+        # Weather data (optional)
+        weather_code=reading.weather_code,
+        temp_max=reading.temp_max,
+        sunshine_hours=reading.sunshine_hours,
+        radiation_sum=reading.radiation_sum,
+        snowfall=reading.snowfall,
     )
     db.add(db_reading)
     db.commit()
@@ -185,6 +199,12 @@ async def create_readings_bulk(
             m2=reading.m2,
             notes=reading.notes,
             is_verified=1 if reading.is_verified else 0,
+            # Weather data (optional)
+            weather_code=reading.weather_code,
+            temp_max=reading.temp_max,
+            sunshine_hours=reading.sunshine_hours,
+            radiation_sum=reading.radiation_sum,
+            snowfall=reading.snowfall,
         )
         db.add(db_reading)
         db_readings.append(db_reading)

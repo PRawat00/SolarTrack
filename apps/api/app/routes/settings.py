@@ -61,7 +61,7 @@ def _settings_to_response(settings: UserSettings) -> SettingsResponse:
         latitude=float(settings.latitude or 13.7563),
         longitude=float(settings.longitude or 100.5018),
         theme=settings.theme,
-        family_feature_enabled=bool(settings.family_feature_enabled) if settings.family_feature_enabled is not None else True,
+        family_feature_enabled=bool(settings.family_feature_enabled) if settings.family_feature_enabled is not None else False,
     )
 
 

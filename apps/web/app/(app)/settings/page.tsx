@@ -82,7 +82,7 @@ export default function SettingsPage() {
   const [storedCountryCode, setStoredCountryCode] = useState<string | null>(null)
   const [storedStateCode, setStoredStateCode] = useState<string | null>(null)
   const [userId, setUserId] = useState<string | undefined>()
-  const [familyEnabled, setFamilyEnabled] = useState(true)
+  const [familyEnabled, setFamilyEnabled] = useState(false)
 
   const {
     register,

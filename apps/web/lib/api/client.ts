@@ -118,6 +118,12 @@ export interface ReadingCreate {
   m2?: number | null
   notes?: string | null
   is_verified?: boolean
+  // Weather data (optional - for CSV imports with weather data)
+  weather_code?: number | null
+  temp_max?: number | null
+  sunshine_hours?: number | null
+  radiation_sum?: number | null
+  snowfall?: number | null
 }
 
 export interface ReadingUpdate {

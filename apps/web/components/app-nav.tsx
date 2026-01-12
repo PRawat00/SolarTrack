@@ -17,7 +17,7 @@ interface AppNavProps {
 export function AppNav({ user }: AppNavProps) {
   const pathname = usePathname()
   const [isInFamily, setIsInFamily] = useState(false)
-  const [familyEnabled, setFamilyEnabled] = useState(true)
+  const [familyEnabled, setFamilyEnabled] = useState(false)
 
   // Check family membership and feature toggle on mount
   useEffect(() => {
@@ -37,8 +37,8 @@ export function AppNav({ user }: AppNavProps) {
           }
         }
       } catch {
-        // Default to enabled on error
-        setFamilyEnabled(true)
+        // Default to disabled on error
+        setFamilyEnabled(false)
       }
     }
     checkFamilyAndSettings()
