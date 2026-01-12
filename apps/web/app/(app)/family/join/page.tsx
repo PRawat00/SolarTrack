@@ -5,8 +5,9 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { familyAPI } from '@/lib/api/client'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { FamilyGate } from '@/components/family/family-gate'
 
-export default function JoinFamilyPage() {
+function JoinFamilyPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const token = searchParams.get('token')
@@ -141,5 +142,13 @@ export default function JoinFamilyPage() {
         </CardContent>
       </Card>
     </div>
+  )
+}
+
+export default function JoinFamilyPage() {
+  return (
+    <FamilyGate>
+      <JoinFamilyPageContent />
+    </FamilyGate>
   )
 }

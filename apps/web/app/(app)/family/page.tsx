@@ -7,8 +7,9 @@ import { Button } from '@/components/ui/button'
 import { FamilyDashboardView } from '@/components/family/family-dashboard'
 import { CreateFamilyDialog } from '@/components/family/create-family-dialog'
 import { JoinFamilyDialog } from '@/components/family/join-family-dialog'
+import { FamilyGate } from '@/components/family/family-gate'
 
-export default function FamilyPage() {
+function FamilyPageContent() {
   const [family, setFamily] = useState<Family | null>(null)
   const [dashboard, setDashboard] = useState<FamilyDashboard | null>(null)
   const [loading, setLoading] = useState(true)
@@ -155,5 +156,13 @@ export default function FamilyPage() {
       onRefresh={loadFamily}
       onLeave={handleLeaveFamily}
     />
+  )
+}
+
+export default function FamilyPage() {
+  return (
+    <FamilyGate>
+      <FamilyPageContent />
+    </FamilyGate>
   )
 }

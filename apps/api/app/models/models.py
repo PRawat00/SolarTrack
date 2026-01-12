@@ -26,6 +26,7 @@ class UserSettings(Base):
     country_code = Column(String(2), nullable=True)  # ISO 3166-1 alpha-2 (e.g., "US", "TH")
     state_code = Column(String(2), nullable=True)  # US state code (e.g., "NY", "CA")
     theme = Column(String(10), default="dark")
+    family_feature_enabled = Column(Integer, default=1)  # Oracle uses NUMBER(1) for boolean
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
 

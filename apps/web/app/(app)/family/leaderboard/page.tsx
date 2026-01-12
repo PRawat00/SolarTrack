@@ -5,8 +5,9 @@ import Link from 'next/link'
 import { familyAPI, type Family, type LeaderboardEntry, type FamilyStats } from '@/lib/api/client'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { FamilyGate } from '@/components/family/family-gate'
 
-export default function LeaderboardPage() {
+function LeaderboardPageContent() {
   const [family, setFamily] = useState<Family | null>(null)
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([])
   const [stats, setStats] = useState<FamilyStats | null>(null)
@@ -196,5 +197,13 @@ export default function LeaderboardPage() {
         </CardContent>
       </Card>
     </div>
+  )
+}
+
+export default function LeaderboardPage() {
+  return (
+    <FamilyGate>
+      <LeaderboardPageContent />
+    </FamilyGate>
   )
 }

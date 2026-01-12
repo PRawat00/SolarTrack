@@ -18,6 +18,7 @@ import {
 import { cn } from '@/lib/utils'
 import { resetAllGifts } from '@/components/christmas/gift-wrap'
 import { createClient } from '@/lib/supabase/client'
+import { Switch } from '@/components/ui/switch'
 
 const settingsSchema = z.object({
   currency_symbol: z
@@ -81,6 +82,7 @@ export default function SettingsPage() {
   const [storedCountryCode, setStoredCountryCode] = useState<string | null>(null)
   const [storedStateCode, setStoredStateCode] = useState<string | null>(null)
   const [userId, setUserId] = useState<string | undefined>()
+  const [familyEnabled, setFamilyEnabled] = useState(true)
 
   const {
     register,
@@ -114,6 +116,8 @@ export default function SettingsPage() {
         // Store country/state codes for auto-suggestions
         setStoredCountryCode(data.country_code || null)
         setStoredStateCode(data.state_code || null)
+        // Set family feature toggle
+        setFamilyEnabled(data.family_feature_enabled)
         setInitialSettingsLoaded(true)
       } catch (err) {
         setMessage({
@@ -277,6 +281,23 @@ export default function SettingsPage() {
       })
     } finally {
       setIsDeleting(false)
+    }
+  }
+
+  const handleFamilyToggle = async () => {
+    try {
+      const newValue = !familyEnabled
+      await settingsAPI.update({ family_feature_enabled: newValue })
+      setFamilyEnabled(newValue)
+      setMessage({
+        type: 'success',
+        text: newValue ? 'Family feature enabled' : 'Family feature disabled'
+      })
+    } catch (err) {
+      setMessage({
+        type: 'error',
+        text: err instanceof Error ? err.message : 'Failed to update setting'
+      })
     }
   }
 
@@ -602,6 +623,30 @@ export default function SettingsPage() {
             >
               Re-wrap All Gifts
             </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Features */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Features</CardTitle>
+          <CardDescription>
+            Enable or disable optional features
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <p className="font-medium">Family Feature</p>
+              <p className="text-sm text-muted-foreground">
+                Collaborative solar tracking with family members
+              </p>
+            </div>
+            <Switch
+              checked={familyEnabled}
+              onCheckedChange={handleFamilyToggle}
+            />
           </div>
         </CardContent>
       </Card>

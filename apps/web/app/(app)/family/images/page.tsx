@@ -8,10 +8,11 @@ import { Button } from '@/components/ui/button'
 import { ImageUploadZone } from '@/components/family/image-upload-zone'
 import { ImageCard } from '@/components/family/image-card'
 import { ImageTaggingDialog } from '@/components/family/image-tagging-dialog'
+import { FamilyGate } from '@/components/family/family-gate'
 
 type StatusFilter = 'all' | 'uploaded' | 'tagged' | 'claimed' | 'processed' | 'error'
 
-export default function FamilyImagesPage() {
+function FamilyImagesPageContent() {
   const [family, setFamily] = useState<Family | null>(null)
   const [imageList, setImageList] = useState<ImageListResponse | null>(null)
   const [loading, setLoading] = useState(true)
@@ -205,5 +206,13 @@ export default function FamilyImagesPage() {
         />
       )}
     </div>
+  )
+}
+
+export default function FamilyImagesPage() {
+  return (
+    <FamilyGate>
+      <FamilyImagesPageContent />
+    </FamilyGate>
   )
 }

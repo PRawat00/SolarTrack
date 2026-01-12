@@ -170,6 +170,7 @@ export interface SettingsResponse {
   country_code: string | null
   state_code: string | null
   theme: string
+  family_feature_enabled: boolean
 }
 
 export interface GeoLocation {
@@ -197,6 +198,7 @@ export interface SettingsUpdate {
   country_code?: string
   state_code?: string
   theme?: string
+  family_feature_enabled?: boolean
 }
 
 // ============ Location Suggestions Types ============

@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { User } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/client'
-import { familyAPI } from '@/lib/api/client'
+import { familyAPI, settingsAPI } from '@/lib/api/client'
 import { Button } from '@/components/ui/button'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { cn } from '@/lib/utils'
@@ -17,26 +17,39 @@ interface AppNavProps {
 export function AppNav({ user }: AppNavProps) {
   const pathname = usePathname()
   const [isInFamily, setIsInFamily] = useState(false)
+  const [familyEnabled, setFamilyEnabled] = useState(true)
 
-  // Check family membership on mount
+  // Check family membership and feature toggle on mount
   useEffect(() => {
-    const checkFamily = async () => {
+    const checkFamilyAndSettings = async () => {
       try {
-        const family = await familyAPI.get()
-        setIsInFamily(!!family)
+        // Check settings for family feature toggle
+        const settings = await settingsAPI.get()
+        setFamilyEnabled(settings.family_feature_enabled)
+
+        // Only check family membership if feature is enabled
+        if (settings.family_feature_enabled) {
+          try {
+            const family = await familyAPI.get()
+            setIsInFamily(!!family)
+          } catch {
+            setIsInFamily(false)
+          }
+        }
       } catch {
-        setIsInFamily(false)
+        // Default to enabled on error
+        setFamilyEnabled(true)
       }
     }
-    checkFamily()
+    checkFamilyAndSettings()
   }, [])
 
-  // Build nav items dynamically based on family membership
+  // Build nav items dynamically based on family membership and feature toggle
   const navItems = [
     { href: '/dashboard', label: 'Dashboard' },
     { href: '/database', label: 'Database' },
-    { href: '/family', label: 'Family' },
-    ...(isInFamily ? [{ href: '/family/leaderboard', label: 'Leaderboard' }] : []),
+    ...(familyEnabled ? [{ href: '/family', label: 'Family' }] : []),
+    ...(familyEnabled && isInFamily ? [{ href: '/family/leaderboard', label: 'Leaderboard' }] : []),
     { href: '/settings', label: 'Settings' },
   ]
 

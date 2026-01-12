@@ -25,6 +25,7 @@ class SettingsUpdate(BaseModel):
     latitude: Optional[float] = None
     longitude: Optional[float] = None
     theme: Optional[str] = None
+    family_feature_enabled: Optional[bool] = None
 
 
 class SettingsResponse(BaseModel):
@@ -40,6 +41,7 @@ class SettingsResponse(BaseModel):
     latitude: float
     longitude: float
     theme: str
+    family_feature_enabled: bool
 
     class Config:
         from_attributes = True
@@ -59,6 +61,7 @@ def _settings_to_response(settings: UserSettings) -> SettingsResponse:
         latitude=float(settings.latitude or 13.7563),
         longitude=float(settings.longitude or 100.5018),
         theme=settings.theme,
+        family_feature_enabled=bool(settings.family_feature_enabled) if settings.family_feature_enabled is not None else True,
     )
 
 
