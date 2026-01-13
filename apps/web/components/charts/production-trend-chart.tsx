@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo, useRef, useCallback } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import {
   LineChart,
   Line,
@@ -18,148 +18,129 @@ import { fillDataGaps, parseDate } from '@/lib/utils/date-range'
 
 type Period = 'daily' | 'weekly' | 'monthly'
 
+type PresetPeriod = 'week' | 'month' | '3months' | 'year' | 'all'
+
+interface PeriodPreset {
+  label: string
+  days: number | null  // null = all time
+  aggregation: Period
+  description: string
+}
+
+const PERIOD_PRESETS: Record<PresetPeriod, PeriodPreset> = {
+  week: {
+    label: 'Past Week',
+    days: 7,
+    aggregation: 'daily',
+    description: 'Last 7 days'
+  },
+  month: {
+    label: 'Past Month',
+    days: 30,
+    aggregation: 'daily',
+    description: 'Last 30 days'
+  },
+  '3months': {
+    label: 'Past 3 Months',
+    days: 90,
+    aggregation: 'weekly',
+    description: 'Last 90 days'
+  },
+  year: {
+    label: 'Past Year',
+    days: 365,
+    aggregation: 'monthly',
+    description: 'Last 365 days'
+  },
+  all: {
+    label: 'All Time',
+    days: null,
+    aggregation: 'monthly',
+    description: 'Full history'
+  }
+}
+
+function calculateDateRange(preset: PresetPeriod): { start: string; end: string } | null {
+  const config = PERIOD_PRESETS[preset]
+
+  if (config.days === null) {
+    // All time - no filtering
+    return null
+  }
+
+  const end = new Date()
+  const start = new Date()
+  start.setDate(start.getDate() - config.days)
+
+  return {
+    start: start.toISOString().split('T')[0],  // YYYY-MM-DD
+    end: end.toISOString().split('T')[0]
+  }
+}
+
 export function ProductionTrendChart() {
-  const [period, setPeriod] = useState<Period>('daily')
+  const [selectedPreset, setSelectedPreset] = useState<PresetPeriod>('month')
   const [data, setData] = useState<TrendDataPoint[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  // Separate input state (what user types) from filter state (what triggers filtering)
-  const [startDateInput, setStartDateInput] = useState<string>('')
-  const [endDateInput, setEndDateInput] = useState<string>('')
-  const [startDate, setStartDate] = useState<string>('')
-  const [endDate, setEndDate] = useState<string>('')
   const [showIrradiance, setShowIrradiance] = useState(true)
   const [showSnowfall, setShowSnowfall] = useState(true)
   const [fillGaps, setFillGaps] = useState(true)
 
-  // Refs for debounce timeouts
-  const startDateTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined)
-  const endDateTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined)
-
-  // Debounced date change handler for start date
-  const handleStartDateChange = useCallback((value: string) => {
-    setStartDateInput(value) // Update input immediately for responsive UI
-    // Clear previous timeout
-    if (startDateTimeoutRef.current) {
-      clearTimeout(startDateTimeoutRef.current)
-    }
-    // Debounce the actual filter update (500ms delay)
-    startDateTimeoutRef.current = setTimeout(() => {
-      setStartDate(value)
-    }, 500)
-  }, [])
-
-  // Debounced date change handler for end date
-  const handleEndDateChange = useCallback((value: string) => {
-    setEndDateInput(value) // Update input immediately for responsive UI
-    // Clear previous timeout
-    if (endDateTimeoutRef.current) {
-      clearTimeout(endDateTimeoutRef.current)
-    }
-    // Debounce the actual filter update (500ms delay)
-    endDateTimeoutRef.current = setTimeout(() => {
-      setEndDate(value)
-    }, 500)
-  }, [])
-
-  // Handle Enter key to apply filter immediately (bypass debounce)
-  const handleStartDateKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      // Clear pending debounce timeout
-      if (startDateTimeoutRef.current) {
-        clearTimeout(startDateTimeoutRef.current)
-      }
-      // Apply filter immediately
-      setStartDate(startDateInput)
-    }
-  }, [startDateInput])
-
-  // Handle Enter key to apply filter immediately (bypass debounce)
-  const handleEndDateKeyDown = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      // Clear pending debounce timeout
-      if (endDateTimeoutRef.current) {
-        clearTimeout(endDateTimeoutRef.current)
-      }
-      // Apply filter immediately
-      setEndDate(endDateInput)
-    }
-  }, [endDateInput])
-
-  // Calculate range duration in days
-  const rangeDays = useMemo(() => {
-    if (!startDate || !endDate) return Infinity
-    const start = new Date(startDate)
-    const end = new Date(endDate)
-    return Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24))
-  }, [startDate, endDate])
-
-  // Determine which periods should be disabled
-  const isWeeklyDisabled = rangeDays < 7
-  const isMonthlyDisabled = rangeDays < 30
-
-  // Auto-switch to valid period if current becomes disabled
-  useEffect(() => {
-    if (period === 'monthly' && isMonthlyDisabled) {
-      setPeriod(isWeeklyDisabled ? 'daily' : 'weekly')
-    } else if (period === 'weekly' && isWeeklyDisabled) {
-      setPeriod('daily')
-    }
-  }, [rangeDays, period, isWeeklyDisabled, isMonthlyDisabled])
-
   // Filter data based on date range and fill gaps for continuous series
   const filteredData = useMemo(() => {
-    // Don't process data while loading or if data is empty - prevents race condition
     if (loading || data.length === 0) {
       return []
     }
 
-    // Step 1: Apply date range filter
+    const dateRange = calculateDateRange(selectedPreset)
+    const preset = PERIOD_PRESETS[selectedPreset]
+
+    // Filter by date range if not "All Time"
     let filtered = data
-    if (startDate || endDate) {
+    if (dateRange) {
       filtered = data.filter(item => {
-        // For weekly format (2025-W01), use accurate ISO week parsing
+        // Handle weekly format (2025-W01)
         if (item.date.includes('W')) {
           try {
-            // Use the same parseDate utility that fillDataGaps uses for consistency
             const weekStartDate = parseDate(item.date, 'weekly')
-            const filterStart = startDate ? new Date(startDate + 'T00:00:00Z') : null
-            const filterEnd = endDate ? new Date(endDate + 'T00:00:00Z') : null
-
-            if (filterStart && weekStartDate < filterStart) return false
-            if (filterEnd && weekStartDate > filterEnd) return false
+            const filterStart = new Date(dateRange.start + 'T00:00:00Z')
+            const filterEnd = new Date(dateRange.end + 'T00:00:00Z')
+            if (weekStartDate < filterStart || weekStartDate > filterEnd) return false
             return true
           } catch (error) {
             console.error(`Failed to parse weekly date: ${item.date}`, error)
-            return false  // Exclude malformed dates
+            return false
           }
         }
-        // For monthly format (2025-01), use first day of month
+        // Handle monthly format (2025-01)
         if (item.date.match(/^\d{4}-\d{2}$/)) {
           const itemDate = new Date(item.date + '-01')
-          if (startDate && itemDate < new Date(startDate)) return false
-          if (endDate && itemDate > new Date(endDate)) return false
+          if (itemDate < new Date(dateRange.start) || itemDate > new Date(dateRange.end)) return false
           return true
         }
-        // For daily format (2025-01-15)
+        // Handle daily format (2025-01-15)
         const itemDate = new Date(item.date)
-        if (startDate && itemDate < new Date(startDate)) return false
-        if (endDate && itemDate > new Date(endDate)) return false
+        if (itemDate < new Date(dateRange.start) || itemDate > new Date(dateRange.end)) return false
         return true
       })
     }
 
-    // Step 2: Optionally fill gaps for continuous series
-    return fillGaps ? fillDataGaps(filtered, period, startDate, endDate) : filtered
-  }, [data, startDate, endDate, period, loading, fillGaps])
+    // Apply gap filling
+    return fillGaps
+      ? fillDataGaps(filtered, preset.aggregation, dateRange?.start, dateRange?.end)
+      : filtered
+  }, [data, selectedPreset, loading, fillGaps])
 
   useEffect(() => {
     const loadTrends = async () => {
       try {
         setLoading(true)
         setError(null)
-        setData([]) // Clear old data to prevent race condition when switching periods
-        const response = await statsAPI.getTrends(period)
+        setData([])
+
+        const preset = PERIOD_PRESETS[selectedPreset]
+        const response = await statsAPI.getTrends(preset.aggregation)
         setData(response.data)
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load trends')
@@ -168,9 +149,12 @@ export function ProductionTrendChart() {
       }
     }
     loadTrends()
-  }, [period])
+  }, [selectedPreset])
 
   const formatXAxis = (value: string) => {
+    const preset = PERIOD_PRESETS[selectedPreset]
+    const period = preset.aggregation
+
     if (period === 'monthly') {
       const [year, month] = value.split('-')
       const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
@@ -226,33 +210,6 @@ export function ProductionTrendChart() {
     return null
   }
 
-  const ToggleButton = ({
-    active,
-    onClick,
-    disabled,
-    children,
-  }: {
-    active: boolean
-    onClick: () => void
-    disabled?: boolean
-    children: React.ReactNode
-  }) => (
-    <button
-      onClick={onClick}
-      disabled={disabled}
-      className={cn(
-        'px-3 py-1.5 text-sm font-medium rounded-md transition-colors',
-        disabled && 'opacity-40 cursor-not-allowed',
-        active && !disabled
-          ? 'bg-muted text-foreground'
-          : 'text-muted-foreground hover:text-foreground',
-        disabled && 'hover:text-muted-foreground'
-      )}
-    >
-      {children}
-    </button>
-  )
-
   return (
     <Card className="flex-1">
       <CardHeader className="pb-4">
@@ -260,66 +217,26 @@ export function ProductionTrendChart() {
           <div>
             <CardTitle>Production Trends</CardTitle>
             <p className="text-sm text-muted-foreground mt-1">
-              Daily generation calculated from logs.
+              {PERIOD_PRESETS[selectedPreset].description}
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <input
-              type="date"
-              value={startDateInput}
-              onChange={(e) => handleStartDateChange(e.target.value)}
-              onKeyDown={handleStartDateKeyDown}
-              placeholder="Start date"
-              title="Enter start date, press Enter to apply"
-              className="bg-muted/50 border-0 rounded-md px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-orange-500"
-            />
-            <span className="text-muted-foreground text-xs">to</span>
-            <input
-              type="date"
-              value={endDateInput}
-              onChange={(e) => handleEndDateChange(e.target.value)}
-              onKeyDown={handleEndDateKeyDown}
-              placeholder="End date"
-              title="Enter end date, press Enter to apply"
-              className="bg-muted/50 border-0 rounded-md px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-orange-500"
-            />
-            {(startDate || endDate) && (
-              <button
-                onClick={() => {
-                  setStartDateInput('')
-                  setEndDateInput('')
-                  setStartDate('')
-                  setEndDate('')
-                  // Clear any pending debounce timeouts
-                  if (startDateTimeoutRef.current) clearTimeout(startDateTimeoutRef.current)
-                  if (endDateTimeoutRef.current) clearTimeout(endDateTimeoutRef.current)
-                }}
-                className="text-xs text-muted-foreground hover:text-foreground"
-              >
-                x
-              </button>
-            )}
-            <div className="flex bg-muted/50 rounded-lg p-0.5">
-              <ToggleButton
-                active={period === 'daily'}
-                onClick={() => setPeriod('daily')}
-              >
-                Daily
-              </ToggleButton>
-              <ToggleButton
-                active={period === 'weekly'}
-                onClick={() => setPeriod('weekly')}
-                disabled={isWeeklyDisabled}
-              >
-                Weekly
-              </ToggleButton>
-              <ToggleButton
-                active={period === 'monthly'}
-                onClick={() => setPeriod('monthly')}
-                disabled={isMonthlyDisabled}
-              >
-                Monthly
-              </ToggleButton>
+            {/* Preset period buttons */}
+            <div className="flex bg-muted/50 rounded-lg p-0.5 gap-0.5">
+              {(Object.keys(PERIOD_PRESETS) as PresetPeriod[]).map(preset => (
+                <button
+                  key={preset}
+                  onClick={() => setSelectedPreset(preset)}
+                  className={cn(
+                    'px-3 py-1.5 text-xs font-medium rounded-md transition-colors whitespace-nowrap',
+                    selectedPreset === preset
+                      ? 'bg-background text-foreground shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground'
+                  )}
+                >
+                  {PERIOD_PRESETS[preset].label}
+                </button>
+              ))}
             </div>
             <button
               onClick={() => setShowIrradiance(!showIrradiance)}
