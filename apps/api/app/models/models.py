@@ -41,6 +41,10 @@ class SolarReading(Base):
     reading_time = Column(String(10), nullable=True)  # TIME as "HH:MM"
     m1 = Column(Numeric(10, 2), nullable=False)  # Meter 1 reading (kWh)
     m2 = Column(Numeric(10, 2), nullable=True)   # Meter 2 reading (kWh)
+    # Daily production values (calculated from difference with previous day)
+    m1_daily = Column(Numeric(10, 2), nullable=True)  # Daily production M1 (kWh)
+    m2_daily = Column(Numeric(10, 2), nullable=True)  # Daily production M2 (kWh)
+    total_daily = Column(Numeric(10, 2), nullable=True)  # Total daily production (kWh)
     notes = Column(Text, nullable=True)
     is_verified = Column(Integer, default=0)  # Oracle uses NUMBER(1) for boolean
     # Weather data from Open-Meteo API

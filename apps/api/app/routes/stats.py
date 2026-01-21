@@ -22,24 +22,37 @@ def calculate_daily_production(readings: List[SolarReading]) -> List[dict]:
     meter replacement). When a reset is detected, production for that day
     is set to 0 and calculations continue from the new baseline.
 
+    Skips readings with date gaps (more than 1 day between readings) by
+    not including them in the output, as we cannot accurately determine
+    daily production for those periods.
+
     Args:
         readings: List of SolarReading objects with cumulative meter values
                  (should be pre-sorted by date ascending)
 
     Returns:
         List of dicts with 'date', 'm1', 'm2', 'radiation', 'snowfall'
-        representing daily production values
+        representing daily production values. Readings after gaps are excluded.
     """
     if len(readings) < 2:
         return []
 
-    # Ensure sorted by date
-    sorted_readings = sorted(readings, key=lambda r: r.reading_date)
+    # Ensure sorted by date AND id for consistency with duplicate readings
+    sorted_readings = sorted(readings, key=lambda r: (r.reading_date, r.id))
     daily_production = []
 
     for i in range(1, len(sorted_readings)):
         current = sorted_readings[i]
         previous = sorted_readings[i-1]
+
+        # Check for date gap (more than 1 day between readings)
+        curr_date = current.reading_date.date()
+        prev_date = previous.reading_date.date()
+        days_diff = (curr_date - prev_date).days
+
+        if days_diff > 1:
+            # Gap detected - skip this reading
+            continue
 
         # Calculate daily difference
         m1_daily = float(current.m1 or 0) - float(previous.m1 or 0)

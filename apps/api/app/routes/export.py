@@ -32,6 +32,7 @@ async def export_csv(
     # Write header
     writer.writerow([
         "Date", "Time", "M1 (kWh)", "M2 (kWh)",
+        "M1 Daily (kWh)", "M2 Daily (kWh)", "Total Daily (kWh)",
         "Weather Code", "Max Temp (°C)", "Sunshine (hours)",
         "Radiation (MJ/m²)", "Snowfall (cm)",
         "Notes", "Verified"
@@ -44,6 +45,9 @@ async def export_csv(
             reading.reading_time or "",
             float(reading.m1) if reading.m1 else "",
             float(reading.m2) if reading.m2 else "",
+            f"{float(reading.m1_daily):.2f}" if reading.m1_daily is not None else "",
+            f"{float(reading.m2_daily):.2f}" if reading.m2_daily is not None else "",
+            f"{float(reading.total_daily):.2f}" if reading.total_daily is not None else "",
             reading.weather_code if reading.weather_code is not None else "",
             f"{float(reading.temp_max):.1f}" if reading.temp_max is not None else "",
             f"{float(reading.sunshine_hours):.2f}" if reading.sunshine_hours is not None else "",

@@ -8,6 +8,7 @@ from app.middleware.auth import get_current_user, TokenData
 from app.models.base import get_db
 from app.models.models import SolarReading
 from app.routes.family import get_readings_user_id
+from app.utils.daily_production import recalculate_reading_daily_values, recalculate_next_reading_daily_values
 
 router = APIRouter(prefix="/api", tags=["readings"])
 
@@ -46,6 +47,10 @@ class ReadingResponse(BaseModel):
     time: Optional[str]
     m1: float
     m2: Optional[float]
+    # Daily production values
+    m1_daily: Optional[float] = None
+    m2_daily: Optional[float] = None
+    total_daily: Optional[float] = None
     notes: Optional[str]
     is_verified: bool
     # Weather data
@@ -80,6 +85,9 @@ def _reading_to_response(reading: SolarReading) -> ReadingResponse:
         time=reading.reading_time,
         m1=float(reading.m1) if reading.m1 else 0.0,
         m2=float(reading.m2) if reading.m2 else None,
+        m1_daily=float(reading.m1_daily) if reading.m1_daily is not None else None,
+        m2_daily=float(reading.m2_daily) if reading.m2_daily is not None else None,
+        total_daily=float(reading.total_daily) if reading.total_daily is not None else None,
         notes=reading.notes,
         is_verified=bool(reading.is_verified),
         weather_code=reading.weather_code,
@@ -161,6 +169,14 @@ async def create_reading(
         snowfall=reading.snowfall,
     )
     db.add(db_reading)
+    db.flush()  # Get the reading ID without committing
+
+    # Calculate daily values for this new reading
+    recalculate_reading_daily_values(db, db_reading, commit=False)
+
+    # If inserted between existing readings, recalculate the next one
+    recalculate_next_reading_daily_values(db, effective_user_id, db_reading.reading_date, commit=False)
+
     db.commit()
     db.refresh(db_reading)
 
@@ -208,6 +224,20 @@ async def create_readings_bulk(
         )
         db.add(db_reading)
         db_readings.append(db_reading)
+
+    db.flush()  # Flush to get IDs without committing
+
+    # Sort readings by date to process in order
+    db_readings.sort(key=lambda r: r.reading_date)
+
+    # Calculate daily values for all readings
+    for db_reading in db_readings:
+        recalculate_reading_daily_values(db, db_reading, commit=False)
+
+    # Recalculate next reading after the last inserted one
+    if db_readings:
+        last_date = max(r.reading_date for r in db_readings)
+        recalculate_next_reading_daily_values(db, effective_user_id, last_date, commit=False)
 
     db.commit()
 
@@ -265,7 +295,16 @@ async def delete_reading(
     if not reading:
         raise HTTPException(status_code=404, detail="Reading not found")
 
+    # Store values before deletion
+    user_id = reading.user_id
+    reading_date = reading.reading_date
+
     db.delete(reading)
+    db.flush()  # Delete but don't commit yet
+
+    # Recalculate next reading's daily values (since it now has a different previous reading)
+    recalculate_next_reading_daily_values(db, user_id, reading_date, commit=False)
+
     db.commit()
 
     return {"message": "Reading deleted"}
@@ -293,6 +332,9 @@ async def update_reading(
     if not reading:
         raise HTTPException(status_code=404, detail="Reading not found")
 
+    # Store old date before applying updates
+    old_date = reading.reading_date
+
     # Apply updates for provided fields only
     update_data = updates.model_dump(exclude_unset=True)
     for field, value in update_data.items():
@@ -304,6 +346,18 @@ async def update_reading(
             reading.is_verified = 1 if value else 0
         else:
             setattr(reading, field, value)
+
+    # If m1, m2, or date changed, recalculate daily values
+    if 'date' in update_data or 'm1' in update_data or 'm2' in update_data:
+        # Recalculate this reading's daily values
+        recalculate_reading_daily_values(db, reading, commit=False)
+
+        # Recalculate next reading after this one
+        recalculate_next_reading_daily_values(db, effective_user_id, reading.reading_date, commit=False)
+
+        # If date changed, also recalculate next reading after old date
+        if 'date' in update_data and old_date != reading.reading_date:
+            recalculate_next_reading_daily_values(db, effective_user_id, old_date, commit=False)
 
     db.commit()
     db.refresh(reading)
