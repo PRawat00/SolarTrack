@@ -286,6 +286,38 @@ export interface RecordsResponse {
   best_month: RecordEntry | null
 }
 
+export interface SeasonalDataPoint {
+  year: number
+  month: number
+  month_name: string
+  season: 'Winter' | 'Spring' | 'Summer' | 'Fall'
+  production: number
+}
+
+export interface YearStats {
+  year: number
+  total_production: number
+  avg_monthly_production: number
+}
+
+export interface SeasonStats {
+  season: 'Winter' | 'Spring' | 'Summer' | 'Fall'
+  avg_production: number
+  best_year: number | null
+  best_production: number | null
+  worst_year: number | null
+  worst_production: number | null
+  current_year_production: number | null
+  vs_average_percent: number | null
+}
+
+export interface SeasonalComparisonResponse {
+  monthly_data: SeasonalDataPoint[]
+  year_stats: YearStats[]
+  season_stats: SeasonStats[]
+  available_years: number[]
+}
+
 // ============ API Methods ============
 
 export const readingsAPI = {
@@ -362,6 +394,9 @@ export const statsAPI = {
 
   getRecords: (): Promise<RecordsResponse> =>
     fetchAPI('/api/stats/records'),
+
+  getSeasonalComparison: (): Promise<SeasonalComparisonResponse> =>
+    fetchAPI('/api/stats/seasonal'),
 }
 
 export interface EnrichResponse {

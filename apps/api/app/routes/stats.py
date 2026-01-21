@@ -320,3 +320,173 @@ async def get_records(
         )
 
     return RecordsResponse(best_day=best_day, best_month=best_month)
+
+
+# ============ Seasonal Comparison Endpoint ============
+
+class SeasonalDataPoint(BaseModel):
+    """Monthly production data with year and season info."""
+    year: int
+    month: int  # 1-12
+    month_name: str  # "Jan", "Feb", etc.
+    season: str  # "Winter", "Spring", "Summer", "Fall"
+    production: float  # Total kWh for that month
+
+
+class YearStats(BaseModel):
+    """Annual statistics for year-over-year comparison."""
+    year: int
+    total_production: float
+    avg_monthly_production: float
+
+
+class SeasonStats(BaseModel):
+    """Seasonal statistics."""
+    season: str
+    avg_production: float  # Historical average for this season
+    best_year: Optional[int]
+    best_production: Optional[float]
+    worst_year: Optional[int]
+    worst_production: Optional[float]
+    current_year_production: Optional[float]  # For current season
+    vs_average_percent: Optional[float]  # % above/below average
+
+
+class SeasonalComparisonResponse(BaseModel):
+    """Response for seasonal comparison endpoint."""
+    monthly_data: List[SeasonalDataPoint]
+    year_stats: List[YearStats]
+    season_stats: List[SeasonStats]
+    available_years: List[int]
+
+
+@router.get("/stats/seasonal", response_model=SeasonalComparisonResponse)
+async def get_seasonal_comparison(
+    current_user: TokenData = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """
+    Get year-over-year seasonal comparison data.
+
+    Returns monthly production aggregated by year with seasonal categorization,
+    plus seasonal statistics including historical averages and best/worst seasons.
+    """
+    # Use family head's user_id if in a family
+    effective_user_id = get_readings_user_id(db, current_user.user_id)
+
+    # Get all readings
+    readings = db.query(SolarReading).filter(
+        SolarReading.user_id == effective_user_id
+    ).order_by(SolarReading.reading_date.asc()).all()
+
+    if not readings:
+        return SeasonalComparisonResponse(
+            monthly_data=[],
+            year_stats=[],
+            season_stats=[],
+            available_years=[]
+        )
+
+    # Calculate daily production
+    daily_production = calculate_daily_production(readings)
+
+    # Aggregate by year and month
+    # Structure: {year: {month: production}}
+    monthly_totals = defaultdict(lambda: defaultdict(float))
+
+    for day in daily_production:
+        year = day['date'].year
+        month = day['date'].month
+        total = day['m1'] + day['m2']
+        monthly_totals[year][month] += total
+
+    # Helper to get season from month
+    def get_season(month: int) -> str:
+        if month in [12, 1, 2]:
+            return "Winter"
+        elif month in [3, 4, 5]:
+            return "Spring"
+        elif month in [6, 7, 8]:
+            return "Summer"
+        else:  # 9, 10, 11
+            return "Fall"
+
+    # Build monthly data points
+    month_names = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                   "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+
+    monthly_data = []
+    for year in sorted(monthly_totals.keys()):
+        for month in range(1, 13):
+            production = monthly_totals[year].get(month, 0.0)
+            monthly_data.append(SeasonalDataPoint(
+                year=year,
+                month=month,
+                month_name=month_names[month - 1],
+                season=get_season(month),
+                production=round(production, 2)
+            ))
+
+    # Calculate year stats
+    year_stats = []
+    for year in sorted(monthly_totals.keys()):
+        total = sum(monthly_totals[year].values())
+        months_with_data = len([p for p in monthly_totals[year].values() if p > 0])
+        avg = total / months_with_data if months_with_data > 0 else 0
+
+        year_stats.append(YearStats(
+            year=year,
+            total_production=round(total, 2),
+            avg_monthly_production=round(avg, 2)
+        ))
+
+    # Calculate seasonal stats
+    # Structure: {season: {year: production}}
+    seasonal_data = defaultdict(lambda: defaultdict(float))
+
+    for year, months in monthly_totals.items():
+        for month, production in months.items():
+            season = get_season(month)
+            seasonal_data[season][year] += production
+
+    current_year = datetime.now().year
+    season_stats = []
+
+    for season in ["Winter", "Spring", "Summer", "Fall"]:
+        if season not in seasonal_data or len(seasonal_data[season]) == 0:
+            continue
+
+        season_years = seasonal_data[season]
+
+        # Calculate historical average
+        avg = sum(season_years.values()) / len(season_years)
+
+        # Find best and worst
+        best_year = max(season_years.keys(), key=lambda y: season_years[y])
+        worst_year = min(season_years.keys(), key=lambda y: season_years[y])
+
+        # Current year data (if available)
+        current_production = season_years.get(current_year)
+        vs_avg = None
+        if current_production is not None and avg > 0:
+            vs_avg = ((current_production - avg) / avg) * 100
+
+        season_stats.append(SeasonStats(
+            season=season,
+            avg_production=round(avg, 2),
+            best_year=best_year,
+            best_production=round(season_years[best_year], 2),
+            worst_year=worst_year,
+            worst_production=round(season_years[worst_year], 2),
+            current_year_production=round(current_production, 2) if current_production else None,
+            vs_average_percent=round(vs_avg, 1) if vs_avg is not None else None
+        ))
+
+    available_years = sorted(monthly_totals.keys(), reverse=True)
+
+    return SeasonalComparisonResponse(
+        monthly_data=monthly_data,
+        year_stats=year_stats,
+        season_stats=season_stats,
+        available_years=available_years
+    )

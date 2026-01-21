@@ -8,6 +8,8 @@ import { UploadPanel } from '@/components/dashboard/upload-panel'
 import { ImpactSidebar } from '@/components/dashboard/impact-sidebar'
 import { ProductionTrendChart } from '@/components/charts/production-trend-chart'
 import { ProductionHeatmap, BestDaysSidebar } from '@/components/charts/production-heatmap'
+import { SeasonalComparisonChart } from '@/components/charts/seasonal-comparison-chart'
+import { SeasonalStatsCard } from '@/components/charts/seasonal-stats-card'
 import { GiftWrap } from '@/components/christmas/gift-wrap'
 
 export default function DashboardPage() {
@@ -186,6 +188,16 @@ export default function DashboardPage() {
         </GiftWrap>
         <GiftWrap id="gift-best-days" userId={userId}>
           <BestDaysSidebar year={heatmapYear} />
+        </GiftWrap>
+      </div>
+
+      {/* Seasonal Comparison */}
+      <div className="grid lg:grid-cols-[minmax(0,1fr),320px] gap-6">
+        <GiftWrap id="gift-seasonal-chart" userId={userId}>
+          <SeasonalComparisonChart />
+        </GiftWrap>
+        <GiftWrap id="gift-seasonal-stats" userId={userId}>
+          <SeasonalStatsCard />
         </GiftWrap>
       </div>
 
