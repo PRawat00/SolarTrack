@@ -249,6 +249,16 @@ export function ProductionHeatmap({ year: controlledYear, onYearChange }: Produc
     return 'bg-orange-300'                                    // Top 20%
   }
 
+  // Get percentile label for a value
+  const getPercentileLabel = (value: number) => {
+    if (value === 0) return 'No production'
+    if (value < percentiles.p20) return 'Bottom 20% (P0-P20)'
+    if (value < percentiles.p40) return 'P20-P40'
+    if (value < percentiles.p60) return 'P40-P60'
+    if (value < percentiles.p80) return 'P60-P80'
+    return 'Top 20% (P80-P100)'
+  }
+
   // Group days by week
   const weeks = useMemo(() => {
     const weekMap = new Map<number, DayData[]>()
@@ -370,10 +380,13 @@ export function ProductionHeatmap({ year: controlledYear, onYearChange }: Produc
 
             {/* Tooltip */}
             {hoveredCell && (
-              <div className="absolute top-0 right-0 bg-popover border rounded-md px-2 py-1 text-xs shadow-lg z-10">
+              <div className="absolute top-0 right-0 bg-popover border rounded-md px-3 py-1.5 text-xs shadow-lg z-10">
                 <p className="font-medium">{formatDate(hoveredCell.date)}</p>
                 <p className="text-muted-foreground">
                   {hoveredCell.value.toFixed(1)} kWh
+                </p>
+                <p className="text-muted-foreground text-[10px] mt-0.5">
+                  {getPercentileLabel(hoveredCell.value)}
                 </p>
               </div>
             )}

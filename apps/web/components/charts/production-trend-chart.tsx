@@ -79,7 +79,7 @@ function calculateDateRange(preset: PresetPeriod): { start: string; end: string 
 }
 
 export function ProductionTrendChart() {
-  const [selectedPreset, setSelectedPreset] = useState<PresetPeriod>('month')
+  const [selectedPreset, setSelectedPreset] = useState<PresetPeriod>('all')
   const [data, setData] = useState<TrendDataPoint[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
