@@ -173,7 +173,7 @@ export function ProductionHeatmap({ year: controlledYear, onYearChange }: Produc
   }, [data])
 
   // Generate all days for the year
-  const { days, maxValue, monthLabels } = useMemo(() => {
+  const { days, percentiles, monthLabels } = useMemo(() => {
     const result: DayData[] = []
     const startDate = new Date(year, 0, 1)
     const endDate = new Date(year, 11, 31)
@@ -182,7 +182,6 @@ export function ProductionHeatmap({ year: controlledYear, onYearChange }: Produc
     const firstDay = new Date(startDate)
     firstDay.setDate(firstDay.getDate() - firstDay.getDay())
 
-    let maxVal = 0
     let currentDate = new Date(firstDay)
     let weekIndex = 0
 
@@ -194,10 +193,6 @@ export function ProductionHeatmap({ year: controlledYear, onYearChange }: Produc
       const dateStr = currentDate.toISOString().split('T')[0]
       const isInYear = currentDate.getFullYear() === year
       const value = isInYear ? (productionMap.get(dateStr) || 0) : -1 // -1 for out of year
-
-      if (isInYear && value > maxVal) {
-        maxVal = value
-      }
 
       // Track month changes for labels
       if (isInYear && currentDate.getMonth() !== lastMonth) {
@@ -219,18 +214,39 @@ export function ProductionHeatmap({ year: controlledYear, onYearChange }: Produc
       }
     }
 
-    return { days: result, maxValue: maxVal || 1, monthLabels: months }
+    // Calculate percentiles from all non-zero production values
+    const values = result
+      .filter(day => day.value > 0)
+      .map(day => day.value)
+      .sort((a, b) => a - b)
+
+    const calcPercentile = (p: number) => {
+      if (values.length === 0) return 0
+      const index = Math.floor(values.length * p)
+      return values[Math.min(index, values.length - 1)]
+    }
+
+    const percentiles = {
+      p20: calcPercentile(0.2),
+      p40: calcPercentile(0.4),
+      p60: calcPercentile(0.6),
+      p80: calcPercentile(0.8),
+    }
+
+    return { days: result, percentiles, monthLabels: months }
   }, [year, productionMap])
 
-  // Get intensity color based on value
+  // Get intensity color based on value (percentile-based)
   const getIntensityColor = (value: number) => {
     if (value < 0) return 'bg-transparent' // Out of year
-    if (value === 0) return 'bg-muted/30'
-    const ratio = value / maxValue
-    if (ratio < 0.25) return 'bg-orange-900/60'
-    if (ratio < 0.50) return 'bg-orange-700/80'
-    if (ratio < 0.75) return 'bg-orange-500'
-    return 'bg-orange-400'
+    if (value === 0) return 'bg-muted/30' // No production
+
+    // Percentile-based colors for even distribution
+    if (value < percentiles.p20) return 'bg-orange-900/60'   // Bottom 20%
+    if (value < percentiles.p40) return 'bg-orange-700/80'   // 20th-40th percentile
+    if (value < percentiles.p60) return 'bg-orange-500'      // 40th-60th percentile
+    if (value < percentiles.p80) return 'bg-orange-400'      // 60th-80th percentile
+    return 'bg-orange-300'                                    // Top 20%
   }
 
   // Group days by week
@@ -362,15 +378,21 @@ export function ProductionHeatmap({ year: controlledYear, onYearChange }: Produc
               </div>
             )}
 
-            {/* Legend */}
-            <div className="flex items-center gap-1 mt-3 text-xs text-muted-foreground">
-              <span>Less</span>
-              <div className="w-4 h-4 rounded-sm bg-muted/30" />
-              <div className="w-4 h-4 rounded-sm bg-orange-900/60" />
-              <div className="w-4 h-4 rounded-sm bg-orange-700/80" />
-              <div className="w-4 h-4 rounded-sm bg-orange-500" />
-              <div className="w-4 h-4 rounded-sm bg-orange-400" />
-              <span>More</span>
+            {/* Legend with dynamic percentile values */}
+            <div className="flex flex-col gap-1.5 mt-3">
+              <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                <span className="w-8">0</span>
+                <div className="w-4 h-4 rounded-sm bg-muted/30" title="0 kWh" />
+                <div className="w-4 h-4 rounded-sm bg-orange-900/60" title={`< ${percentiles.p20.toFixed(1)} kWh (Bottom 20%)`} />
+                <div className="w-4 h-4 rounded-sm bg-orange-700/80" title={`${percentiles.p20.toFixed(1)}-${percentiles.p40.toFixed(1)} kWh (P20-P40)`} />
+                <div className="w-4 h-4 rounded-sm bg-orange-500" title={`${percentiles.p40.toFixed(1)}-${percentiles.p60.toFixed(1)} kWh (P40-P60)`} />
+                <div className="w-4 h-4 rounded-sm bg-orange-400" title={`${percentiles.p60.toFixed(1)}-${percentiles.p80.toFixed(1)} kWh (P60-P80)`} />
+                <div className="w-4 h-4 rounded-sm bg-orange-300" title={`${percentiles.p80.toFixed(1)}+ kWh (Top 20%)`} />
+                <span className="w-8 text-right">{percentiles.p80.toFixed(0)}+</span>
+              </div>
+              <div className="text-[10px] text-muted-foreground/70">
+                P20: {percentiles.p20.toFixed(1)} • P50: {percentiles.p60.toFixed(1)} • P80: {percentiles.p80.toFixed(1)} kWh
+              </div>
             </div>
           </div>
         )}
