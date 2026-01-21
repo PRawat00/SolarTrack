@@ -181,16 +181,6 @@ export default function DashboardPage() {
         </GiftWrap>
       </div>
 
-      {/* Heatmap */}
-      <div className="grid lg:grid-cols-[minmax(0,1fr),320px] gap-6">
-        <GiftWrap id="gift-heatmap" userId={userId}>
-          <ProductionHeatmap year={heatmapYear} onYearChange={setHeatmapYear} />
-        </GiftWrap>
-        <GiftWrap id="gift-best-days" userId={userId}>
-          <BestDaysSidebar year={heatmapYear} />
-        </GiftWrap>
-      </div>
-
       {/* Seasonal Comparison */}
       <div className="grid lg:grid-cols-[minmax(0,1fr),320px] gap-6">
         <GiftWrap id="gift-seasonal-chart" userId={userId}>
@@ -198,6 +188,16 @@ export default function DashboardPage() {
         </GiftWrap>
         <GiftWrap id="gift-seasonal-stats" userId={userId}>
           <SeasonalStatsCard />
+        </GiftWrap>
+      </div>
+
+      {/* Heatmap */}
+      <div className="grid lg:grid-cols-[minmax(0,1fr),320px] gap-6">
+        <GiftWrap id="gift-heatmap" userId={userId}>
+          <ProductionHeatmap year={heatmapYear} onYearChange={setHeatmapYear} />
+        </GiftWrap>
+        <GiftWrap id="gift-best-days" userId={userId}>
+          <BestDaysSidebar year={heatmapYear} />
         </GiftWrap>
       </div>
 
