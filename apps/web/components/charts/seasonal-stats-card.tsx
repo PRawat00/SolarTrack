@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
-import { statsAPI, type SeasonalComparisonResponse, type SeasonStats } from '@/lib/api/client'
+import { statsAPI, type SeasonalComparisonResponse } from '@/lib/api/client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 
