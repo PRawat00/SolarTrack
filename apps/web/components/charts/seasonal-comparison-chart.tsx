@@ -278,7 +278,7 @@ export function SeasonalComparisonChart() {
               {data?.available_years
                 .filter(year => selectedYears.has(year))
                 .sort((a, b) => a - b)
-                .map((year, index) => (
+                .map((year) => (
                   <Line
                     key={year}
                     type="monotone"
