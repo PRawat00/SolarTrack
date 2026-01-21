@@ -14,6 +14,57 @@ from app.routes.family import get_readings_user_id
 router = APIRouter(prefix="/api", tags=["stats"])
 
 
+def calculate_daily_production(readings: List[SolarReading]) -> List[dict]:
+    """
+    Convert cumulative meter readings to daily production values.
+
+    Handles meter resets by detecting when readings decrease (indicating
+    meter replacement). When a reset is detected, production for that day
+    is set to 0 and calculations continue from the new baseline.
+
+    Args:
+        readings: List of SolarReading objects with cumulative meter values
+                 (should be pre-sorted by date ascending)
+
+    Returns:
+        List of dicts with 'date', 'm1', 'm2', 'radiation', 'snowfall'
+        representing daily production values
+    """
+    if len(readings) < 2:
+        return []
+
+    # Ensure sorted by date
+    sorted_readings = sorted(readings, key=lambda r: r.reading_date)
+    daily_production = []
+
+    for i in range(1, len(sorted_readings)):
+        current = sorted_readings[i]
+        previous = sorted_readings[i-1]
+
+        # Calculate daily difference
+        m1_daily = float(current.m1 or 0) - float(previous.m1 or 0)
+        m2_daily = float(current.m2 or 0) - float(previous.m2 or 0)
+
+        # Handle meter resets (when meter reading goes down)
+        # When meters are replaced, they start from a low value
+        # Example: 25807 -> 4 means new meter at 4 kWh
+        # We set production to 0 for reset day and start fresh from new baseline
+        if m1_daily < 0:
+            m1_daily = 0  # Skip this day - it's a reset point
+        if m2_daily < 0:
+            m2_daily = 0  # Skip this day - it's a reset point
+
+        daily_production.append({
+            'date': current.reading_date,
+            'm1': m1_daily,
+            'm2': m2_daily,
+            'radiation': float(current.radiation_sum or 0),
+            'snowfall': float(current.snowfall or 0)
+        })
+
+    return daily_production
+
+
 class StatsResponse(BaseModel):
     """Response body for dashboard stats."""
     total_m1: float  # Total Meter 1 production (kWh)
@@ -57,21 +108,19 @@ async def get_stats(
         db.commit()
         db.refresh(settings)
 
-    # Calculate totals from readings (using family head's readings)
-    result = db.query(
-        func.sum(SolarReading.m1).label("total_m1"),
-        func.sum(SolarReading.m2).label("total_m2"),
-        func.count(SolarReading.id).label("count"),
-        func.min(SolarReading.reading_date).label("first_date"),
-        func.max(SolarReading.reading_date).label("last_date"),
-    ).filter(
+    # Get all readings sorted by date to calculate daily production
+    readings = db.query(SolarReading).filter(
         SolarReading.user_id == effective_user_id
-    ).first()
+    ).order_by(SolarReading.reading_date.asc()).all()
 
-    total_m1 = float(result.total_m1 or 0)
-    total_m2 = float(result.total_m2 or 0)
+    # Calculate daily production (handles meter resets automatically)
+    daily_production = calculate_daily_production(readings)
+
+    # Sum all daily production to get totals
+    total_m1 = sum(day['m1'] for day in daily_production)
+    total_m2 = sum(day['m2'] for day in daily_production)
     total_production = total_m1 + total_m2
-    reading_count = result.count or 0
+    reading_count = len(readings)
 
     # Calculate derived values
     cost_per_kwh = float(settings.cost_per_kwh)
@@ -89,9 +138,9 @@ async def get_stats(
     # Calculate goal progress
     goal_progress = (total_production / yearly_goal * 100) if yearly_goal > 0 else 0
 
-    # Format dates
-    first_date = result.first_date.strftime("%Y-%m-%d") if result.first_date else None
-    last_date = result.last_date.strftime("%Y-%m-%d") if result.last_date else None
+    # Format dates from readings
+    first_date = readings[0].reading_date.strftime("%Y-%m-%d") if readings else None
+    last_date = readings[-1].reading_date.strftime("%Y-%m-%d") if readings else None
 
     return StatsResponse(
         total_m1=round(total_m1, 2),
@@ -166,16 +215,18 @@ async def get_trends(
         SolarReading.user_id == effective_user_id
     ).order_by(SolarReading.reading_date.asc()).all()
 
-    # Aggregate by period
+    # Calculate daily production first (converts cumulative to daily)
+    daily_production = calculate_daily_production(readings)
+
+    # Aggregate daily production by period
     aggregated: dict = defaultdict(lambda: {"m1": 0.0, "m2": 0.0, "radiation": 0.0, "snowfall": 0.0})
 
-    for reading in readings:
-        if reading.reading_date:
-            key = get_period_key(reading.reading_date, period)
-            aggregated[key]["m1"] += float(reading.m1 or 0)
-            aggregated[key]["m2"] += float(reading.m2 or 0)
-            aggregated[key]["radiation"] += float(reading.radiation_sum or 0)
-            aggregated[key]["snowfall"] += float(reading.snowfall or 0)
+    for day in daily_production:
+        key = get_period_key(day['date'], period)
+        aggregated[key]["m1"] += day['m1']
+        aggregated[key]["m2"] += day['m2']
+        aggregated[key]["radiation"] += day['radiation']
+        aggregated[key]["snowfall"] += day['snowfall']
 
     # Convert to sorted list of data points
     data = []
@@ -227,22 +278,28 @@ async def get_records(
     # Fetch all readings for the family
     readings = db.query(SolarReading).filter(
         SolarReading.user_id == effective_user_id
-    ).all()
+    ).order_by(SolarReading.reading_date.asc()).all()
 
     if not readings:
         return RecordsResponse(best_day=None, best_month=None)
 
-    # Aggregate by day
-    daily_totals: dict = defaultdict(float)
+    # Calculate daily production (converts cumulative to daily)
+    daily_production = calculate_daily_production(readings)
+
+    if not daily_production:
+        return RecordsResponse(best_day=None, best_month=None)
+
+    # Aggregate by day and month
+    daily_totals: dict = {}  # Each day appears once, so use regular dict
     monthly_totals: dict = defaultdict(float)
 
-    for reading in readings:
-        if reading.reading_date:
-            day_key = reading.reading_date.strftime("%Y-%m-%d")
-            month_key = reading.reading_date.strftime("%Y-%m")
-            total = float(reading.m1 or 0) + float(reading.m2 or 0)
-            daily_totals[day_key] += total
-            monthly_totals[month_key] += total
+    for day in daily_production:
+        day_key = day['date'].strftime("%Y-%m-%d")
+        month_key = day['date'].strftime("%Y-%m")
+
+        daily_total = day['m1'] + day['m2']
+        daily_totals[day_key] = daily_total
+        monthly_totals[month_key] += daily_total
 
     # Find best day
     best_day = None
