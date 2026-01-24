@@ -64,14 +64,14 @@ export function SeasonalStatsCard() {
   const currentSeasonStats = data?.season_stats.find(s => s.season === currentSeason)
 
   const bestSeason = useMemo(() => {
-    if (!data) return null
+    if (!data || data.season_stats.length === 0) return null
     return data.season_stats.reduce((best, season) =>
       season.avg_production > best.avg_production ? season : best
     )
   }, [data])
 
   const worstSeason = useMemo(() => {
-    if (!data) return null
+    if (!data || data.season_stats.length === 0) return null
     return data.season_stats.reduce((worst, season) =>
       season.avg_production < worst.avg_production ? season : worst
     )
