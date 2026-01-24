@@ -7,6 +7,9 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { RegionSelector } from './region-selector'
 import { Region, cropImage, generateRegionId } from '@/lib/image-crop'
+import { CSVImportPanel } from './csv-import-panel'
+
+type ImportMode = 'image' | 'csv'
 
 type UploadStatus =
   | 'idle'
@@ -56,6 +59,7 @@ function apiToDisplayRegion(apiRegion: TableRegion): Region {
 }
 
 export function UploadPanel({ onComplete, onCancel, visible = true }: UploadPanelProps) {
+  const [importMode, setImportMode] = useState<ImportMode>('image')
   const [state, setState] = useState<UploadState>({
     status: 'idle',
     regions: [],
@@ -499,18 +503,51 @@ export function UploadPanel({ onComplete, onCancel, visible = true }: UploadPane
       <CardHeader className="pb-4">
         <CardTitle>Import Data</CardTitle>
         <p className="text-sm text-muted-foreground">
-          Upload images to extract data automatically.
+          {importMode === 'image'
+            ? 'Upload images to extract data automatically.'
+            : 'Import data from CSV or Excel spreadsheets.'}
         </p>
       </CardHeader>
       <CardContent>
+        {/* Mode Toggle - Only show in idle state */}
+        {state.status === 'idle' && (
+          <div className="flex gap-1 p-1 bg-muted rounded-lg mb-4">
+            <button
+              onClick={() => setImportMode('image')}
+              className={`flex-1 px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+                importMode === 'image'
+                  ? 'bg-background text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              Image Upload
+            </button>
+            <button
+              onClick={() => setImportMode('csv')}
+              className={`flex-1 px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+                importMode === 'csv'
+                  ? 'bg-background text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              CSV/Excel Import
+            </button>
+          </div>
+        )}
+
         {state.error && (
           <div className="mb-4 p-3 bg-destructive/10 text-destructive rounded-lg text-sm">
             {state.error}
           </div>
         )}
 
-        {/* Idle State - Drop Zone */}
-        {state.status === 'idle' && (
+        {/* CSV Import Mode */}
+        {state.status === 'idle' && importMode === 'csv' && (
+          <CSVImportPanel onComplete={onComplete} onCancel={onCancel} />
+        )}
+
+        {/* Idle State - Drop Zone (Image Mode) */}
+        {state.status === 'idle' && importMode === 'image' && (
           <div className="space-y-4">
             <div
               {...getRootProps()}

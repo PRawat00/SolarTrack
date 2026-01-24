@@ -39,6 +39,16 @@ class ReadingUpdate(BaseModel):
     is_verified: Optional[bool] = None
 
 
+class CheckDuplicatesRequest(BaseModel):
+    """Request body for checking duplicate dates."""
+    dates: List[str]
+
+
+class CheckDuplicatesResponse(BaseModel):
+    """Response body for duplicate check."""
+    existing_dates: List[str]
+
+
 class ReadingResponse(BaseModel):
     """Response body for a reading."""
     id: str
@@ -186,14 +196,17 @@ async def create_reading(
 @router.post("/readings/bulk", response_model=List[ReadingResponse])
 async def create_readings_bulk(
     readings: List[ReadingCreate],
+    overwrite: bool = Query(False, description="Delete existing readings for these dates before inserting"),
     current_user: TokenData = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     """
     Create multiple readings at once.
 
-    Used for confirming AI-extracted readings from uploaded images.
+    Used for confirming AI-extracted readings from uploaded images or CSV imports.
     If user is in a family, readings are stored under family head's user_id.
+
+    Set overwrite=true to delete existing readings for the same dates before inserting.
     """
     if not readings:
         raise HTTPException(status_code=400, detail="No readings provided")
@@ -203,6 +216,14 @@ async def create_readings_bulk(
 
     # Use family head's user_id if in a family
     effective_user_id = get_readings_user_id(db, current_user.user_id)
+
+    # If overwrite mode, delete existing readings for these dates first
+    if overwrite:
+        dates_to_delete = [datetime.fromisoformat(r.date) for r in readings]
+        db.query(SolarReading).filter(
+            SolarReading.user_id == effective_user_id,
+            SolarReading.reading_date.in_(dates_to_delete)
+        ).delete(synchronize_session=False)
 
     db_readings = []
     for reading in readings:
@@ -246,6 +267,40 @@ async def create_readings_bulk(
         db.refresh(r)
 
     return [_reading_to_response(r) for r in db_readings]
+
+
+@router.post("/readings/check-duplicates", response_model=CheckDuplicatesResponse)
+async def check_duplicates(
+    request: CheckDuplicatesRequest,
+    current_user: TokenData = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """
+    Check which dates already have readings.
+
+    Returns a list of dates that already exist in the database.
+    Used for CSV/Excel import duplicate detection.
+    """
+    if not request.dates:
+        return CheckDuplicatesResponse(existing_dates=[])
+
+    # Use family head's user_id if in a family
+    effective_user_id = get_readings_user_id(db, current_user.user_id)
+
+    # Parse dates and query
+    try:
+        date_objects = [datetime.fromisoformat(d) for d in request.dates]
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid date format. Use YYYY-MM-DD.")
+
+    existing = db.query(SolarReading.reading_date).filter(
+        SolarReading.user_id == effective_user_id,
+        SolarReading.reading_date.in_(date_objects)
+    ).all()
+
+    existing_dates = [r.reading_date.strftime("%Y-%m-%d") for r in existing]
+
+    return CheckDuplicatesResponse(existing_dates=existing_dates)
 
 
 @router.delete("/readings/all")

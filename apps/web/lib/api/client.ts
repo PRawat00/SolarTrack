@@ -342,10 +342,16 @@ export const readingsAPI = {
       body: JSON.stringify(reading),
     }),
 
-  createBulk: (readings: ReadingCreate[]): Promise<ReadingResponse[]> =>
-    fetchAPI('/api/readings/bulk', {
+  createBulk: (readings: ReadingCreate[], overwrite: boolean = false): Promise<ReadingResponse[]> =>
+    fetchAPI(`/api/readings/bulk${overwrite ? '?overwrite=true' : ''}`, {
       method: 'POST',
       body: JSON.stringify(readings),
+    }),
+
+  checkDuplicates: (dates: string[]): Promise<{ existing_dates: string[] }> =>
+    fetchAPI('/api/readings/check-duplicates', {
+      method: 'POST',
+      body: JSON.stringify({ dates }),
     }),
 
   delete: (id: string): Promise<{ message: string }> =>
